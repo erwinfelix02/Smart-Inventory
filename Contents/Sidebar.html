@@ -56,8 +56,8 @@
         <small></small>
       </div>
       <!-- Change account button -->
-      <button class="change-account" onclick="changeAccount()">
-        <img src="../images/switchaccount.svg" alt="Change Account">
+      <button class="log-out" onclick="changeAccount()">
+        <img src="../images/logout.svg" alt="Change Account">
       </button>
     </div>
   </div>
@@ -255,6 +255,17 @@ if (settingsMenu) {
   changePage(title, subtitle, element, file);
 }
 
+// Change account / Logout button
+function changeAccount() {
+  // Clear user data from localStorage
+  localStorage.removeItem("user");
+  
+  // Optionally, clear other session-related data
+  // localStorage.clear(); // uncomment if you want to clear all localStorage
+
+  // Redirect to sign-in page
+   window.location.href = "../Landing Page/signin.html";
+}
 
 </script>
 </body>

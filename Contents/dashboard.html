@@ -112,12 +112,13 @@
         </div>
 
         <h4 class="quick-title">Quick Actions</h4>
-        <button class="btn add">+ Add New Product</button>
-        <button class="btn add">+ Add New User</button>
+        <button class="btn add" id="add-product">+ Add New Product</button>
+        <button class="btn add" id="add-user">+ Add New User</button>
         <button class="btn settings">
           <img src="../images/settings.svg" alt="Settings" class="btn-icon">
           Alert Settings
         </button>
+
       </div>
     </div>
 
@@ -141,5 +142,49 @@
     </div>
 
   </div>
+<script>
+  const loggedInUserRole = "Manager"; // This comes from backend/session
+  const addUserBtn = document.getElementById('add-user');
+  const addProductBtn = document.getElementById('add-product');
+  const alertSettingsBtn = document.querySelector('.btn.settings');
+
+  // Disable Add User for Managers
+  if (loggedInUserRole === "Manager") {
+    addUserBtn.disabled = true;
+    addUserBtn.style.opacity = 0.5;
+    addUserBtn.style.cursor = "not-allowed";
+    addUserBtn.title = "You cannot add new users";
+  } else {
+    addUserBtn.addEventListener("click", () => {
+      window.location.href = "/user-management.html";
+    });
+  }
+
+  // Make Add Product simulate clicking Inventory Management in sidebar
+  addProductBtn.addEventListener("click", () => {
+    const sidebarItem = parent.document.querySelector(
+      "li[onclick*='inventory-management.html']"
+    );
+    if (sidebarItem) {
+      sidebarItem.click();
+    } else {
+      console.warn("Sidebar item for Inventory Management not found.");
+    }
+  });
+
+  // Make Alert Settings button simulate clicking Alert Management in sidebar
+  alertSettingsBtn.addEventListener("click", () => {
+    const sidebarItem = parent.document.querySelector(
+      "li[onclick*='alerts.html']"
+    );
+    if (sidebarItem) {
+      sidebarItem.click();
+    } else {
+      console.warn("Sidebar item for Alert Management not found.");
+    }
+  });
+</script>
+
+
 </body>
 </html>

@@ -144,6 +144,18 @@
 </div>
 
 <script>
+  let signedInUserRole = "guest"; // default if not logged in
+
+const userData = localStorage.getItem("user");
+if (userData) {
+  try {
+    const user = JSON.parse(userData);
+    signedInUserRole = user.role || "guest";
+  } catch (e) {
+    console.error("Error parsing user data:", e);
+  }
+}
+
   let currentPage = 1;
 const rowsPerPage = 5;
 
@@ -200,43 +212,50 @@ const rowsPerPage = 5;
     }
   }
 
-  function renderUsers(users, page = 1) {
+function renderUsers(users, page = 1) {
+  // Role-based filtering: managers only see staff, admins see all
+  const visibleUsers = users.filter(user => {
+    if (signedInUserRole.toLowerCase() === "admin") return true;
+    if (signedInUserRole.toLowerCase() === "manager") return user.role.toLowerCase() === "staff";
+    return false; // other roles see nothing
+  });
+
   tbody.innerHTML = "";
 
-  if (users.length === 0) {
+  if (visibleUsers.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No users found</td></tr>`;
     return;
   }
 
   const start = (page - 1) * rowsPerPage;
   const end = start + rowsPerPage;
-  const paginatedUsers = users.slice(start, end);
+  const paginatedUsers = visibleUsers.slice(start, end);
 
   paginatedUsers.forEach((user, index) => {
-    const globalIndex = start + index + 1; // To show #001, #002 etc.
+    const globalIndex = start + index + 1;
     const status = user.isVerified ? "Active" : "Disabled";
     const lastLogin = formatLastLogin(user.lastLogin);
 
-  const row = `
-    <tr data-id="${user._id}">
-      <td>#${globalIndex.toString().padStart(3, "0")}</td>
-      <td><div class="user"><div class="avatar"></div> ${user.fullName || "Unknown"}</div></td>
-      <td><span class="role ${user.role.toLowerCase().replace(" ", "-")}">${user.role}</span></td>
-      <td>${user.email}</td>
-      <td><span class="status ${status.toLowerCase()}">${status}</span></td>
-      <td>${lastLogin}</td>
-      <td class="actions">
-        <i class="fa fa-pen"></i>
-        ${status === "Active" ? '<i class="fa fa-ban"></i>' : '<i class="fa fa-check"></i>'}
-      </td>
-    </tr>
-  `;
-
+    const row = `
+      <tr data-id="${user._id}">
+        <td>#${globalIndex.toString().padStart(3, "0")}</td>
+        <td><div class="user"><div class="avatar"></div> ${user.fullName || "Unknown"}</div></td>
+        <td><span class="role ${user.role.toLowerCase().replace(" ", "-")}">${user.role}</span></td>
+        <td>${user.email}</td>
+        <td><span class="status ${status.toLowerCase()}">${status}</span></td>
+        <td>${lastLogin}</td>
+        <td class="actions">
+          <i class="fa fa-pen"></i>
+          ${status === "Active" ? '<i class="fa fa-ban"></i>' : '<i class="fa fa-check"></i>'}
+        </td>
+      </tr>
+    `;
     tbody.insertAdjacentHTML("beforeend", row);
   });
 
-  renderPagination(users, page);
+  renderPagination(visibleUsers, page);
 }
+
 const paginationContainer = document.querySelector(".pagination .pages");
 const paginationText = document.querySelector(".pagination p");
 
@@ -279,20 +298,29 @@ function renderPagination(users, page) {
   const selectedRole = roleSelect.value;
   const selectedStatus = statusSelect.value;
 
-  const filtered = allUsers.filter(user => {
-    const nameMatch = user.fullName?.toLowerCase().includes(searchTerm) || false;
-    const emailMatch = user.email?.toLowerCase().includes(searchTerm) || false;
-    const matchesSearch = !searchTerm || nameMatch || emailMatch;
+  const filtered = allUsers
+    .filter(user => {
+      // Role-based visibility
+      if (signedInUserRole.toLowerCase() === "manager" && user.role.toLowerCase() !== "staff") return false;
 
-    const matchesRole = selectedRole === "All Roles" || user.role === selectedRole;
-    const userStatus = user.isVerified ? "Active" : "Disabled";
-    const matchesStatus = selectedStatus === "All Status" || userStatus === selectedStatus;
+      // Search filter
+      const nameMatch = user.fullName?.toLowerCase().includes(searchTerm) || false;
+      const emailMatch = user.email?.toLowerCase().includes(searchTerm) || false;
+      const matchesSearch = !searchTerm || nameMatch || emailMatch;
 
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+      // Role dropdown filter
+      const matchesRole = selectedRole === "All Roles" || user.role === selectedRole;
 
-  renderUsers(filtered, 1); // Always reset to first page
+      // Status filter
+      const userStatus = user.isVerified ? "Active" : "Disabled";
+      const matchesStatus = selectedStatus === "All Status" || userStatus === selectedStatus;
+
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+
+  renderUsers(filtered, 1);
 }
+
 
 
   document.addEventListener("DOMContentLoaded", loadUsers);
@@ -355,7 +383,7 @@ function renderPagination(users, page) {
 
     try {
       if (editingId) {
-        // Update user
+        // ✏️ Update user
         const res = await fetch(`http://localhost:3000/users/${editingId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -365,7 +393,7 @@ function renderPagination(users, page) {
         await loadUsers();
         closeModal();
       } else {
-        // Add new user
+        // 🆕 Add new user
         const checkRes = await fetch(`http://localhost:3000/users?email=${encodeURIComponent(email)}`);
         const users = await checkRes.json();
         const existingUser = users.find(u => u.email.toLowerCase() === email);
