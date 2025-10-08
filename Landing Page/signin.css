@@ -1,0 +1,155 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.image-side {
+  flex: 1;
+  background: url("../images/signin.svg") no-repeat center center / cover;
+}
+
+.form-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  padding: 2rem;
+  background: #111;
+  z-index: 0;
+}
+
+.form-side::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+background: linear-gradient(
+  45deg,
+  #0a0a0a,
+  #1a1a1a,
+  #164285,
+  #4a6fa5,
+  #2c3e50,
+  #0a0a0a
+);
+
+
+  background-size: 400% 400%;
+  animation: gradientMove 18s ease-in-out infinite;
+  z-index: -1;
+  opacity: 0.4; 
+}
+
+@keyframes gradientMove {
+  0%   { background-position: 0% 0%; }
+  25%  { background-position: 100% 0%; }
+  50%  { background-position: 100% 100%; }
+  75%  { background-position: 0% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+.signin {
+  position: relative;
+  z-index: 1;
+  max-width: 350px;
+  width: 100%;
+}
+
+.signin h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #A4BADB;
+}
+
+.signin .subtitle {
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: #A4BADB;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.input-group i {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #A4BADB;
+}
+
+.input-group i:first-child {
+  left: 10px;
+}
+
+.toggle-password {
+  right: 10px;
+  cursor: pointer;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.8rem 2.5rem;
+  border: 1px solid #555;
+  border-radius: 5px;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+}
+
+.input-group input::placeholder {
+  color: #fff;
+}
+
+.forgot {
+  display: block;
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+  color: #A4BADB;
+  text-decoration: none;
+}
+
+.btn {
+  width: 100%;
+  padding: 0.8rem;
+  background: #164285;
+  color: #A4BADB;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #1e56a0;
+  color: #ffffff; 
+}
+
+@media (max-width: 900px) {
+  .container {
+    flex-direction: column;
+  }
+  .image-side {
+    height: 40vh;
+    flex: none;
+  }
+  .form-side {
+    flex: none;
+    height: auto;
+  }
+}

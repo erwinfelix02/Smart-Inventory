@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Management</title>
+  <link rel="stylesheet" href="user-management.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <div class="filters">
+        <div class="search-box">
+          <i class="fa fa-search"></i>
+          <input type="text" placeholder="Search users...">
+        </div>
+        <select>
+          <option>All Roles</option>
+          <option>Admin</option>
+          <option>Inventory Manager</option>
+          <option>Staff</option>
+        </select>
+        <select>
+          <option>All Status</option>
+          <option>Active</option>
+          <option>Disabled</option>
+        </select>
+      </div>
+      <button class="add-btn"><i class="fa fa-plus"></i> Add New User</button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Last Login</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>#001</td>
+            <td><div class="user"><div class="avatar"></div> Mama Mo Globe</div></td>
+            <td><span class="role admin">Admin</span></td>
+            <td>mamamo.globle@gmail.com</td>
+            <td><span class="status active">Active</span></td>
+            <td>2 hours ago</td>
+            <td class="actions">
+              <i class="fa fa-pen"></i>
+              <i class="fa fa-ban"></i>
+            </td>
+          </tr>
+          <tr>
+            <td>#002</td>
+            <td><div class="user"><div class="avatar"></div> Mama Mo TNT</div></td>
+            <td><span class="role manager">Inventory Manager</span></td>
+            <td>mamamo.globle@gmail.com</td>
+            <td><span class="status active">Active</span></td>
+            <td>1 day ago</td>
+            <td class="actions">
+              <i class="fa fa-pen"></i>
+              <i class="fa fa-ban"></i>
+            </td>
+          </tr>
+          <tr>
+            <td>#003</td>
+            <td><div class="user"><div class="avatar"></div> Mama Mo Smart</div></td>
+            <td><span class="role staff">Staff</span></td>
+            <td>mamamo.globle@gmail.com</td>
+            <td><span class="status disabled">Disabled</span></td>
+            <td>1 week ago</td>
+            <td class="actions">
+              <i class="fa fa-pen"></i>
+              <i class="fa fa-check"></i>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination">
+        <p>Showing 1 to 5 of 10 users</p>
+        <div class="pages">
+          <button disabled>Previous</button>
+          <button class="active">1</button>
+          <button>2</button>
+          <button>3</button>
+          <button>Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<!-- Add User Modal -->
+<div id="addUserModal" class="modal-overlay" style="display: none;">
+  <div class="modal">
+   <h3 id="modalTitle">Add New User</h3>
+    <form id="addUserForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="firstName" required placeholder="Enter Firstname">
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" id="lastName" required placeholder="Enter Lastname">
+        </div>
+      </div>
+  <div class="form-row">
+  <div class="form-group">
+    <label>Email</label>
+    <input type="email" id="email" required placeholder="Enter Email">
+  </div>
+  <div class="form-group">
+    <label>Phone Number</label>
+    <input type="tel" id="phone" placeholder="Enter Phone Number" maxlength="14" required>
+  </div>
+</div>
+
+<div class="form-row">
+  <div class="form-group" style="flex: 1;">
+    <label>Role</label>
+    <select id="role" required>
+      <option value="">Select Role</option>
+      <option value="Admin">Admin</option>
+      <option value="Inventory Manager">Inventory Manager</option>
+      <option value="Staff">Staff</option>
+    </select>
+  </div>
+</div>
+      <div class="buttons">
+        <button type="button" id="cancelBtn">Cancel</button>
+        <button type="submit" id="saveBtn">Save User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  let currentPage = 1;
+const rowsPerPage = 5;
+
+  // =========================
+  // Role-based button visibility
+  // =========================
+  document.addEventListener("DOMContentLoaded", () => {
+    const addBtn = document.querySelector(".add-btn");
+    const userData = localStorage.getItem("user");
+
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        if (user.role && user.role.toLowerCase() !== "admin") {
+          if (addBtn) addBtn.style.display = "none";
+        }
+      } catch (e) {
+        console.error("Error parsing user data:", e);
+      }
+    }
+  });
+
+  // =========================
+  // Format "Last Login" display
+  // =========================
+  function formatLastLogin(dateString) {
+    if (!dateString) return "—";
+    const date = new Date(dateString);
+    const diffMs = Date.now() - date;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    if (diffHours < 1) return "Just now";
+    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+  }
+
+  // =========================
+  // User table handling
+  // =========================
+  let allUsers = [];
+  const tbody = document.querySelector("tbody");
+  const searchInput = document.querySelector(".search-box input");
+  const roleSelect = document.querySelectorAll("select")[0];
+  const statusSelect = document.querySelectorAll("select")[1];
+
+  async function loadUsers() {
+    try {
+      const res = await fetch("http://localhost:3000/users");
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      allUsers = await res.json();
+      renderUsers(allUsers);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+  }
+
+  function renderUsers(users, page = 1) {
+  tbody.innerHTML = "";
+
+  if (users.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No users found</td></tr>`;
+    return;
+  }
+
+  const start = (page - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+  const paginatedUsers = users.slice(start, end);
+
+  paginatedUsers.forEach((user, index) => {
+    const globalIndex = start + index + 1; // To show #001, #002 etc.
+    const status = user.isVerified ? "Active" : "Disabled";
+    const lastLogin = formatLastLogin(user.lastLogin);
+
+  const row = `
+    <tr data-id="${user._id}">
+      <td>#${globalIndex.toString().padStart(3, "0")}</td>
+      <td><div class="user"><div class="avatar"></div> ${user.fullName || "Unknown"}</div></td>
+      <td><span class="role ${user.role.toLowerCase().replace(" ", "-")}">${user.role}</span></td>
+      <td>${user.email}</td>
+      <td><span class="status ${status.toLowerCase()}">${status}</span></td>
+      <td>${lastLogin}</td>
+      <td class="actions">
+        <i class="fa fa-pen"></i>
+        ${status === "Active" ? '<i class="fa fa-ban"></i>' : '<i class="fa fa-check"></i>'}
+      </td>
+    </tr>
+  `;
+
+    tbody.insertAdjacentHTML("beforeend", row);
+  });
+
+  renderPagination(users, page);
+}
+const paginationContainer = document.querySelector(".pagination .pages");
+const paginationText = document.querySelector(".pagination p");
+
+function renderPagination(users, page) {
+  const totalPages = Math.ceil(users.length / rowsPerPage);
+  currentPage = page;
+
+  // Update text
+  paginationText.textContent = `Showing ${Math.min((page - 1) * rowsPerPage + 1, users.length)} to ${Math.min(page * rowsPerPage, users.length)} of ${users.length} users`;
+
+  // Clear old buttons
+  paginationContainer.innerHTML = "";
+
+  // Previous button
+  const prevBtn = document.createElement("button");
+  prevBtn.textContent = "Previous";
+  prevBtn.disabled = page === 1;
+  prevBtn.addEventListener("click", () => renderUsers(users, page - 1));
+  paginationContainer.appendChild(prevBtn);
+
+  // Page numbers
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    if (i === page) btn.classList.add("active");
+    btn.addEventListener("click", () => renderUsers(users, i));
+    paginationContainer.appendChild(btn);
+  }
+
+  // Next button
+  const nextBtn = document.createElement("button");
+  nextBtn.textContent = "Next";
+  nextBtn.disabled = page === totalPages;
+  nextBtn.addEventListener("click", () => renderUsers(users, page + 1));
+  paginationContainer.appendChild(nextBtn);
+}
+
+ function applyFilters() {
+  const searchTerm = searchInput.value.toLowerCase().trim();
+  const selectedRole = roleSelect.value;
+  const selectedStatus = statusSelect.value;
+
+  const filtered = allUsers.filter(user => {
+    const nameMatch = user.fullName?.toLowerCase().includes(searchTerm) || false;
+    const emailMatch = user.email?.toLowerCase().includes(searchTerm) || false;
+    const matchesSearch = !searchTerm || nameMatch || emailMatch;
+
+    const matchesRole = selectedRole === "All Roles" || user.role === selectedRole;
+    const userStatus = user.isVerified ? "Active" : "Disabled";
+    const matchesStatus = selectedStatus === "All Status" || userStatus === selectedStatus;
+
+    return matchesSearch && matchesRole && matchesStatus;
+  });
+
+  renderUsers(filtered, 1); // Always reset to first page
+}
+
+
+  document.addEventListener("DOMContentLoaded", loadUsers);
+  searchInput.addEventListener("input", applyFilters);
+  roleSelect.addEventListener("change", applyFilters);
+  statusSelect.addEventListener("change", applyFilters);
+
+  // =========================
+  // Modal handling
+  // =========================
+  const addBtn = document.querySelector(".add-btn");
+  const modal = document.getElementById("addUserModal");
+  const cancelBtn = document.getElementById("cancelBtn");
+  const addUserForm = document.getElementById("addUserForm");
+  const phoneInput = document.getElementById("phone");
+  const modalTitle = document.getElementById("modalTitle");
+  const saveBtn = document.getElementById("saveBtn");
+
+  addBtn.addEventListener("click", () => {
+    modalTitle.textContent = "Add New User";
+    saveBtn.textContent = "Save User";
+    addUserForm.reset();
+    document.getElementById("email").readOnly = false;
+    delete addUserForm.dataset.editing;
+    modal.style.display = "flex";
+    setTimeout(() => modal.classList.add("show"), 10);
+  });
+
+  function closeModal() {
+    modal.classList.remove("show");
+    addUserForm.reset();
+    phoneInput.value = "";
+    document.getElementById("email").readOnly = false;
+    delete addUserForm.dataset.editing;
+    saveBtn.textContent = "Save User";
+    modalTitle.textContent = "Add New User";
+    setTimeout(() => { modal.style.display = "none"; }, 300);
+  }
+
+  cancelBtn.addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // =========================
+  // Unified Save & Update Handler
+  // =========================
+  addUserForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const firstName = document.getElementById("firstName").value.trim();
+    const lastName = document.getElementById("lastName").value.trim();
+    const email = document.getElementById("email").value.trim().toLowerCase();
+    const phone = document.getElementById("phone").value.trim();
+    const role = document.getElementById("role").value;
+    const fullName = `${firstName} ${lastName}`;
+    const editingId = addUserForm.dataset.editing;
+
+    if (!firstName || !lastName || !email || !role) return;
+
+    try {
+      if (editingId) {
+        // Update user
+        const res = await fetch(`http://localhost:3000/users/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fullName, email, phone, role })
+        });
+        if (!res.ok) throw new Error("Failed to update user");
+        await loadUsers();
+        closeModal();
+      } else {
+        // Add new user
+        const checkRes = await fetch(`http://localhost:3000/users?email=${encodeURIComponent(email)}`);
+        const users = await checkRes.json();
+        const existingUser = users.find(u => u.email.toLowerCase() === email);
+        if (existingUser) {
+          alert("An account with this email already exists!");
+          return;
+        }
+
+        let endpoint = "";
+        if (role === "Admin") endpoint = "/users/admins";
+        else if (role === "Inventory Manager") endpoint = "/users/managers";
+        else if (role === "Staff") endpoint = "/users/staff";
+
+        const res = await fetch(`http://localhost:3000${endpoint}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fullName, email, phone, role, isVerified: true, lastLogin: new Date() })
+        });
+        if (!res.ok) throw new Error("Failed to save user");
+        await loadUsers();
+        closeModal();
+      }
+    } catch (err) {
+      console.error("Error saving/updating user:", err);
+      alert("Failed to save user. Check console for details.");
+    }
+  });
+
+  // =========================
+  // Edit User
+  // =========================
+  function openEditUserModal(user) {
+    modalTitle.textContent = "Edit User Info";
+    saveBtn.textContent = "Update";
+    modal.style.display = "flex";
+    setTimeout(() => modal.classList.add("show"), 10);
+
+    const [first, ...lastParts] = (user.fullName || "").split(" ");
+    document.getElementById("firstName").value = first || "";
+    document.getElementById("lastName").value = lastParts.join(" ") || "";
+    document.getElementById("email").value = user.email;
+    document.getElementById("email").readOnly = true;
+    document.getElementById("phone").value = user.phone || "";
+    document.getElementById("role").value = user.role;
+   addUserForm.dataset.editing = user._id;
+  }
+
+tbody.addEventListener("click", (e) => {
+  if (e.target.classList.contains("fa-pen")) {
+    const row = e.target.closest("tr");
+    const userId = row.dataset.id;
+    const user = allUsers.find(u => u._id === userId);
+    if (user) openEditUserModal(user);
+  }
+});
+
+  // =========================
+  // Phone Input Formatting
+  // =========================
+  phoneInput.addEventListener("input", () => {
+    let value = phoneInput.value;
+    if (value.match(/^\d/) && !value.startsWith("+63")) value = "+63 " + value;
+    value = value.replace(/[^\d+ ]/g, "");
+    if (value.startsWith("+63")) {
+      const afterPrefix = value.slice(4).replace(/\D/g, "").slice(0, 10);
+      value = "+63 " + afterPrefix;
+    }
+    phoneInput.value = value;
+  });
+
+  phoneInput.addEventListener("keydown", (e) => {
+    if (phoneInput.selectionStart <= 4 && (e.key === "Backspace" || e.key === "Delete")) {
+      e.preventDefault();
+    }
+  });
+
+  phoneInput.addEventListener("blur", () => {
+    if (phoneInput.value.trim() === "+63") phoneInput.value = "";
+  });
+</script>
+
+</body>
+</html>

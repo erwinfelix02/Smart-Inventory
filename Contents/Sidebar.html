@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Inventory</title>
+  <link rel="stylesheet" href="Sidebar.css">
+  
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="logo">
+      <img src="../images/logo.svg" alt="Logo" class="logo-img"> 
+      <div class="logo-text">
+        <h2>Smart Inventory</h2>
+        <small>Alert System</small>
+      </div>
+      <!-- Close button for mobile -->
+      <button class="close-btn" onclick="closeSidebar()">✖</button>
+    </div>
+
+    <ul>
+      <li class="active" onclick="changePage('Dashboard','Real-time inventory monitoring and alerts', this, 'dashboard.html')">
+        <img src="../images/dashboard.svg" alt="Dashboard Icon" class="menu-icon"> Dashboard
+      </li>
+
+     <li id="user-management" onclick="changePage('User Management','Manage users and roles', this, 'user-management.html')">
+      <img src="../images/user.svg" alt="User Management Icon" class="menu-icon"> User Management
+     </li>
+
+
+      <li onclick="changePage('Inventory Management','Track and manage inventory', this, 'inventory-management.html')">
+        <img src="../images/inventory.svg" alt="Inventory Icon" class="menu-icon"> Inventory Management
+      </li>
+
+      <li id="sales-menu" onclick="handleSalesMenu(this)">
+        <img src="../images/sales.svg" alt="Sales Icon" class="menu-icon"> Sales & Transactions
+      </li>
+
+      <li onclick="changePage('Alert Management','Manage system alerts and notifications', this, 'alerts.html')">
+        <img src="../images/alert.svg" alt="Alert Icon" class="menu-icon"> Alert Management
+      </li>
+
+      <li id="settings-menu">
+        <img src="../images/settings.svg" alt="Settings Icon" class="menu-icon"> Settings
+      </li>
+
+    </ul>
+
+    <!-- User footer -->
+    <div class="user-info">
+      <span class="avatar"></span>
+      <div>
+        <p></p>
+        <small></small>
+      </div>
+      <!-- Change account button -->
+      <button class="change-account" onclick="changeAccount()">
+        <img src="../images/switchaccount.svg" alt="Change Account">
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="title">
+        <h2 id="page-title">Dashboard</h2>
+        <p id="page-subtitle">Real-time inventory monitoring and alerts</p>
+      </div>
+       <!-- ✅ MOVING BANNER -->
+      <div class="banner-container">
+        <div class="banner-text">
+          - Welcome to Smart Inventory System! | Stay updated with real-time alerts, low-stock warnings, and sales notifications! | Manage your inventory efficiently today!
+        </div>
+
+      </div>
+      <div class="icons">
+        <img src="../images/bell.svg" alt="Notification Bell" class="bell" onclick="toggleBell(this)">
+      </div>
+    </div>
+    <div id="page-content">
+     <iframe id="content-frame" src="/Contents/dashboard.html" style="width:100%; height:80vh; border:none;"></iframe>
+    </div>
+  </div>
+
+  <script>
+  const userData = localStorage.getItem("user");
+  let user = null;
+
+  if (userData) {
+    try {
+      user = JSON.parse(userData);
+    } catch(e) {
+      console.error("Error parsing user data:", e);
+    }
+  }
+
+  // 2️⃣ Display user info in sidebar
+  const userNameEl = document.querySelector(".user-info p");
+  const userRoleEl = document.querySelector(".user-info small");
+  const avatarEl = document.querySelector(".user-info .avatar");
+
+  if (user) {
+    userNameEl.innerText = user.fullName || "Guest";
+    userRoleEl.innerText = user.role || "Unknown";
+    avatarEl.innerText = user.fullName
+      ? user.fullName.split(" ").map(n => n[0]).join("").toUpperCase()
+      : "?";
+  } else {
+    userNameEl.innerText = "Guest";
+    userRoleEl.innerText = "Unknown";
+    avatarEl.innerText = "?";
+  }
+
+  console.log("Loaded user:", user);
+// 🔒 Hide User Management for staff and other non-admin/manager roles
+// Hide User Management for staff and other non-admin/manager roles
+const userManagementMenu = document.getElementById("user-management");
+
+if (user && user.role) {
+  const role = user.role.toLowerCase();
+  if (role !== "admin" && role !== "manager") {
+    if (userManagementMenu) {
+      userManagementMenu.style.display = "none";
+    }
+  }
+} else {
+  // Hide if no user data (guest)
+  if (userManagementMenu) {
+    userManagementMenu.style.display = "none";
+  }
+}
+
+
+//Set default page and top-bar text based on role
+let defaultFile, defaultTitle, defaultSubtitle;
+if (user && user.role) {
+  const role = user.role.toLowerCase();
+  if (role === "admin") {
+    defaultFile = "system-settings.html";
+    defaultTitle = "System Settings";
+    defaultSubtitle = "Manage business settings and preferences";
+  } else {
+    defaultFile = "profile-settings.html";
+    defaultTitle = "Profile Settings";
+    defaultSubtitle = "Manage your account settings";
+  }
+} else {
+  defaultFile = "profile-settings.html";
+  defaultTitle = "Profile Settings";
+  defaultSubtitle = "Manage your account settings";
+}
+
+// Set Dashboard as default on page load
+document.getElementById("page-title").innerText = "Dashboard";
+document.getElementById("page-subtitle").innerText = "Real-time inventory monitoring and alerts";
+document.getElementById("content-frame").src = "../Contents/dashboard.html";
+
+// Settings menu click will handle role-based page
+const settingsMenu = document.getElementById("settings-menu");
+if (settingsMenu) {
+  settingsMenu.onclick = function() {
+    let fileToLoad, title, subtitle;
+
+    if (user && user.role) {
+      const role = user.role.toLowerCase();
+      if (role === "admin") {
+        fileToLoad = "system-settings.html";
+        title = "System Settings";
+        subtitle = "Manage business settings and preferences";
+      } else {
+        fileToLoad = "profile-settings.html";
+        title = "Profile Settings";
+        subtitle = "Manage your account settings";
+      }
+    } else {
+      fileToLoad = "profile-settings.html";
+      title = "Profile Settings";
+      subtitle = "Manage your account settings";
+    }
+
+    changePage(title, subtitle, settingsMenu, fileToLoad);
+  };
+}
+
+
+  // 4️⃣ Page change function
+  function changePage(title, subtitle, element, file) {
+    document.getElementById("page-title").innerText = title;
+    document.getElementById("page-subtitle").innerText = subtitle;
+
+    // Highlight active menu item
+    document.querySelectorAll(".sidebar ul li").forEach(li => li.classList.remove("active"));
+    if (element) element.classList.add("active");
+
+    // Load file into iframe
+    const iframe = document.getElementById("content-frame");
+    if (iframe) iframe.src = file;
+
+    // Auto-close sidebar on small screens
+    if (window.innerWidth < 768) closeSidebar();
+  }
+
+  // Sidebar toggle functions
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) sidebar.classList.toggle("open");
+  }
+
+  function closeSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) sidebar.classList.remove("open");
+  }
+
+  // Reset sidebar on window resize
+  window.addEventListener("resize", () => {
+    const sidebar = document.getElementById("sidebar");
+    if (window.innerWidth >= 768 && sidebar) sidebar.classList.remove("open");
+  });
+
+  // Change account button
+  function changeAccount() {
+    alert("Redirecting to Change Account page...");
+    // window.location.href = "change-account.html"; // uncomment for real redirect
+  }
+
+  // Toggle notification bell
+  function toggleBell(element) {
+    if (element) element.classList.toggle("active");
+  }
+
+ function handleSalesMenu(element) {
+  if (!user || !user.role) return; // Guest fallback
+
+  const role = user.role.toLowerCase();
+  let file, title, subtitle;
+
+  if (role === "admin" || role === "manager") {
+    file = "/Contents/admin-manager-sales-and-transaction.html"; // updated path
+    title = "Sales & Transactions";
+    subtitle = "Monitor sales and transactions (Admin/Manager)";
+  } else if (role === "staff") {
+    file = "/Contents/staff-sales-and-transaction.html"; // updated path
+    title = "Sales & Transactions";
+    subtitle = "Monitor sales and transactions (Staff)";
+  } else {
+    alert("You do not have access to Sales & Transactions.");
+    return;
+  }
+
+  changePage(title, subtitle, element, file);
+}
+
+
+</script>
+</body>
+</html>

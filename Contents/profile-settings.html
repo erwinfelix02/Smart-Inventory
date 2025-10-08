@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Settings</title>
+  <!-- Link external CSS -->
+  <link rel="stylesheet" href="profile-settings.css">
+  <!-- for eye icon -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body>
+  <div class="content">
+    <!-- Personal Information -->
+    <div class="card">
+      <h3>Personal Information</h3>
+      <p class="desc">Update your personal details and contact information</p>
+
+      <!-- Full Name + Username -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fullname">Full Name</label>
+          <input type="text" id="fullname" value="" disabled> 
+          <small>Name cannot be changed</small>
+        </div>
+        <div class="form-group">
+    <label for="role">Role</label>
+    <input type="text" id="role" value="" disabled>
+    <small>Role cannot be changed</small>
+  </div>
+      </div>
+
+      <!-- Email + Phone -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" value=""disabled>
+          <small>Email cannot be changed</small>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="text" id="phone" value=""disabled>
+          <small>Phone number cannot be changed</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Settings -->
+<div class="card">
+  <h3>Security Settings</h3>
+  <p class="desc">Update your password and security details</p>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="current-password">Current Password</label>
+      <div class="input-wrapper">
+        <input type="password" id="current-password" placeholder="Enter current password">
+        <i class="fa-solid fa-eye-slash toggle-password"></i>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="new-password">New Password</label>
+      <div class="input-wrapper">
+        <input type="password" id="new-password" placeholder="Enter new password">
+        <i class="fa-solid fa-eye-slash toggle-password"></i>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="confirm-password">Confirm Password</label>
+      <div class="input-wrapper">
+        <input type="password" id="confirm-password" placeholder="Confirm new password">
+        <i class="fa-solid fa-eye-slash toggle-password"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn cancel">Cancel</button>
+    <button class="btn save">Save Changes</button>
+  </div>
+</div>
+
+    
+    <script>
+const userData = localStorage.getItem("user");
+let user = null;
+
+if (userData) {
+  try { user = JSON.parse(userData); } 
+  catch (e) { console.error("❌ Error parsing user data:", e); }
+}
+
+if (user && user.email) {
+  fetch(`http://localhost:3000/settings?email=${encodeURIComponent(user.email)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const u = data.user;
+        document.getElementById("fullname").value = u.fullName || "";
+        document.getElementById("role").value = u.role || "";
+        document.getElementById("email").value = u.email || "";
+        document.getElementById("phone").value = u.phone || "";
+
+        applyRolePermissions(u.role);
+      } else {
+        alert("⚠️ Failed to load profile information.");
+      }
+    })
+    .catch(err => console.error("❌ Error fetching user:", err));
+} else {
+  alert("⚠️ No user logged in.");
+}
+
+function applyRolePermissions(role) {
+  const phoneInput = document.getElementById("phone");
+  const fullnameInput = document.getElementById("fullname");
+  const emailInput = document.getElementById("email");
+  const passwordFields = document.querySelectorAll("#current-password, #new-password, #confirm-password");
+  const phoneNote = document.querySelector("#phone + small"); // the small text under phone
+
+  if (role.toLowerCase() === "staff") {
+    fullnameInput.disabled = true;
+    emailInput.disabled = true;
+    phoneInput.disabled = true;
+    passwordFields.forEach(f => f.disabled = false); // staff can change password
+    phoneNote.style.display = "block";
+  } else if (role.toLowerCase() === "manager") {
+    fullnameInput.disabled = true;
+    emailInput.disabled = true;
+    phoneInput.disabled = false; // manager can edit phone
+    passwordFields.forEach(f => f.disabled = false);
+    phoneNote.style.display = "none"; // hide the note
+  }
+}
+
+// Save updated info
+function saveChanges() {
+  const payload = {
+    email: document.getElementById("email").value,
+    phone: document.getElementById("phone").value,
+    currentPassword: document.getElementById("current-password").value,
+    newPassword: document.getElementById("new-password").value,
+    confirmPassword: document.getElementById("confirm-password").value
+  };
+
+  // ✅ Password validation
+  if (payload.newPassword || payload.confirmPassword) {
+    if (!payload.currentPassword) {
+      alert("⚠️ Please enter your current password.");
+      return;
+    }
+    if (payload.newPassword !== payload.confirmPassword) {
+      alert("⚠️ New password and confirmation do not match.");
+      return;
+    }
+    if (payload.newPassword.length < 6) {
+      alert("⚠️ New password must be at least 6 characters.");
+      return;
+    }
+  }
+
+  fetch("http://localhost:3000/settings/update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message);
+      if (data.success) {
+        // Update localStorage if phone changed
+        const updatedUser = { ...user, phone: payload.phone };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+
+        // Clear password fields
+        document.getElementById("current-password").value = "";
+        document.getElementById("new-password").value = "";
+        document.getElementById("confirm-password").value = "";
+      }
+    })
+    .catch(err => console.error("Error updating profile:", err));
+}
+
+
+
+document.querySelector(".btn.save").addEventListener("click", (e) => { e.preventDefault(); saveChanges(); });
+document.querySelector(".btn.cancel").addEventListener("click", (e) => { e.preventDefault(); window.location.reload(); });
+document.querySelectorAll(".toggle-password").forEach(icon => {
+  icon.addEventListener("click", () => {
+    const input = icon.previousElementSibling;
+    if (input.type === "password") {
+      input.type = "text";
+      icon.classList.remove("fa-eye-slash");
+      icon.classList.add("fa-eye");
+    } else {
+      input.type = "password";
+      icon.classList.remove("fa-eye");
+      icon.classList.add("fa-eye-slash");
+    }
+  });
+});
+
+</script>
+</body>
+</html>

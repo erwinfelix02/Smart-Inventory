@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+  <link rel="stylesheet" href="signin.css">
+  <!-- Icons (Font Awesome) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Left side image -->
+    <div class="image-side"></div>
+
+    <!-- Right side login form -->
+    <div class="form-side">
+      <div class="signin">
+        <h2>Sign In</h2>
+        <p class="subtitle">Sign in to Your Registered Account</p>
+
+        <form id="loginForm">
+          <!-- Email -->
+          <div class="input-group">
+            <i class="fa-solid fa-envelope"></i>
+            <input type="email" id="email" placeholder="Enter your email" required>
+          </div>
+
+          <!-- Password -->
+          <div class="input-group">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <i class="fa-solid fa-eye-slash toggle-password" id="togglePassword"></i>
+          </div>
+          <a href="#" class="forgot">Forgot Password?</a>
+          <button type="submit" class="btn">Sign in</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS for toggle password -->
+  <script>
+  const togglePassword = document.getElementById("togglePassword");
+  const passwordInput = document.getElementById("password");
+
+  togglePassword.addEventListener("click", () => {
+    const isPassword = passwordInput.type === "password";
+    passwordInput.type = isPassword ? "text" : "password";
+    togglePassword.classList.toggle("fa-eye");
+    togglePassword.classList.toggle("fa-eye-slash");
+  });
+
+  // Handle login form
+  const loginForm = document.getElementById("loginForm");
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+      const response = await fetch("http://127.0.0.1:3000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Verification code sent! Check your email.");
+        window.location.href = `email.html?email=${encodeURIComponent(email)}&role=${encodeURIComponent(data.role)}`;
+      } else {
+        alert(data.msg || "Login failed");
+      }
+    } catch (err) {
+      alert("Error connecting to server");
+    }
+  });
+</script>
+
+</body>
+</html>

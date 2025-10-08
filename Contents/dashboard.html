@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <div class="dashboard">
+
+    <!-- TOP SECTION -->
+    <div class="top-section">
+      <div class="left-side">
+        <!-- SUMMARY CARDS -->
+        <div class="summary-section">
+          <div class="summary-card total">
+            <div class="summary-info">
+              <p>Total Products</p>
+              <h2>1,247</h2>
+              <small>+12% from last month</small>
+            </div>
+            <div class="summary-icon"><img src="../images/inventory.svg" alt="Total"></div>
+          </div>
+
+          <div class="summary-card low-stock">
+            <div class="summary-info">
+              <p>Low Stock Items</p>
+              <h2>142</h2>
+              <small>⚠️ Needs attention</small>
+            </div>
+            <div class="summary-icon"><img src="../images/warning.svg" alt="Low Stock"></div>
+          </div>
+
+          <div class="summary-card sales">
+            <div class="summary-info">
+              <p>Today's Sales</p>
+              <h2>₱1,247</h2>
+              <small>+25% from yesterday</small>
+            </div>
+            <div class="summary-icon"><img src="../images/money.svg" alt="Sales"></div>
+          </div>
+
+          <div class="summary-card active-alerts">
+            <div class="summary-info">
+              <p>Active Alerts</p>
+              <h2>12</h2>
+              <small>Pending review</small>
+            </div>
+            <div class="summary-icon"><img src="../images/bell.svg" alt="Alerts"></div>
+          </div>
+        </div>
+
+        <!-- CHART + TOP PRODUCTS SIDE BY SIDE -->
+        <div class="chart-products-row">
+          <div class="chart-card">
+            <h3>Recent Alerts</h3>
+            <div class="chart-placeholder">
+              <i class="fa-solid fa-chart-line"></i>
+              <p>Alerts Overview Chart</p>
+            </div>
+          </div>
+
+          <div class="top-products">
+            <h3>Top Selling Products</h3>
+            <div class="product-item">
+              <div class="product-left">
+                <div class="product-icon"></div>
+                <span>Product A</span>
+              </div>
+              <span>100 sold</span>
+            </div>
+            <div class="product-item">
+              <div class="product-left">
+                <div class="product-icon"></div>
+                <span>Product B</span>
+              </div>
+              <span>95 sold</span>
+            </div>
+            <div class="product-item">
+              <div class="product-left">
+                <div class="product-icon"></div>
+                <span>Product C</span>
+              </div>
+              <span>89 sold</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-panel">
+        <h3>Recent Alerts</h3>
+        <div class="alert-item">
+          <div class="dot blue"></div>
+          <div>
+            <p><strong>Low Stock Alert!</strong></p>
+            <small>Product A is running low (5 units left)</small><br>
+            <small>2 hours ago</small>
+          </div>
+        </div>
+
+        <div class="alert-item">
+          <div class="dot green"></div>
+          <div>
+            <p><strong>Restock Complete</strong></p>
+            <small>Product B restocked with 10 units</small><br>
+            <small>4 hours ago</small>
+          </div>
+        </div>
+
+        <h4 class="quick-title">Quick Actions</h4>
+        <button class="btn add">+ Add New Product</button>
+        <button class="btn add">+ Add New User</button>
+        <button class="btn settings">
+          <img src="../images/settings.svg" alt="Settings" class="btn-icon">
+          Alert Settings
+        </button>
+      </div>
+    </div>
+
+    <!-- RECENT ACTIVITY -->
+    <div class="activity-section">
+      <h3>Recent Activity</h3>
+      <div class="activity-item">
+        <div class="dot blue"></div>
+        <div>
+          <p><strong>Sinigang Mix</strong> updated inventory thresholds</p>
+          <small>2 hours ago</small>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="dot blue"></div>
+        <div>
+          <p><strong>Adobong Kambing</strong> acknowledged low stock alert</p>
+          <small>4 hours ago</small>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

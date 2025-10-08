@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Settings</title>
+  <link rel="stylesheet" href="system-settings.css">
+</head>
+<body>
+  <div class="content">
+
+    <!-- 🔹 Top Row -->
+    <div class="top-row">
+
+      <!-- General Settings -->
+      <div class="card dark general-card">
+        <h3>General</h3>
+        <div class="general-body">
+          <!-- Business Information -->
+          <div class="sub-card">
+            <h4>Business Information</h4>
+            <div class="form-group">
+              <label>Business Name</label>
+              <input type="text" value="TechCorp Solution">
+            </div>
+            <div class="form-group">
+              <label>Address</label>
+              <input type="text" placeholder="Enter address">
+            </div>
+          </div>
+
+          <!-- Regional Settings -->
+          <div class="sub-card">
+            <h4>Regional Settings</h4>
+            <div class="form-group">
+              <label>Time Zone</label>
+              <select>
+                <option>Asia/Manila (GMT+8)</option>
+                <option>UTC (GMT+0)</option>
+                <option>US/Eastern (GMT-5)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Currency</label>
+              <select>
+                <option>USD ($)</option>
+                <option>PHP (₱)</option>
+                <option>EUR (€)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Language</label>
+              <select>
+                <option>English</option>
+                <option>Filipino</option>
+                <option>Spanish</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="save-btn-container">
+          <button class="btn save">Save Changes</button>
+        </div>
+      </div>
+
+      <!-- Alert Recipients -->
+      <div class="card alert-card">
+        <h3>Alert Recipients</h3>
+        <div class="form-group">
+          <label>Low Stock Threshold</label>
+          <input type="number" value="10">
+        </div>
+        <div class="form-group">
+          <label>Critical Stock Threshold</label>
+          <input type="number" value="10">
+        </div>
+        <div class="form-group">
+          <label>Warning Stock Threshold</label>
+          <input type="number" value="10">
+        </div>
+        <div class="form-group">
+          <label>Notification Recipients</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox" checked> All Admins</label>
+            <label><input type="checkbox" checked> Inventory Managers</label>
+            <label><input type="checkbox"> Sales Staff</label>
+          </div>
+        </div>
+        <button class="btn save">Save Notification Settings</button>
+      </div>
+    </div>
+
+    <!-- 🔹 Bottom Row -->
+    <div class="bottom-row">
+      <!-- Roles & Permissions -->
+      <div class="card roles-card">
+        <h3>Roles & Permissions</h3>
+        <p class="desc">Manage access for Admin, Manager, Staff.</p>
+       <button class="btn primary" id="btnUserManagement"
+  onclick="goToUserManagement()">
+  Go to User Management
+</button>
+      </div>
+
+      <!-- System Logs -->
+      <div class="card logs-card">
+        <h3>System Logs & API Keys</h3>
+        <p class="desc">Recent system activities</p>
+        <div class="logs-container">
+          <table class="logs-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Action</th>
+                <th>User</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2024-01-15</td>
+                <td>Login</td>
+                <td>admin@company.com</td>
+                <td class="status success">Success</td>
+              </tr>
+              <tr>
+                <td>2024-01-15</td>
+                <td>Update Item</td>
+                <td>manager@company.com</td>
+                <td class="status success">Success</td>
+              </tr>
+              <tr>
+                <td>2024-01-16</td>
+                <td>Delete Item</td>
+                <td>staff@company.com</td>
+                <td class="status failed">Failed</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+ <script>
+function goToUserManagement() {
+  // Find the sidebar item for User Management in the parent window
+  const sidebarItem = parent.document.querySelector("li[onclick*='user-management.html']");
+  if (sidebarItem && parent.changePage) {
+    parent.changePage(
+      'User Management',
+      'Manage users and roles',
+      sidebarItem,
+      'user-management.html'
+    );
+  }
+}
+</script>
+
+</body>
+</html>

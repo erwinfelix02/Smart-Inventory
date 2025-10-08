@@ -1,0 +1,449 @@
+/* ===== Global Reset ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: #FFFFFF;
+  padding: 20px;
+  color: #333;
+}
+
+.dashboard-container {
+  max-width: none;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ===== Top Section Layout ===== */
+.top-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+/* ===== General Card Style ===== */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+/* 🎨 Background for the whole summary section */
+.summary-card {
+  flex: 2;
+  background: #EEEEEE;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  transition: transform 0.3s ease; /* Keep only transform for smooth hover lift */
+}
+
+/* Hover effect (only lift, no color change) */
+.summary-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Each metric card inside remains colored as before */
+.metric-item.sales {
+  background: linear-gradient(135deg, #42a5f5, #1e88e5);
+}
+
+.metric-item.transactions {
+  background: linear-gradient(135deg, #66bb6a, #43a047);
+}
+
+.metric-item.avg {
+  background: linear-gradient(135deg, #ffb300, #fb8c00);
+}
+
+/* ===== Custom Card Backgrounds ===== */
+
+.alerts-card {
+  background: #EEEEEE;
+}
+
+/* ===== Summary Metrics ===== */
+.metric-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.metric-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 10px;
+  padding: 15px;
+  transition: 0.3s ease;
+}
+
+/* Default cards */
+.metric-item.sales {
+  background: #F9FAFB;
+  transition: all 0.3s ease;
+}
+
+.metric-item.transactions {
+  background: #F9FAFB;
+  transition: all 0.3s ease;
+}
+
+.metric-item.avg-order {
+  background: #F9FAFB;
+  transition: all 0.3s ease;
+}
+
+/* 🔹 Hover Effects */
+.metric-item.sales:hover {
+  background: #E3F2FD; /* light blue hover */
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(66, 165, 245, 0.3);
+}
+
+.metric-item.transactions:hover {
+  background: #E8F5E9; /* light green hover */
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(102, 187, 106, 0.3);
+}
+
+.metric-item.avg-order:hover {
+  background: #FFF3E0; /* light orange hover */
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(255, 179, 0, 0.3);
+}
+
+
+.metric-item h3 {
+  font-size: 14px;
+  color: #555;
+}
+
+.metric-item .amount {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a237e;
+}
+
+.metric-item small {
+  font-size: 12px;
+}
+
+.positive { color: #2e7d32; }
+.negative { color: #c62828; }
+.neutral { color: #1565c0; }
+
+.metric-item .icon {
+  background: rgba(255, 255, 255, 0.6);
+  color: #1a73e8;
+  padding: 10px;
+  border-radius: 50%;
+  font-size: 18px;
+}
+
+/* ===== Low Stock Alerts ===== */
+.alerts-card h3 {
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.alert-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.alert-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 6px;
+}
+
+.alert-item {
+  display: flex;
+  align-items: center;
+  background: #E0E7FF;
+  border-radius: 8px;
+  padding: 10px;
+  transition: 0.3s ease;
+}
+
+.alert-item:hover {
+  background: #C7D2FE;
+}
+
+.alert-item i {
+  font-size: 18px;
+  margin-right: 10px;
+  color: #1a73e8;
+}
+
+.alert-details p {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.alert-details small {
+  color: #777;
+  font-size: 12px;
+}
+
+.units {
+  margin-left: auto;
+  font-size: 13px;
+  color: #1565c0;
+  font-weight: 600;
+}
+
+/* ===== Sales Trend ===== */
+.trend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: #1a73e8;
+  color: #fff;
+}
+
+.btn.active {
+  background: #1a73e8;
+  color: #fff;
+  border-color: #1a73e8;
+}
+
+.chart-placeholder {
+  text-align: center;
+  padding: 60px 0;
+  color: #aaa;
+}
+
+.chart-placeholder i {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+/* ===== Recent Transactions ===== */
+.transactions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.transactions select {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  text-align: left;
+  padding: 12px;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  background: #f1f1f1;
+  color: #555;
+}
+
+tr:hover {
+  background: #f9f9ff;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge.paid {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge.pending {
+  background: #fff8e1;
+  color: #f57f17;
+}
+
+/* ===== Table Actions ===== */
+.actions i {
+  margin-right: 8px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  color: #1a73e8;
+}
+
+.actions i:hover {
+  transform: scale(1.2);
+  color: #0c5ed9;
+}
+
+/* ===== Table Footer ===== */
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  font-size: 13px;
+}
+
+.pagination button {
+  border: none;
+  background: #e0e0e0;
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.pagination button:hover {
+  background: #1a73e8;
+  color: #fff;
+}
+
+.pagination .active {
+  background: #1a73e8;
+  color: #fff;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 992px) {
+  .top-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    margin-bottom: 15px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #777;
+  }
+
+  .trend-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .btn-group {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+/* ===== Make All Containers More Visible ===== */
+
+/* General card visibility enhancement */
+.card, 
+.summary-card, 
+.alerts-card, 
+.transactions, 
+.metric-item, 
+table tr {
+  border: 1px solid #e0e0e0; /* subtle border for structure */
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08); /* soft shadow for lift */
+  background: #ffffff;
+}
+
+/* Stronger distinction for top-level cards */
+.summary-card, 
+.alerts-card {
+  background: #f9fafb; /* light gray tint for contrast against page */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  border: 1px solid #dcdcdc;
+}
+
+/* Keep hover lift but add smooth glow */
+.card:hover,
+.summary-card:hover,
+.alerts-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+/* Table container refinement */
+table {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* Add background tint to dashboard layout */
+.dashboard-container {
+  background: #FFFFFF; /* soft neutral backdrop */
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
+}

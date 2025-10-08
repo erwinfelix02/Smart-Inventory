@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Dashboard</title>
+  <link rel="stylesheet" href="inventory-management.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+</head>
+<body>
+
+  <div class="dashboard-container">
+    
+    <!-- ===== Inventory Overview ===== -->
+    <section class="overview">
+      <h2>Inventory Overview</h2>
+      <div class="overview-cards">
+        <div class="overview-card total">
+         <div class="icon">
+         <img src="../images/total.svg" alt="Box Icon"></div>
+          <div class="info">
+            <h3>Total Products</h3>
+            <p>1,247</p>
+          </div>
+        </div>
+
+        <div class="overview-card in-stock">
+          <div class="icon">
+         <img src="../images/check.svg" alt="Check Icon"></div>
+          <div class="info">
+            <h3>In Stock</h3>
+            <p>1,089</p>
+          </div>
+        </div>
+
+        <div class="overview-card low-stock">
+          <div class="icon">
+         <img src="../images/warning.svg" alt="Warn Icon"></div>
+          <div class="info">
+            <h3>Low Stock</h3>
+            <p>142</p>
+          </div>
+        </div>
+
+        <div class="overview-card out-stock">
+        <div class="icon">
+         <img src="../images/wrong.svg" alt="Wrong Icon"></div>
+          <div class="info">
+            <h3>Out of Stock</h3>
+            <p>1,089</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Product Inventory + Alerts (Side by Side) ===== -->
+    <section class="main-content">
+      
+      <!-- Product Inventory -->
+      <div class="product-inventory">
+        <div class="inventory-header">
+          <h3>Product Inventory</h3>
+          <div class="filters">
+            <div class="search-box">
+              <i class="fa fa-search"></i>
+              <input type="text" placeholder="Search products..." />
+            </div>
+            <select>
+              <option>All Categories</option>
+              <option>Electronics</option>
+              <option>Accessories</option>
+            </select>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Product Name</th>
+              <th>SKU</th>
+              <th>Category</th>
+              <th>Current Quantity</th>
+              <th>Stock Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Wireless Bluetooth Headphones</td>
+              <td>WBH-001</td>
+              <td>Electronics</td>
+              <td>5</td>
+              <td><span class="badge low">Low Stock</span></td>
+            </tr>
+            <tr>
+              <td>Gaming Mechanical Keyboard</td>
+              <td>GMK-205</td>
+              <td>Electronics</td>
+              <td>3</td>
+              <td><span class="badge low">Low Stock</span></td>
+            </tr>
+            <tr>
+              <td>USB-C Cable 3ft</td>
+              <td>USC-003</td>
+              <td>Cables</td>
+              <td>0</td>
+              <td><span class="badge out">Out of Stock</span></td>
+            </tr>
+            <tr>
+              <td>Wireless Mouse</td>
+              <td>WM-102</td>
+              <td>Electronics</td>
+              <td>45</td>
+              <td><span class="badge normal">Normal</span></td>
+            </tr>
+            <tr>
+              <td>Laptop Stand Adjustable</td>
+              <td>LSA-078</td>
+              <td>Accessories</td>
+              <td>28</td>
+              <td><span class="badge normal">Normal</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Low Stock Alerts -->
+      <div class="low-stock-alerts">
+  <h3>Low Stock Alerts</h3>
+
+  <div class="alert-item">
+    <img src="../images/exclamation.svg" alt="Headphones" class="alert-icon">
+    <div class="details">
+      <p>Wireless Bluetooth Headphones</p>
+      <small>SKU: WBH-001</small>
+    </div>
+    <div class="units">5 units left</div>
+  </div>
+
+  <div class="alert-item">
+    <img src="../images/exclamation.svg" alt="Keyboard" class="alert-icon">
+    <div class="details">
+      <p>Gaming Mechanical Keyboard</p>
+      <small>SKU: GMK-205</small>
+    </div>
+    <div class="units">3 units left</div>
+  </div>
+
+  <div class="alert-item">
+    <img src="../images/exclamation.svg" alt="USB Cable" class="alert-icon">
+    <div class="details">
+      <p>USB-C Cable 3ft</p>
+      <small>SKU: USC-003</small>
+    </div>
+    <div class="units">0 units left</div>
+  </div>
+</div>
+
+    </section>
+
+    <!-- ===== Charts Section ===== -->
+    <section class="charts">
+      <div class="chart-card">
+        <h3>Stock Distribution by Category</h3>
+        <div class="chart-placeholder">
+          <i class="fa-solid fa-chart-pie"></i> Pie Chart Placeholder
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Stock Levels Trend</h3>
+        <div class="chart-placeholder">
+          <i class="fa-solid fa-chart-line"></i> Line Chart Placeholder
+        </div>
+      </div>
+    </section>
+  </div>
+
+</body>
+</html>

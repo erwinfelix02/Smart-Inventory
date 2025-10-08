@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Transaction Dashboard</title>
+  <link rel="stylesheet" href="staff-sales-and-transaction.css">
+
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body>
+
+  <div class="container">
+   <section class="transaction-form card">
+  <h2>New Sale Transaction</h2>
+
+  <div class="form-grid">
+
+    <!-- Row 1: Product Search + Customer Name -->
+    <div class="form-group half product-search">
+      <label>Product Search</label>
+      <div class="input-icon">
+        <input type="text" placeholder="Search by SKU or Product Name">
+        <i class="fa fa-search"></i>
+      </div>
+    </div>
+
+    <div class="form-group half customer-name">
+      <label>Customer Name</label>
+      <input type="text" placeholder="Enter customer name">
+    </div>
+
+    <!-- Row 2: Unit Price + Quantity -->
+    <div class="form-group half unit-price">
+      <label>Unit Price</label>
+      <input type="number" placeholder="0.00">
+    </div>
+
+    <div class="form-group half quantity">
+      <label>Quantity</label>
+      <input type="number" value="1">
+    </div>
+
+    <!-- Row 3: Payment Method under Customer Name -->
+    <div class="form-group half payment-method">
+      <label>Total Amount</label>
+      <input type="text" placeholder="Total Amount:">
+    </div>
+
+    <!-- Row 4: Discount + Tax -->
+    <div class="form-group half discount">
+      <label>Discount (%)</label>
+      <input type="number" value="0">
+    </div>
+
+    <div class="form-group half tax">
+      <label>Tax (%)</label>
+      <input type="number" value="12">
+    </div>
+
+  </div>
+
+  <div class="buttons">
+    <button class="btn cancel">Cancel</button>
+    <button class="btn save"><i class="fa fa-floppy-disk"></i> Save Transaction</button>
+  </div>
+</section>
+
+
+    <!-- Recent Transactions -->
+    <section class="recent-transactions card">
+      <div class="header">
+        <h2>Recent Transactions</h2>
+        <div class="search-box">
+          <input type="text" placeholder="Search transactions...">
+          <button><i class="fa fa-filter"></i></button>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>TRANS ID</th>
+            <th>DATE/TIME</th>
+            <th>SALES REP</th>
+            <th>ITEMS</th>
+            <th>TOTAL</th>
+            <th>PAYMENT STATUS</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>#TXN-001</td>
+            <td>2024-01-15 14:30</td>
+            <td>John Smith</td>
+            <td>3 items</td>
+            <td>₱1,250.00</td>
+            <td><span class="status red">Requires Approval</span></td>
+            <td><button class="icon-btn"><i class="fa fa-eye"></i></button></td>
+          </tr>
+          <tr>
+            <td>#TXN-002</td>
+            <td>2024-01-16 10:45</td>
+            <td>John Smith</td>
+            <td>2 items</td>
+            <td>₱1,000.00</td>
+            <td><span class="status green">Completed</span></td>
+            <td><button class="icon-btn"><i class="fa fa-eye"></i></button></td>
+          </tr>
+          <tr>
+            <td>#TXN-003</td>
+            <td>2024-01-17 09:20</td>
+            <td>John Smith</td>
+            <td>5 items</td>
+            <td>₱1,750.00</td>
+            <td><span class="status yellow">Pending</span></td>
+            <td><button class="icon-btn"><i class="fa fa-eye"></i></button></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+</body>
+</html>

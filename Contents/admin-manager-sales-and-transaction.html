@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Dashboard</title>
+  <link rel="stylesheet" href="admin-manager-sales-and-transaction.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+</head>
+<body>
+  <div class="dashboard-container">
+
+    <!-- 🔹 Top Section -->
+    <div class="top-section">
+      
+      <!-- 🔸 Summary Metrics -->
+      <div class="card summary-card">
+        <div class="metric-cards">
+          <div class="metric-item sales">
+            <div>
+              <h3>Today's Sales</h3>
+              <p class="amount">₱45,280</p>
+              <small class="positive">↑ 12.5% vs yesterday</small>
+            </div>
+            <div class="icon"><i class="fa fa-chart-line"></i></div>
+          </div>
+
+          <div class="metric-item transactions">
+            <div>
+              <h3>Transactions</h3>
+              <p class="amount">127</p>
+              <small class="neutral">+8 new today</small>
+            </div>
+            <div class="icon"><i class="fa fa-receipt"></i></div>
+          </div>
+
+          <div class="metric-item avg-order">
+            <div>
+              <h3>Avg. Order Value</h3>
+              <p class="amount">₱356</p>
+              <small class="negative">↓ 2.1% vs last week</small>
+            </div>
+            <div class="icon"><i class="fa fa-dollar-sign"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🔸 Low Stock Alerts -->
+      <div class="card alerts-card">
+        <h3>Low Stock Alerts</h3>
+        <div class="alert-list">
+          <div class="alert-item">
+            <i class="fa fa-box"></i>
+            <div class="alert-details">
+              <p>Wireless Bluetooth Headphones</p>
+              <small>SKU: WBH-001</small>
+            </div>
+            <span class="units">5 units left</span>
+          </div>
+
+          <div class="alert-item">
+            <i class="fa fa-box"></i>
+            <div class="alert-details">
+              <p>USB-C Fast Charger</p>
+              <small>SKU: CHG-112</small>
+            </div>
+            <span class="units">3 units left</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔹 Sales Trend -->
+    <div class="card trend">
+      <div class="trend-header">
+        <h3>Sales Trend</h3>
+        <div class="btn-group">
+          <button class="btn active">Daily</button>
+          <button class="btn">Weekly</button>
+          <button class="btn">Monthly</button>
+        </div>
+      </div>
+
+      <div class="chart-placeholder">
+        <i class="fa fa-chart-area"></i>
+        <p>Sales Chart Placeholder</p>
+      </div>
+    </div>
+
+    <!-- 🔹 Recent Transactions -->
+    <div class="card transactions">
+      <div class="transactions-header">
+        <h3>Recent Transactions</h3>
+        <select>
+          <option>All Status</option>
+          <option>Paid</option>
+          <option>Pending</option>
+        </select>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>TRANSACTION ID</th>
+            <th>DATE/TIME</th>
+            <th>SALES REP</th>
+            <th>ITEMS SUMMARY</th>
+            <th>TOTAL</th>
+            <th>STATUS</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>#TXN-001234</td>
+            <td>Dec 15, 2024 2:30 PM</td>
+            <td>Dhie Nacrushback</td>
+            <td>iPhone 14 Pro x2, AirPods Pro x1</td>
+            <td>₱65,890</td>
+            <td><span class="badge paid">Paid</span></td>
+            <td class="actions">
+              <i class="fa fa-eye"></i>
+              <i class="fa fa-pen"></i>
+              <i class="fa fa-trash"></i>
+            </td>
+          </tr>
+          <tr>
+            <td>#TXN-001233</td>
+            <td>Dec 15, 2024 1:15 PM</td>
+            <td>Mhile Ibana</td>
+            <td>Samsung Galaxy S23 ×1</td>
+            <td>₱42,990</td>
+            <td><span class="badge pending">Pending</span></td>
+            <td class="actions">
+              <i class="fa fa-eye"></i>
+              <i class="fa fa-pen"></i>
+              <i class="fa fa-trash"></i>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="table-footer">
+        <p>Showing 1 to 10 of 127 results</p>
+        <div class="pagination">
+          <button>Previous</button>
+          <button class="active">1</button>
+          <button>2</button>
+          <button>3</button>
+          <button>Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
