@@ -112,8 +112,18 @@
         </div>
 
         <h4 class="quick-title">Quick Actions</h4>
-        <button class="btn add" id="add-product">+ Add New Product</button>
-        <button class="btn add" id="add-user">+ Add New User</button>
+        <div class="button-row">
+  <button class="btn add" id="add-product">
+    <img src="../images/add.svg" class="btn-icon"> Add New Product
+  </button>
+  <button class="btn add" id="add-user">
+    <img src="../images/adduser.svg" class="btn-icon"> Add New User
+  </button>
+  <button class="btn add" id="export-data">
+    <img src="../images/export.svg" class="btn-icon"> Export Report
+  </button>
+</div>
+
         <button class="btn settings">
           <img src="../images/settings.svg" alt="Settings" class="btn-icon">
           Alert Settings
@@ -146,21 +156,34 @@
   const loggedInUserRole = "Manager"; // This comes from backend/session
   const addUserBtn = document.getElementById('add-user');
   const addProductBtn = document.getElementById('add-product');
+  const exportDataBtn = document.getElementById('export-data');
   const alertSettingsBtn = document.querySelector('.btn.settings');
 
-  // Disable Add User for Managers
+  // 🔹 Disable restricted buttons for Managers
   if (loggedInUserRole === "Manager") {
+    // Disable Add User
     addUserBtn.disabled = true;
     addUserBtn.style.opacity = 0.5;
     addUserBtn.style.cursor = "not-allowed";
     addUserBtn.title = "You cannot add new users";
+
+    // Disable Export Report
+    exportDataBtn.disabled = true;
+    exportDataBtn.style.opacity = 0.5;
+    exportDataBtn.style.cursor = "not-allowed";
+    exportDataBtn.title = "You cannot export reports";
   } else {
+    // 🔹 Only Admins can access these
     addUserBtn.addEventListener("click", () => {
       window.location.href = "/user-management.html";
     });
+
+    exportDataBtn.addEventListener("click", () => {
+      window.location.href = "/export-report.html";
+    });
   }
 
-  // Make Add Product simulate clicking Inventory Management in sidebar
+  // 🔹 Add Product → Go to Inventory Management page
   addProductBtn.addEventListener("click", () => {
     const sidebarItem = parent.document.querySelector(
       "li[onclick*='inventory-management.html']"
@@ -172,7 +195,7 @@
     }
   });
 
-  // Make Alert Settings button simulate clicking Alert Management in sidebar
+  // 🔹 Alert Settings → Go to Alert Management page
   alertSettingsBtn.addEventListener("click", () => {
     const sidebarItem = parent.document.querySelector(
       "li[onclick*='alerts.html']"
