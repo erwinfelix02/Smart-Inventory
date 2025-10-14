@@ -270,3 +270,60 @@ input, select {
     gap: 0.3rem;
   }
 }
+/* Button container for the General Card */
+.save-btn-container {
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 10px; /* Space between buttons */
+  margin-top: 15px;
+}
+
+/* Button styles */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #fff; /* White text for contrast */
+}
+
+/* Edit button - slightly lighter than card */
+.btn.edit {
+  background-color: #2a3b6d; /* lighter blue */
+}
+
+/* Save button - matches card color but slightly brighter */
+.btn.save {
+  background-color: #1c2b4d; /* same as card background */
+  border: 1px solid #fff; /* optional: white border for visibility */
+}
+
+/* Cancel button - darker red for visibility */
+.btn.cancel {
+  background-color: #a83232; /* deep red */
+}
+
+/* Make disabled inputs partially visible and readable */
+input:disabled,
+select:disabled {
+  background-color: rgba(255, 255, 255, 0.1); /* light transparent background */
+  color: #fff; /* or a slightly faded color */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* optional: lighter border */
+  cursor: not-allowed;
+}
+/* ===== CARDS HOVER EFFECT ===== */
+.card,
+.card.dark,
+.alert-card,
+.sub-card {
+  transition: all 0.3s ease;
+}
+
+.card:hover,
+.card.dark:hover,
+.alert-card:hover,
+.sub-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}

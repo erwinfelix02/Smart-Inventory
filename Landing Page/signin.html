@@ -32,53 +32,143 @@
             <input type="password" id="password" placeholder="Enter your password" required>
             <i class="fa-solid fa-eye-slash toggle-password" id="togglePassword"></i>
           </div>
-          <a href="#" class="forgot">Forgot Password?</a>
+          <a href="../Contents/forgot-password.html" class="forgot">Forgot Password?</a>
           <button type="submit" class="btn">Sign in</button>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- JS for toggle password -->
-  <script>
-  const togglePassword = document.getElementById("togglePassword");
-  const passwordInput = document.getElementById("password");
+<script>
+const togglePassword = document.getElementById("togglePassword");
+const passwordInput = document.getElementById("password");
+const emailInput = document.getElementById("email");
+const loginForm = document.getElementById("loginForm");
 
-  togglePassword.addEventListener("click", () => {
-    const isPassword = passwordInput.type === "password";
-    passwordInput.type = isPassword ? "text" : "password";
-    togglePassword.classList.toggle("fa-eye");
-    togglePassword.classList.toggle("fa-eye-slash");
-  });
+// 🔒 Toggle password visibility
+togglePassword.addEventListener("click", () => {
+  const isPassword = passwordInput.type === "password";
+  passwordInput.type = isPassword ? "text" : "password";
+  togglePassword.classList.toggle("fa-eye");
+  togglePassword.classList.toggle("fa-eye-slash");
+});
 
-  // Handle login form
-  const loginForm = document.getElementById("loginForm");
-  loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+// 🧩 Create error text element under email input if it doesn't exist
+let emailError = emailInput.parentNode.querySelector('.error-text');
+if (!emailError) {
+  emailError = document.createElement("div");
+  emailError.classList.add("error-text");
+  emailInput.parentNode.insertAdjacentElement("afterend", emailError);
+}
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+// Function to show loading spinner
+function showLoading() {
+  const loading = document.createElement("div");
+  loading.classList.add("loading-overlay", "active"); 
+  loading.innerHTML = '<div class="spinner"></div>';
+  document.body.appendChild(loading);
+  return loading;
+}
 
-    try {
-      const response = await fetch("http://127.0.0.1:3000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
+// Function to hide loading spinner
+function hideLoading(loading) {
+  if (loading) {
+    loading.classList.remove("active");
+    setTimeout(() => loading.remove(), 300);
+  }
+}
 
-      const data = await response.json();
+// Reset error states
+function resetErrors() {
+  [emailInput, passwordInput].forEach(input => input.classList.remove("input-error"));
+  emailError.textContent = "";
+}
+
+// ✅ Email validation pattern (gmail.com or phinmaed.com)
+const emailPattern = /^[a-zA-Z0-9._%+-]+@(gmail\.com|phinmaed\.com)$/;
+
+// 🖊 Show error on blur if email is invalid
+emailInput.addEventListener("blur", () => {
+  const value = emailInput.value.trim();
+  if (value && !emailPattern.test(value)) {
+    emailInput.classList.add("input-error");
+    emailError.textContent = "Please enter a valid email (e.g. example@gmail.com or example@phinmaed.com)";
+  }
+});
+
+// 📝 Handle login form submit
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
+
+  resetErrors();
+
+  // ❌ Show error if email invalid after submit
+  if (!emailPattern.test(email)) {
+    emailInput.classList.add("input-error");
+    emailError.textContent = "Please enter a valid email (e.g. example@gmail.com or example@phinmaed.com)";
+    return;
+  }
+
+  if (!password) {
+    passwordInput.classList.add("input-error");
+    emailError.textContent = "Please enter your password.";
+    return;
+  }
+
+  const loading = showLoading();
+
+  try {
+    const response = await fetch("http://127.0.0.1:3000/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await response.json();
+
+    setTimeout(() => {
+      hideLoading(loading);
 
       if (response.ok) {
-        alert("Verification code sent! Check your email.");
         window.location.href = `email.html?email=${encodeURIComponent(email)}&role=${encodeURIComponent(data.role)}`;
       } else {
-        alert(data.msg || "Login failed");
+        emailInput.classList.add("input-error");
+        passwordInput.classList.add("input-error");
+        emailError.textContent = "Incorrect email or password.";
       }
-    } catch (err) {
-      alert("Error connecting to server");
-    }
+    }, 800);
+
+  } catch (err) {
+    console.error(err);
+    setTimeout(() => {
+      hideLoading(loading);
+      emailInput.classList.add("input-error");
+      passwordInput.classList.add("input-error");
+      emailError.textContent = "Server error. Please try again.";
+    }, 800);
+  }
+});
+
+// ✏️ Remove error state when typing again
+const inputs = document.querySelectorAll('.input-group input, #email, #password');
+inputs.forEach(input => {
+  input.addEventListener('input', () => {
+    input.classList.remove('input-error');
+
+    const parentGroup = input.closest('.input-group');
+    if (parentGroup?.classList.contains('error')) parentGroup.classList.remove('error');
+
+    const errorText = parentGroup?.querySelector('.error-message, .error-text');
+    if (errorText) errorText.textContent = '';
   });
+});
+
 </script>
+
+
 
 </body>
 </html>

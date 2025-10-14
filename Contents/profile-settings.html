@@ -47,6 +47,7 @@
     </div>
 
     <!-- Security Settings -->
+<!-- Security Settings -->
 <div class="card">
   <h3>Security Settings</h3>
   <p class="desc">Update your password and security details</p>
@@ -55,34 +56,37 @@
     <div class="form-group">
       <label for="current-password">Current Password</label>
       <div class="input-wrapper">
-        <input type="password" id="current-password" placeholder="Enter current password">
+        <input type="password" id="current-password" placeholder="Enter current password" disabled>
         <i class="fa-solid fa-eye-slash toggle-password"></i>
       </div>
     </div>
     <div class="form-group">
       <label for="new-password">New Password</label>
       <div class="input-wrapper">
-        <input type="password" id="new-password" placeholder="Enter new password">
+        <input type="password" id="new-password" placeholder="Enter new password" disabled>
         <i class="fa-solid fa-eye-slash toggle-password"></i>
       </div>
     </div>
     <div class="form-group">
       <label for="confirm-password">Confirm Password</label>
       <div class="input-wrapper">
-        <input type="password" id="confirm-password" placeholder="Confirm new password">
+        <input type="password" id="confirm-password" placeholder="Confirm new password" disabled>
         <i class="fa-solid fa-eye-slash toggle-password"></i>
       </div>
     </div>
   </div>
 
+  <!-- Edit, Save, Cancel buttons -->
   <div class="form-actions">
-    <button class="btn cancel">Cancel</button>
-    <button class="btn save">Save Changes</button>
+    <button class="btn edit">Edit</button>
+    <button class="btn cancel hidden">Cancel</button>
+    <button class="btn save hidden">Save Changes</button>
   </div>
 </div>
 
+
     
-    <script>
+ <script>
 const userData = localStorage.getItem("user");
 let user = null;
 
@@ -101,7 +105,6 @@ if (user && user.email) {
         document.getElementById("role").value = u.role || "";
         document.getElementById("email").value = u.email || "";
         document.getElementById("phone").value = u.phone || "";
-
         applyRolePermissions(u.role);
       } else {
         alert("⚠️ Failed to load profile information.");
@@ -112,6 +115,7 @@ if (user && user.email) {
   alert("⚠️ No user logged in.");
 }
 
+// Initial Role Permissions
 function applyRolePermissions(role) {
   const phoneInput = document.getElementById("phone");
   const fullnameInput = document.getElementById("fullname");
@@ -123,18 +127,40 @@ function applyRolePermissions(role) {
     fullnameInput.disabled = true;
     emailInput.disabled = true;
     phoneInput.disabled = true;
-    passwordFields.forEach(f => f.disabled = false); // staff can change password
+    passwordFields.forEach(f => f.disabled = true);
     phoneNote.style.display = "block";
   } else if (role.toLowerCase() === "manager") {
     fullnameInput.disabled = true;
     emailInput.disabled = true;
-    phoneInput.disabled = false; // manager can edit phone
-    passwordFields.forEach(f => f.disabled = false);
-    phoneNote.style.display = "none"; // hide the note
+    phoneInput.disabled = true;
+    passwordFields.forEach(f => f.disabled = true);
+    phoneNote.style.display = "none";
   }
 }
 
-// Save updated info
+// Toggle edit mode
+const editBtn = document.querySelector(".btn.edit");
+const cancelBtn = document.querySelector(".btn.cancel");
+const saveBtn = document.querySelector(".btn.save");
+const passwordFields = document.querySelectorAll("#current-password, #new-password, #confirm-password");
+
+editBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  passwordFields.forEach(f => f.disabled = false); // enable fields
+  cancelBtn.classList.remove("hidden");
+  saveBtn.classList.remove("hidden");
+  editBtn.classList.add("hidden");
+});
+
+cancelBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  passwordFields.forEach(f => f.disabled = true);
+  passwordFields.forEach(f => f.value = ""); // clear inputs
+  cancelBtn.classList.add("hidden");
+  saveBtn.classList.add("hidden");
+  editBtn.classList.remove("hidden");
+});
+
 function saveChanges() {
   const payload = {
     email: document.getElementById("email").value,
@@ -144,7 +170,7 @@ function saveChanges() {
     confirmPassword: document.getElementById("confirm-password").value
   };
 
-  // ✅ Password validation
+  // Password validation
   if (payload.newPassword || payload.confirmPassword) {
     if (!payload.currentPassword) {
       alert("⚠️ Please enter your current password.");
@@ -169,23 +195,28 @@ function saveChanges() {
     .then(data => {
       alert(data.message);
       if (data.success) {
-        // Update localStorage if phone changed
         const updatedUser = { ...user, phone: payload.phone };
         localStorage.setItem("user", JSON.stringify(updatedUser));
 
-        // Clear password fields
-        document.getElementById("current-password").value = "";
-        document.getElementById("new-password").value = "";
-        document.getElementById("confirm-password").value = "";
+        // Clear password fields and disable again
+        passwordFields.forEach(f => {
+          f.value = "";
+          f.disabled = true;
+        });
+
+        // Hide Save/Cancel, show Edit
+        cancelBtn.classList.add("hidden");
+        saveBtn.classList.add("hidden");
+        editBtn.classList.remove("hidden");
       }
     })
     .catch(err => console.error("Error updating profile:", err));
 }
 
+// Save button
+saveBtn.addEventListener("click", (e) => { e.preventDefault(); saveChanges(); });
 
-
-document.querySelector(".btn.save").addEventListener("click", (e) => { e.preventDefault(); saveChanges(); });
-document.querySelector(".btn.cancel").addEventListener("click", (e) => { e.preventDefault(); window.location.reload(); });
+// Toggle password visibility
 document.querySelectorAll(".toggle-password").forEach(icon => {
   icon.addEventListener("click", () => {
     const input = icon.previousElementSibling;
@@ -200,7 +231,7 @@ document.querySelectorAll(".toggle-password").forEach(icon => {
     }
   });
 });
-
 </script>
+
 </body>
 </html>

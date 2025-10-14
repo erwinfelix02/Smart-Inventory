@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alerts Dashboard</title>
+  <link rel="stylesheet" href="alert.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+  <div class="alerts-container">
+    <div class="filters">
+      <div class="search-box">
+        <i class="fa fa-search"></i>
+        <input type="text" placeholder="Search alerts..." />
+      </div>
+      <select>
+        <option value="">Severity</option>
+        <option value="Critical">Critical</option>
+        <option value="Warning">Warning</option>
+        <option value="Info">Info</option>
+      </select>
+      <select>
+        <option value="">All Status</option>
+        <option value="New">New</option>
+        <option value="Acknowledged">Acknowledged</option>
+        <option value="Resolved">Resolved</option>
+      </select>
+    </div>
+
+    <div class="table-container">
+      <table class="alerts-table">
+        <thead>
+          <tr>
+            <th>Alert ID</th>
+            <th>Type</th>
+            <th>Product</th>
+            <th>Severity</th>

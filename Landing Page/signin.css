@@ -1,3 +1,4 @@
+/* ===== RESET ===== */
 * {
   margin: 0;
   padding: 0;
@@ -9,6 +10,7 @@ body, html {
   font-family: Arial, sans-serif;
 }
 
+/* ===== LAYOUT ===== */
 .container {
   display: flex;
   height: 100vh;
@@ -32,23 +34,21 @@ body, html {
   z-index: 0;
 }
 
+/* ===== GRADIENT ANIMATION ===== */
 .form-side::before {
   content: "";
   position: absolute;
   top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-background: linear-gradient(
-  45deg,
-  #0a0a0a,
-  #1a1a1a,
-  #164285,
-  #4a6fa5,
-  #2c3e50,
-  #0a0a0a
-);
-
-
+  width: 100%; height: 100%;
+  background: linear-gradient(
+    45deg,
+    #0a0a0a,
+    #1a1a1a,
+    #164285,
+    #4a6fa5,
+    #2c3e50,
+    #0a0a0a
+  );
   background-size: 400% 400%;
   animation: gradientMove 18s ease-in-out infinite;
   z-index: -1;
@@ -63,6 +63,7 @@ background: linear-gradient(
   100% { background-position: 0% 0%; }
 }
 
+/* ===== FORM CONTENT ===== */
 .signin {
   position: relative;
   z-index: 1;
@@ -82,6 +83,7 @@ background: linear-gradient(
   color: #A4BADB;
 }
 
+/* ===== INPUTS ===== */
 .input-group {
   position: relative;
   margin-bottom: 1rem;
@@ -110,12 +112,14 @@ background: linear-gradient(
   border-radius: 5px;
   background: rgba(0,0,0,0.5);
   color: #fff;
+  transition: border 0.2s, box-shadow 0.2s;
 }
 
 .input-group input::placeholder {
   color: #fff;
 }
 
+/* ===== LINKS ===== */
 .forgot {
   display: block;
   margin-bottom: 1.5rem;
@@ -124,6 +128,11 @@ background: linear-gradient(
   text-decoration: none;
 }
 
+.forgot:hover {
+  text-decoration: underline;
+}
+
+/* ===== BUTTON ===== */
 .btn {
   width: 100%;
   padding: 0.8rem;
@@ -133,6 +142,7 @@ background: linear-gradient(
   border-radius: 5px;
   font-size: 1rem;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .btn:hover {
@@ -140,6 +150,7 @@ background: linear-gradient(
   color: #ffffff; 
 }
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
   .container {
     flex-direction: column;
@@ -152,4 +163,69 @@ background: linear-gradient(
     flex: none;
     height: auto;
   }
+}
+
+/* ===== ERROR STATES ===== */
+.input-group.error input,
+.input-error {
+  border: 1px solid #ff4c4c !important;
+  animation: shake 0.3s ease;
+  box-shadow: 0 0 6px rgba(255, 76, 76, 0.6);
+}
+
+.input-group.error i:first-child {
+  color: #ff4c4c;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* Small red text under inputs */
+.error-message,
+.error-text {
+  color: #ff4c4c;
+  font-size: 0.8rem;
+  margin-top: 4px; /* a little space from input */
+  text-align: center; /* center text */
+  width: 100%; /* span full width of container */
+  display: block; /* ensure block for centering */
+  transition: opacity 0.2s ease;
+}
+
+
+/* ===== LOADING SPINNER ===== */
+.loading-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.loading-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.spinner {
+  border: 4px solid rgba(255,255,255,0.3);
+  border-top: 4px solid #A4BADB;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

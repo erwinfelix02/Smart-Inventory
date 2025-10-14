@@ -8,9 +8,10 @@ const userSchema = new mongoose.Schema({
   role: { type: String, required: true }, // Admin / Manager / Staff
   phone: { type: String, default: "" },
   verificationCode: String,
-  codeExpiry: Date, 
+  codeExpiry: Date,
   isVerified: { type: Boolean, default: false },
-  lastLogin: { type: Date, default: null }
+  lastLogin: { type: Date, default: null },
+  isDisabled: { type: Boolean, default: false }// Add this if you want to track active/disabled
 });
 
 // ✅ Pre-save hook to hash password automatically

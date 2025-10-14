@@ -96,5 +96,33 @@ router.post("/verify", async (req, res) => {
     res.status(500).json({ msg: "Server error" });
   }
 });
+// ================= RESEND VERIFICATION CODE =================
+router.post("/resend-code", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const result = await findUserByEmail(email);
+    if (!result) return res.status(400).json({ msg: "User not found" });
 
+    const { user, role } = result;
+
+    // Generate new 6-digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    user.verificationCode = code;
+    user.codeExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
+    await user.save();
+
+    // Send email
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Your Verification Code",
+      text: `Your new code is ${code}`,
+    });
+
+    res.json({ msg: "Verification code resent successfully", role });
+  } catch (err) {
+    console.error("Resend code error:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
 module.exports = router;

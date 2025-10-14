@@ -171,3 +171,50 @@ body, html {
     padding: 0.8rem;
   }
 }
+/* Error state for code inputs */
+.code-inputs input.input-error {
+  border: 1px solid #ff4c4c;
+  box-shadow: 0 0 6px rgba(255, 76, 76, 0.6);
+  animation: shake 0.3s ease;
+}
+
+/* Shake animation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.loading-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.spinner {
+  border: 4px solid rgba(255,255,255,0.3);
+  border-top: 4px solid #A4BADB;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

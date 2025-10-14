@@ -144,8 +144,9 @@
 </div>
 
 <script>
-  let signedInUserRole = "guest"; // default if not logged in
+let signedInUserRole = "guest"; // default if not logged in
 
+// Get signed-in user role from localStorage
 const userData = localStorage.getItem("user");
 if (userData) {
   try {
@@ -156,72 +157,79 @@ if (userData) {
   }
 }
 
-  let currentPage = 1;
+let currentPage = 1;
 const rowsPerPage = 5;
 
-  // =========================
-  // Role-based button visibility
-  // =========================
-  document.addEventListener("DOMContentLoaded", () => {
-    const addBtn = document.querySelector(".add-btn");
-    const userData = localStorage.getItem("user");
+// DOM elements
+const tbody = document.querySelector("tbody");
+const searchInput = document.querySelector(".search-box input");
+const roleSelect = document.querySelectorAll("select")[0];
+const statusSelect = document.querySelectorAll("select")[1];
+const addBtn = document.querySelector(".add-btn");
+const modal = document.getElementById("addUserModal");
+const cancelBtn = document.getElementById("cancelBtn");
+const addUserForm = document.getElementById("addUserForm");
+const phoneInput = document.getElementById("phone");
+const modalTitle = document.getElementById("modalTitle");
+const saveBtn = document.getElementById("saveBtn");
 
-    if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        if (user.role && user.role.toLowerCase() !== "admin") {
-          if (addBtn) addBtn.style.display = "none";
-        }
-      } catch (e) {
-        console.error("Error parsing user data:", e);
-      }
-    }
-  });
+let allUsers = [];
 
-  // =========================
-  // Format "Last Login" display
-  // =========================
-  function formatLastLogin(dateString) {
-    if (!dateString) return "—";
-    const date = new Date(dateString);
-    const diffMs = Date.now() - date;
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    if (diffHours < 1) return "Just now";
-    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
-    const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
-  }
-
-  // =========================
-  // User table handling
-  // =========================
-  let allUsers = [];
-  const tbody = document.querySelector("tbody");
-  const searchInput = document.querySelector(".search-box input");
-  const roleSelect = document.querySelectorAll("select")[0];
-  const statusSelect = document.querySelectorAll("select")[1];
-
-  async function loadUsers() {
+// =========================
+// Role-based button visibility
+// =========================
+document.addEventListener("DOMContentLoaded", () => {
+  if (userData) {
     try {
-      const res = await fetch("http://localhost:3000/users");
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      allUsers = await res.json();
-      renderUsers(allUsers);
-    } catch (err) {
-      console.error("Error fetching users:", err);
+      const user = JSON.parse(userData);
+      if (user.role && user.role.toLowerCase() !== "admin") {
+        if (addBtn) addBtn.style.display = "none";
+      }
+    } catch (e) {
+      console.error("Error parsing user data:", e);
     }
   }
+});
 
+// =========================
+// Format Last Login
+// =========================
+function formatLastLogin(dateString) {
+  if (!dateString) return "—";
+  const date = new Date(dateString);
+  const diffMs = Date.now() - date;
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 1) return "Just now";
+  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+}
+
+// =========================
+// Load users from server
+// =========================
+async function loadUsers() {
+  try {
+    const res = await fetch("http://localhost:3000/users");
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    allUsers = await res.json();
+    renderUsers(allUsers);
+  } catch (err) {
+    console.error("Error fetching users:", err);
+  }
+}
+
+// =========================
+// Render users table
+// =========================
 function renderUsers(users, page = 1) {
-  // Role-based filtering: managers only see staff, admins see all
   const visibleUsers = users.filter(user => {
     if (signedInUserRole.toLowerCase() === "admin") return true;
     if (signedInUserRole.toLowerCase() === "manager") return user.role.toLowerCase() === "staff";
-    return false; // other roles see nothing
+    return false;
   });
 
   tbody.innerHTML = "";
-
   if (visibleUsers.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No users found</td></tr>`;
     return;
@@ -233,7 +241,7 @@ function renderUsers(users, page = 1) {
 
   paginatedUsers.forEach((user, index) => {
     const globalIndex = start + index + 1;
-    const status = user.isVerified ? "Active" : "Disabled";
+    const status = user.isDisabled ? "Disabled" : "Active";
     const lastLogin = formatLastLogin(user.lastLogin);
 
     const row = `
@@ -256,6 +264,9 @@ function renderUsers(users, page = 1) {
   renderPagination(visibleUsers, page);
 }
 
+// =========================
+// Pagination
+// =========================
 const paginationContainer = document.querySelector(".pagination .pages");
 const paginationText = document.querySelector(".pagination p");
 
@@ -263,20 +274,15 @@ function renderPagination(users, page) {
   const totalPages = Math.ceil(users.length / rowsPerPage);
   currentPage = page;
 
-  // Update text
   paginationText.textContent = `Showing ${Math.min((page - 1) * rowsPerPage + 1, users.length)} to ${Math.min(page * rowsPerPage, users.length)} of ${users.length} users`;
-
-  // Clear old buttons
   paginationContainer.innerHTML = "";
 
-  // Previous button
   const prevBtn = document.createElement("button");
   prevBtn.textContent = "Previous";
   prevBtn.disabled = page === 1;
   prevBtn.addEventListener("click", () => renderUsers(users, page - 1));
   paginationContainer.appendChild(prevBtn);
 
-  // Page numbers
   for (let i = 1; i <= totalPages; i++) {
     const btn = document.createElement("button");
     btn.textContent = i;
@@ -285,7 +291,6 @@ function renderPagination(users, page) {
     paginationContainer.appendChild(btn);
   }
 
-  // Next button
   const nextBtn = document.createElement("button");
   nextBtn.textContent = "Next";
   nextBtn.disabled = page === totalPages;
@@ -293,187 +298,225 @@ function renderPagination(users, page) {
   paginationContainer.appendChild(nextBtn);
 }
 
- function applyFilters() {
+// =========================
+// Filters
+// =========================
+function applyFilters() {
   const searchTerm = searchInput.value.toLowerCase().trim();
   const selectedRole = roleSelect.value;
   const selectedStatus = statusSelect.value;
 
-  const filtered = allUsers
-    .filter(user => {
-      // Role-based visibility
-      if (signedInUserRole.toLowerCase() === "manager" && user.role.toLowerCase() !== "staff") return false;
+  const filtered = allUsers.filter(user => {
+    if (signedInUserRole.toLowerCase() === "manager" && user.role.toLowerCase() !== "staff") return false;
 
-      // Search filter
-      const nameMatch = user.fullName?.toLowerCase().includes(searchTerm) || false;
-      const emailMatch = user.email?.toLowerCase().includes(searchTerm) || false;
-      const matchesSearch = !searchTerm || nameMatch || emailMatch;
+    const nameMatch = user.fullName?.toLowerCase().includes(searchTerm) || false;
+    const emailMatch = user.email?.toLowerCase().includes(searchTerm) || false;
+    const matchesSearch = !searchTerm || nameMatch || emailMatch;
 
-      // Role dropdown filter
-      const matchesRole = selectedRole === "All Roles" || user.role === selectedRole;
+    const matchesRole = selectedRole === "All Roles" || user.role === selectedRole;
 
-      // Status filter
-      const userStatus = user.isVerified ? "Active" : "Disabled";
-      const matchesStatus = selectedStatus === "All Status" || userStatus === selectedStatus;
+    const userStatus = user.isDisabled ? "Disabled" : "Active";
+    const matchesStatus = selectedStatus === "All Status" || userStatus === selectedStatus;
 
-      return matchesSearch && matchesRole && matchesStatus;
-    });
+    return matchesSearch && matchesRole && matchesStatus;
+  });
 
   renderUsers(filtered, 1);
 }
 
+// =========================
+// Modal Handling
+// =========================
+addBtn.addEventListener("click", () => {
+  modalTitle.textContent = "Add New User";
+  saveBtn.textContent = "Save User";
+  addUserForm.reset();
+  document.getElementById("email").readOnly = false;
+  delete addUserForm.dataset.editing;
+  modal.style.display = "flex";
+  setTimeout(() => modal.classList.add("show"), 10);
+});
 
+function closeModal() {
+  modal.classList.remove("show");
+  addUserForm.reset();
+  phoneInput.value = "";
+  document.getElementById("email").readOnly = false;
+  delete addUserForm.dataset.editing;
+  saveBtn.textContent = "Save User";
+  modalTitle.textContent = "Add New User";
+  setTimeout(() => { modal.style.display = "none"; }, 300);
+}
 
-  document.addEventListener("DOMContentLoaded", loadUsers);
-  searchInput.addEventListener("input", applyFilters);
-  roleSelect.addEventListener("change", applyFilters);
-  statusSelect.addEventListener("change", applyFilters);
+cancelBtn.addEventListener("click", closeModal);
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) closeModal();
+});
 
-  // =========================
-  // Modal handling
-  // =========================
-  const addBtn = document.querySelector(".add-btn");
-  const modal = document.getElementById("addUserModal");
-  const cancelBtn = document.getElementById("cancelBtn");
-  const addUserForm = document.getElementById("addUserForm");
-  const phoneInput = document.getElementById("phone");
-  const modalTitle = document.getElementById("modalTitle");
-  const saveBtn = document.getElementById("saveBtn");
+// =========================
+// Save / Update User
+// =========================
+addUserForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  addBtn.addEventListener("click", () => {
-    modalTitle.textContent = "Add New User";
-    saveBtn.textContent = "Save User";
-    addUserForm.reset();
-    document.getElementById("email").readOnly = false;
-    delete addUserForm.dataset.editing;
-    modal.style.display = "flex";
-    setTimeout(() => modal.classList.add("show"), 10);
-  });
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const phone = document.getElementById("phone").value.trim();
+  const role = document.getElementById("role").value;
+  const fullName = `${firstName} ${lastName}`;
+  const editingId = addUserForm.dataset.editing;
 
-  function closeModal() {
-    modal.classList.remove("show");
-    addUserForm.reset();
-    phoneInput.value = "";
-    document.getElementById("email").readOnly = false;
-    delete addUserForm.dataset.editing;
-    saveBtn.textContent = "Save User";
-    modalTitle.textContent = "Add New User";
-    setTimeout(() => { modal.style.display = "none"; }, 300);
-  }
+  if (!firstName || !lastName || !email || !role) return;
 
-  cancelBtn.addEventListener("click", closeModal);
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) closeModal();
-  });
-
-  // =========================
-  // Unified Save & Update Handler
-  // =========================
-  addUserForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const firstName = document.getElementById("firstName").value.trim();
-    const lastName = document.getElementById("lastName").value.trim();
-    const email = document.getElementById("email").value.trim().toLowerCase();
-    const phone = document.getElementById("phone").value.trim();
-    const role = document.getElementById("role").value;
-    const fullName = `${firstName} ${lastName}`;
-    const editingId = addUserForm.dataset.editing;
-
-    if (!firstName || !lastName || !email || !role) return;
-
-    try {
-      if (editingId) {
-        // ✏️ Update user
-        const res = await fetch(`http://localhost:3000/users/${editingId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fullName, email, phone, role })
-        });
-        if (!res.ok) throw new Error("Failed to update user");
-        await loadUsers();
-        closeModal();
-      } else {
-        // 🆕 Add new user
-        const checkRes = await fetch(`http://localhost:3000/users?email=${encodeURIComponent(email)}`);
-        const users = await checkRes.json();
-        const existingUser = users.find(u => u.email.toLowerCase() === email);
-        if (existingUser) {
-          alert("An account with this email already exists!");
-          return;
-        }
-
-        let endpoint = "";
-        if (role === "Admin") endpoint = "/users/admins";
-        else if (role === "Inventory Manager") endpoint = "/users/managers";
-        else if (role === "Staff") endpoint = "/users/staff";
-
-        const res = await fetch(`http://localhost:3000${endpoint}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fullName, email, phone, role, isVerified: true, lastLogin: new Date() })
-        });
-        if (!res.ok) throw new Error("Failed to save user");
-        await loadUsers();
-        closeModal();
+  try {
+    if (editingId) {
+      // Update existing user
+      const res = await fetch(`http://localhost:3000/users/${editingId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, email, phone, role })
+      });
+      if (!res.ok) throw new Error("Failed to update user");
+      await loadUsers();
+      closeModal();
+    } else {
+      // Add new user
+      const checkRes = await fetch(`http://localhost:3000/users?email=${encodeURIComponent(email)}`);
+      const users = await checkRes.json();
+      const existingUser = users.find(u => u.email.toLowerCase() === email);
+      if (existingUser) {
+        alert("An account with this email already exists!");
+        return;
       }
-    } catch (err) {
-      console.error("Error saving/updating user:", err);
-      alert("Failed to save user. Check console for details.");
+
+      let endpoint = "";
+      if (role === "Admin") endpoint = "/users/admins";
+      else if (role === "Inventory Manager") endpoint = "/users/managers";
+      else if (role === "Staff") endpoint = "/users/staff";
+
+      const res = await fetch(`http://localhost:3000${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, email, phone, role, isDisabled: false, lastLogin: new Date() })
+      });
+      if (!res.ok) throw new Error("Failed to save user");
+      await loadUsers();
+      closeModal();
     }
-  });
-
-  // =========================
-  // Edit User
-  // =========================
-  function openEditUserModal(user) {
-    modalTitle.textContent = "Edit User Info";
-    saveBtn.textContent = "Update";
-    modal.style.display = "flex";
-    setTimeout(() => modal.classList.add("show"), 10);
-
-    const [first, ...lastParts] = (user.fullName || "").split(" ");
-    document.getElementById("firstName").value = first || "";
-    document.getElementById("lastName").value = lastParts.join(" ") || "";
-    document.getElementById("email").value = user.email;
-    document.getElementById("email").readOnly = true;
-    document.getElementById("phone").value = user.phone || "";
-    document.getElementById("role").value = user.role;
-   addUserForm.dataset.editing = user._id;
-  }
-
-tbody.addEventListener("click", (e) => {
-  if (e.target.classList.contains("fa-pen")) {
-    const row = e.target.closest("tr");
-    const userId = row.dataset.id;
-    const user = allUsers.find(u => u._id === userId);
-    if (user) openEditUserModal(user);
+  } catch (err) {
+    console.error("Error saving/updating user:", err);
+    alert("Failed to save user. Check console for details.");
   }
 });
 
-  // =========================
-  // Phone Input Formatting
-  // =========================
-  phoneInput.addEventListener("input", () => {
-    let value = phoneInput.value;
-    if (value.match(/^\d/) && !value.startsWith("+63")) value = "+63 " + value;
-    value = value.replace(/[^\d+ ]/g, "");
-    if (value.startsWith("+63")) {
-      const afterPrefix = value.slice(4).replace(/\D/g, "").slice(0, 10);
-      value = "+63 " + afterPrefix;
-    }
-    phoneInput.value = value;
-  });
+// =========================
+// Edit User
+// =========================
+function openEditUserModal(user) {
+  modalTitle.textContent = "Edit User Info";
+  saveBtn.textContent = "Update";
+  modal.style.display = "flex";
+  setTimeout(() => modal.classList.add("show"), 10);
 
-  phoneInput.addEventListener("keydown", (e) => {
-    if (phoneInput.selectionStart <= 4 && (e.key === "Backspace" || e.key === "Delete")) {
-      e.preventDefault();
-    }
-  });
+  const [first, ...lastParts] = (user.fullName || "").split(" ");
+  document.getElementById("firstName").value = first || "";
+  document.getElementById("lastName").value = lastParts.join(" ") || "";
+  document.getElementById("email").value = user.email;
+  document.getElementById("email").readOnly = true;
+  document.getElementById("phone").value = user.phone || "";
+  document.getElementById("role").value = user.role;
+  addUserForm.dataset.editing = user._id;
+}
 
-  phoneInput.addEventListener("blur", () => {
-    if (phoneInput.value.trim() === "+63") phoneInput.value = "";
-  });
+// =========================
+// Toggle Active / Disabled (Fixed)
+// =========================
+tbody.addEventListener("click", (e) => {
+  const row = e.target.closest("tr");
+  if (!row) return;
+
+  const userId = row.dataset.id;
+  const user = allUsers.find(u => u._id === userId);
+  if (!user) return;
+
+  // Edit user
+  if (e.target.classList.contains("fa-pen")) {
+    openEditUserModal(user);
+    return;
+  }
+
+  // Toggle Active / Disabled
+  if (e.target.classList.contains("fa-ban") || e.target.classList.contains("fa-check")) {
+    const newStatus = !(user.isDisabled ?? false); // ✅ safe toggle
+
+    const icon = e.target;
+    icon.style.pointerEvents = "none";
+    icon.classList.add("fa-spin");
+
+    (async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/users/${userId}/status`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isDisabled: newStatus })
+        });
+
+        if (!res.ok) throw new Error("Failed to update user status");
+
+        // Update local object and UI
+        user.isDisabled = newStatus;
+        const statusSpan = row.querySelector(".status");
+        statusSpan.textContent = newStatus ? "Disabled" : "Active";
+        statusSpan.className = `status ${newStatus ? "disabled" : "active"}`;
+        icon.className = `fa ${newStatus ? "fa-check" : "fa-ban"}`;
+      } catch (err) {
+        console.error(err);
+        alert("Failed to update user status. Check console.");
+      } finally {
+        icon.style.pointerEvents = "auto";
+        icon.classList.remove("fa-spin");
+      }
+    })();
+  }
+});
+
+
+
+// =========================
+// Phone Input Formatting
+// =========================
+phoneInput.addEventListener("input", () => {
+  let value = phoneInput.value;
+  if (value.match(/^\d/) && !value.startsWith("+63")) value = "+63 " + value;
+  value = value.replace(/[^\d+ ]/g, "");
+  if (value.startsWith("+63")) {
+    const afterPrefix = value.slice(4).replace(/\D/g, "").slice(0, 10);
+    value = "+63 " + afterPrefix;
+  }
+  phoneInput.value = value;
+});
+
+phoneInput.addEventListener("keydown", (e) => {
+  if (phoneInput.selectionStart <= 4 && (e.key === "Backspace" || e.key === "Delete")) {
+    e.preventDefault();
+  }
+});
+
+phoneInput.addEventListener("blur", () => {
+  if (phoneInput.value.trim() === "+63") phoneInput.value = "";
+});
+
+// =========================
+// Event Listeners for Filters
+// =========================
+document.addEventListener("DOMContentLoaded", loadUsers);
+searchInput.addEventListener("input", applyFilters);
+roleSelect.addEventListener("change", applyFilters);
+statusSelect.addEventListener("change", applyFilters);
 </script>
+
+
 
 </body>
 </html>

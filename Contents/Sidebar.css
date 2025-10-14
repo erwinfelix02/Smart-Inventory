@@ -236,6 +236,17 @@ body {
   padding: 20px;
 }
 
+/* Default main content margin */
+.main-content {
+  margin-left: 240px;
+  transition: margin-left 0.3s ease;
+}
+
+/* When sidebar is collapsed (all screen sizes) */
+.sidebar.collapsed + .main-content {
+  margin-left: 70px; /* shift content when sidebar collapses */
+}
+
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
@@ -247,9 +258,6 @@ body {
     transform: translateX(0);
   }
 
-  .main-content {
-    margin-left: 0;
-  }
 
   .topbar .menu-btn {
     display: inline-block;
@@ -295,3 +303,115 @@ body {
 .sidebar ul li.active img.menu-icon {
   filter: invert(100%);
 }
+/* Collapsed sidebar width */
+.sidebar.collapsed {
+  width: 70px; /* only icons visible */
+  overflow: hidden;
+}
+
+/* Hide logo and text when collapsed */
+.sidebar.collapsed .logo-img,
+.sidebar.collapsed .logo-text {
+  display: none;
+}
+
+/* Keep collapse button visible at top inside sidebar */
+.sidebar.collapsed #collapse-btn {
+  position: relative;
+  top: 10px;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  margin: 0 auto; /* center horizontally */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide menu text but keep icons clickable */
+/* Only hide the text, keep icons visible */
+/* Collapsed sidebar width */
+.sidebar.collapsed {
+  width: 70px; /* only icons visible */
+  overflow: hidden;
+}
+
+/* Hide logo and text when collapsed */
+.sidebar.collapsed .logo-img,
+.sidebar.collapsed .logo-text {
+  display: none;
+}
+
+/* Keep collapse button visible at top inside sidebar */
+.sidebar.collapsed #collapse-btn {
+  position: relative;
+  top: 10px;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  margin: 0 auto; /* center horizontally */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Menu items: hide text but keep icons visible */
+.sidebar.collapsed ul li {
+  justify-content: center; /* center icons */
+  padding: 15px 0;
+  color: transparent; /* hide text */
+  font-size: 0;       /* remove text spacing */
+}
+
+.sidebar.collapsed ul li img.menu-icon {
+  display: block; /* ensure icons are visible */
+  filter: none;   /* normal icon color */
+}
+.collapse-btn {
+  background: none;   /* remove default background */
+  border: none;       /* remove default border */
+  cursor: pointer;    /* pointer on hover */
+  padding: 0;         /* remove extra padding */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* Center logout icon and hide avatar & text */
+.sidebar.collapsed .user-info {
+  flex-direction: column; /* stack vertically */
+  align-items: center;
+  justify-content: center;
+  gap: 0;                 /* remove gap */
+  padding: 10px 0;
+}
+
+.sidebar.collapsed .user-info .avatar,
+.sidebar.collapsed .user-info p,
+.sidebar.collapsed .user-info small {
+  display: none; /* hide avatar and text */
+}
+
+.sidebar.collapsed .log-out {
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar.collapsed .log-out img {
+  display: block;
+  width: 36px;
+  height: 36px;
+}
+/* Menu icons turn white when active */
+.sidebar ul li.active img.menu-icon {
+  filter: brightness(0) invert(1); /* ensures white icon */
+}
+
+/* Remove the fixed white filter */
+.sidebar .log-out.active img,
+.sidebar .log-out:hover img {
+  /* filter removed; color will be set via JS */
+  transition: filter 0.2s, transform 0.2s;
+}
+

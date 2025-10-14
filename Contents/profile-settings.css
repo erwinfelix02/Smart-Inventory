@@ -156,4 +156,34 @@ input:disabled {
   cursor: pointer;
   color: #777;
 }
-    
+  .hidden {
+  display: none;
+}
+
+.btn.edit {
+  background-color: #2563eb;
+  color: #fff;
+}
+
+.btn.edit:hover {
+  background-color: #1e40af;
+}
+
+.btn.save {
+  background-color: #2563eb;
+  color: #fff;
+}
+
+.btn.save:hover {
+  background-color: #1e40af;
+}
+
+.btn.cancel {
+  background-color: #6b7280; /* cool gray */
+  color: #fff;
+}
+
+.btn.cancel:hover {
+  background-color: #4b5563; /* darker gray on hover */
+}
+ 

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Overview</title>
+  <link rel="stylesheet" href="staff-dashboard.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <div class="dashboard">
+
+    <!-- ===== TOP SECTION ===== -->
+    <div class="top-section">
+      <div class="cards">
+        <div class="card">
+          <div class="card-content">
+            <h4>Today's Sales</h4>
+            <p class="amount">₱45,280</p>
+            <p class="change">▲ +18% vs yesterday</p>
+          </div>
+          <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
+        </div>
+
+        <div class="card">
+          <div class="card-content">
+            <h4>Orders Completed</h4>
+            <p class="count">127</p>
+            <p class="change red">3 more than yesterday</p>
+          </div>
+          <div class="icon"><i class="fa-solid fa-clipboard-check"></i></div>
+        </div>
+
+        <div class="card">
+          <div class="card-content">
+            <h4>Pending Approvals</h4>
+            <p class="count">7</p>
+            <p class="change orange">Requires attention</p>
+          </div>
+          <div class="icon"><i class="fa-regular fa-clock"></i></div>
+        </div>
+      </div>
+
+      <div class="transactions">
+        <div class="header">
+          <h4>Recent Transactions</h4>
+          <a href="#">View All</a>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>TRANS ID</th>
+              <th>CUSTOMER</th>
+              <th>ITEMS</th>
+              <th>TOTAL</th>
+              <th>STATUS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>#TXN-001</td>
+              <td>Sarah Johnson</td>
+              <td>3</td>
+              <td>$450.00</td>
+              <td><span class="status completed">Completed</span></td>
+            </tr>
+            <tr>
+              <td>#TXN-002</td>
+              <td>Mike Chen</td>
+              <td>1</td>
+              <td>$120.00</td>
+              <td><span class="status pending">Pending</span></td>
+            </tr>
+            <tr>
+              <td>#TXN-003</td>
+              <td>Emma Davis</td>
+              <td>5</td>
+              <td>$890.00</td>
+              <td><span class="status completed">Completed</span></td>
+            </tr>
+            <tr>
+              <td>#TXN-004</td>
+              <td>Alex Wilson</td>
+              <td>2</td>
+              <td>$340.00</td>
+              <td><span class="status delayed">Delayed</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== SALES TREND ===== -->
+    <div class="sales-trend">
+      <h4>Sales Trend</h4>
+      <div class="chart-placeholder">
+        <i class="fa-solid fa-chart-line"></i>
+        <p>Sales Chart Placeholder</p>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

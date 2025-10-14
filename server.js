@@ -31,6 +31,7 @@ const signinRoutes = require("./routes/signin");
 const settingsRoutes = require("./routes/settings");
 const userManagementRoutes = require("./routes/user-management");
 
+
 app.use("/users", usersRoute);
 app.use("/auth", signinRoutes);     // login & verify
 app.use("/settings", settingsRoutes); // fetch settings info

@@ -153,61 +153,96 @@
 
   </div>
 <script>
-  const loggedInUserRole = "Manager"; // This comes from backend/session
-  const addUserBtn = document.getElementById('add-user');
-  const addProductBtn = document.getElementById('add-product');
-  const exportDataBtn = document.getElementById('export-data');
-  const alertSettingsBtn = document.querySelector('.btn.settings');
+document.addEventListener("DOMContentLoaded", () => {
+  // 🧩 Get user object from localStorage (used by sidebar)
+  const userData = localStorage.getItem("user");
+  let role = "";
 
-  // 🔹 Disable restricted buttons for Managers
-  if (loggedInUserRole === "Manager") {
-    // Disable Add User
-    addUserBtn.disabled = true;
-    addUserBtn.style.opacity = 0.5;
-    addUserBtn.style.cursor = "not-allowed";
-    addUserBtn.title = "You cannot add new users";
-
-    // Disable Export Report
-    exportDataBtn.disabled = true;
-    exportDataBtn.style.opacity = 0.5;
-    exportDataBtn.style.cursor = "not-allowed";
-    exportDataBtn.title = "You cannot export reports";
-  } else {
-    // 🔹 Only Admins can access these
-    addUserBtn.addEventListener("click", () => {
-      window.location.href = "/user-management.html";
-    });
-
-    exportDataBtn.addEventListener("click", () => {
-      window.location.href = "/export-report.html";
-    });
+  if (userData) {
+    try {
+      const user = JSON.parse(userData);
+      role = (user.role || "").trim().toLowerCase();
+    } catch (e) {
+      console.error("❌ Error parsing user data:", e);
+    }
   }
 
-  // 🔹 Add Product → Go to Inventory Management page
-  addProductBtn.addEventListener("click", () => {
-    const sidebarItem = parent.document.querySelector(
-      "li[onclick*='inventory-management.html']"
-    );
-    if (sidebarItem) {
-      sidebarItem.click();
-    } else {
-      console.warn("Sidebar item for Inventory Management not found.");
-    }
-  });
+  console.log("🎯 Detected role:", role);
 
-  // 🔹 Alert Settings → Go to Alert Management page
-  alertSettingsBtn.addEventListener("click", () => {
-    const sidebarItem = parent.document.querySelector(
-      "li[onclick*='alerts.html']"
-    );
-    if (sidebarItem) {
-      sidebarItem.click();
+  // 🎯 Get dashboard buttons
+  const addUserBtn = document.getElementById("add-user");
+  const addProductBtn = document.getElementById("add-product");
+  const exportDataBtn = document.getElementById("export-data");
+  const alertSettingsBtn = document.querySelector(".btn.settings");
+
+  // 🔒 Disable button completely and show 🚫 cursor
+  const disableButton = (btn, message) => {
+    if (!btn) return;
+    btn.classList.add("locked");
+    btn.title = message;
+    btn.disabled = true;
+    btn.style.opacity = "0.6";
+    btn.style.cursor = "not-allowed";
+  };
+
+  // 🧭 Helper: open page and highlight sidebar item
+  const doc = parent?.document || document;
+  const pageChanger = parent?.changePage || window.changePage;
+
+  function openPage(title, subtitle, file) {
+    if (pageChanger) {
+      pageChanger(title, subtitle, null, file);
+      const sidebarItems = doc.querySelectorAll("li[onclick*='changePage']");
+      sidebarItems.forEach((li) => {
+        const match = li.getAttribute("onclick").includes(file);
+        li.classList.toggle("active", match);
+      });
     } else {
-      console.warn("Sidebar item for Alert Management not found.");
+      console.warn("⚠️ changePage() not found");
     }
-  });
+  }
+
+  // ===============================
+  // 🧷 ROLE PERMISSIONS LOGIC
+  // ===============================
+  if (role.includes("admin")) {
+    console.log("✅ Admin detected: Export allowed");
+
+    if (exportDataBtn) {
+      exportDataBtn.addEventListener("click", () =>
+        openPage("Export Report", "Export and download data", "../Contents/export-report.html")
+      );
+    }
+  } else if (role.includes("manager")) {
+    console.log("⚠️ Manager detected: Export disabled");
+    disableButton(exportDataBtn, "Managers cannot export reports");
+  } else {
+    console.log("👤 Other role detected: Export disabled");
+    disableButton(exportDataBtn, "You do not have permission to export data");
+  }
+
+  // ===============================
+  // 🌍 COMMON BUTTONS (All Roles)
+  // ===============================
+  if (addUserBtn) {
+    addUserBtn.addEventListener("click", () =>
+      openPage("User Management", "Manage users and roles", "../Contents/user-management.html")
+    );
+  }
+
+  if (addProductBtn) {
+    addProductBtn.addEventListener("click", () =>
+      openPage("Inventory Management", "Track and manage inventory", "../Contents/inventory-management.html")
+    );
+  }
+
+  if (alertSettingsBtn) {
+    alertSettingsBtn.addEventListener("click", () =>
+      openPage("Alert Management", "Manage system alerts and notifications", "../Contents/alert.html")
+    );
+  }
+});
 </script>
-
 
 </body>
 </html>

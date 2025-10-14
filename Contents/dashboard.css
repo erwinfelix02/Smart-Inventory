@@ -366,6 +366,28 @@ body {
   color: #777;
 }
 
+/* Subtle lock + dimmed look for restricted buttons */
+.locked {
+  position: relative;
+  opacity: 0.6; /* Slightly dim to show restriction */
+  filter: grayscale(20%); /* Faded look */
+  cursor: not-allowed; /* 🚫 Cursor shows restriction */
+  pointer-events: auto; /* Keep hover active for tooltip & cursor */
+  transition: opacity 0.3s ease;
+}
+
+/* Small lock icon appears only when hovered */
+.locked:hover::after {
+  content: "🔒";
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  font-size: 0.9em;
+  opacity: 0.6;
+}
+
+
 /* Right panel buttons pop more */
 .btn.add {
   background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
@@ -398,3 +420,7 @@ body {
 .low-stock .summary-icon { background: linear-gradient(135deg, #A83B3B, #7F1D1D); }
 .sales .summary-icon { background: linear-gradient(135deg, #2F6F3A, #14532D); }
 .active-alerts .summary-icon { background: linear-gradient(135deg, #787C14, #4D4D04); }
+/* Subtle lock style for disabled buttons */
+/* Subtle lock + dimmed look for restricted buttons */
+
+

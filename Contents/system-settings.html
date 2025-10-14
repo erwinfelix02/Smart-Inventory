@@ -59,10 +59,12 @@
           </div>
         </div>
 
-        <!-- Save Button -->
         <div class="save-btn-container">
-          <button class="btn save">Save Changes</button>
-        </div>
+  <button class="btn cancel" id="cancelBtn" style="display:none;">Cancel</button>
+  <button class="btn save" id="saveBtn" style="display:none;">Save Changes</button>
+  <button class="btn edit" id="editBtn">Edit</button>
+</div>
+
       </div>
 
       <!-- Alert Recipients -->
@@ -145,7 +147,6 @@
   </div>
  <script>
 function goToUserManagement() {
-  // Find the sidebar item for User Management in the parent window
   const sidebarItem = parent.document.querySelector("li[onclick*='user-management.html']");
   if (sidebarItem && parent.changePage) {
     parent.changePage(
@@ -156,6 +157,64 @@ function goToUserManagement() {
     );
   }
 }
+
+const editBtn = document.getElementById('editBtn');
+const saveBtn = document.getElementById('saveBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+
+const generalCard = document.querySelector('.general-card');
+const inputs = generalCard.querySelectorAll('input, select');
+
+// Store original values
+let originalValues = [];
+inputs.forEach(input => originalValues.push(input.value));
+
+// Initially disable all fields
+inputs.forEach(input => {
+  input.setAttribute('disabled', true);
+  input.style.cursor = 'not-allowed';
+});
+
+// Enable fields on Edit
+editBtn.addEventListener('click', () => {
+  inputs.forEach(input => {
+    input.removeAttribute('disabled');
+    input.style.cursor = 'text'; // normal cursor for editing
+  });
+
+  editBtn.style.display = 'none';
+  saveBtn.style.display = 'inline-block';
+  cancelBtn.style.display = 'inline-block';
+});
+
+// Cancel button: revert values and disable fields
+cancelBtn.addEventListener('click', () => {
+  inputs.forEach((input, index) => {
+    input.value = originalValues[index];
+    input.setAttribute('disabled', true);
+    input.style.cursor = 'not-allowed';
+  });
+
+  editBtn.style.display = 'inline-block';
+  saveBtn.style.display = 'none';
+  cancelBtn.style.display = 'none';
+});
+
+// Save button: save values and disable fields
+saveBtn.addEventListener('click', () => {
+  inputs.forEach((input, index) => {
+    originalValues[index] = input.value;
+    input.setAttribute('disabled', true);
+    input.style.cursor = 'not-allowed';
+  });
+
+  editBtn.style.display = 'inline-block';
+  saveBtn.style.display = 'none';
+  cancelBtn.style.display = 'none';
+
+  // Optionally add your save logic here (AJAX, form submission, etc.)
+  alert('Changes saved!');
+});
 </script>
 
 </body>
