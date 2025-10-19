@@ -30,10 +30,15 @@ const usersRoute = require("./routes/users");
 const signinRoutes = require("./routes/signin");
 const settingsRoutes = require("./routes/settings");
 const userManagementRoutes = require("./routes/user-management");
+const productRoutes = require("./routes/productRoutes");
+const alertRoute = require("./routes/alert");
+const systemsettingsRoutes = require("./routes/system-settings");
 
-
+app.use("/system-settings", systemsettingsRoutes);
+app.use("/alert", alertRoute);
 app.use("/users", usersRoute);
 app.use("/auth", signinRoutes);     // login & verify
+app.use("/products", productRoutes);
 app.use("/settings", settingsRoutes); // fetch settings info
 app.use("/users", userManagementRoutes);
 

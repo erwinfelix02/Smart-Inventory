@@ -354,3 +354,30 @@ th, td {
   transform: translateY(0);
   opacity: 0.9;
 }
+/* Top-centered save status message */
+#saveStatus {
+  position: fixed;
+  top: 20px;                      /* Top part of the screen */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 26px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+  background-color: #28a745;      /* Green for success */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+#saveStatus.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(10px); /* Slide down a bit */
+}
+
+#saveStatus.error {
+  background-color: #dc3545; /* Red for error */
+}

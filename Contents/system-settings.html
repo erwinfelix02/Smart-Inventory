@@ -21,39 +21,32 @@
             <h4>Business Information</h4>
             <div class="form-group">
               <label>Business Name</label>
-              <input type="text" value="TechCorp Solution">
+              <input type="text" name="business_name" value="TechCorp Solution">
             </div>
             <div class="form-group">
               <label>Address</label>
-              <input type="text" placeholder="Enter address">
-            </div>
+              <input type="text" name="address" placeholder="Enter address">
+            </div>  
           </div>
 
           <!-- Regional Settings -->
           <div class="sub-card">
             <h4>Regional Settings</h4>
-            <div class="form-group">
-              <label>Time Zone</label>
-              <select>
-                <option>Asia/Manila (GMT+8)</option>
-                <option>UTC (GMT+0)</option>
-                <option>US/Eastern (GMT-5)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Currency</label>
-              <select>
-                <option>USD ($)</option>
-                <option>PHP (₱)</option>
-                <option>EUR (€)</option>
-              </select>
-            </div>
+            
+        <div class="form-group">
+            <label>Currency</label>
+            <select name="currency">
+              <option value="USD">USD ($)</option>
+              <option value="PHP">PHP (₱)</option>
+              <option value="EUR">EUR (€)</option>
+            </select>
+          </div>
             <div class="form-group">
               <label>Language</label>
-              <select>
-                <option>English</option>
-                <option>Filipino</option>
-                <option>Spanish</option>
+              <select name="language">
+                <option value="English">English</option>
+                <option value="Filipino">Filipino</option>
+                <option value="Spanish">Spanish</option>
               </select>
             </div>
           </div>
@@ -68,30 +61,39 @@
       </div>
 
       <!-- Alert Recipients -->
-      <div class="card alert-card">
-        <h3>Alert Recipients</h3>
-        <div class="form-group">
-          <label>Low Stock Threshold</label>
-          <input type="number" value="10">
-        </div>
-        <div class="form-group">
-          <label>Critical Stock Threshold</label>
-          <input type="number" value="10">
-        </div>
-        <div class="form-group">
-          <label>Warning Stock Threshold</label>
-          <input type="number" value="10">
-        </div>
-        <div class="form-group">
-          <label>Notification Recipients</label>
-          <div class="checkbox-group">
-            <label><input type="checkbox" checked> All Admins</label>
-            <label><input type="checkbox" checked> Inventory Managers</label>
-            <label><input type="checkbox"> Sales Staff</label>
-          </div>
-        </div>
-        <button class="btn save">Save Notification Settings</button>
-      </div>
+      <!-- Alert Recipients -->
+<div class="card alert-card">
+  <h3>Alert Recipients</h3>
+  <div class="form-group">
+    <label>Low Stock Threshold</label>
+    <input type="number" name="low_stock_threshold" value="10">
+  </div>
+  <div class="form-group">
+    <label>Critical Stock Threshold</label>
+    <input type="number" name="critical_stock_threshold" value="10">
+  </div>
+  <div class="form-group">
+    <label>Warning Stock Threshold</label>
+    <input type="number" name="warning_stock_threshold" value="10">
+  </div>
+  <div class="form-group">
+    <label>Notification Recipients</label>
+    <div class="checkbox-group">
+  <label>All Admins <input type="checkbox"></label>
+  <label>Inventory Managers <input type="checkbox"></label>
+  <label>Sales Staff <input type="checkbox"></label>
+</div>
+
+  </div>
+
+  <!-- New Button Set for Alerts -->
+  <div class="save-btn-container">
+    <button class="btn cancel" id="cancelAlertBtn" style="display:none;">Cancel</button>
+    <button class="btn save" id="saveAlertBtn" style="display:none;">Save Changes</button>
+    <button class="btn edit" id="editAlertBtn">Edit</button>
+  </div>
+</div>
+
     </div>
 
     <!-- 🔹 Bottom Row -->
@@ -145,7 +147,13 @@
       </div>
     </div>
   </div>
+  <!-- Save Status Message -->
+<div id="saveStatus"></div>
+
  <script>
+// ============================
+// NAVIGATION FUNCTION
+// ============================
 function goToUserManagement() {
   const sidebarItem = parent.document.querySelector("li[onclick*='user-management.html']");
   if (sidebarItem && parent.changePage) {
@@ -158,64 +166,254 @@ function goToUserManagement() {
   }
 }
 
+// ============================
+// GENERAL SETTINGS SECTION
+// ============================
 const editBtn = document.getElementById('editBtn');
 const saveBtn = document.getElementById('saveBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 
-const generalCard = document.querySelector('.general-card');
-const inputs = generalCard.querySelectorAll('input, select');
+const generalInputs = [
+  ...document.querySelectorAll('.general-card input, .general-card select')
+];
 
-// Store original values
-let originalValues = [];
-inputs.forEach(input => originalValues.push(input.value));
+let generalOriginalValues = [];
 
-// Initially disable all fields
-inputs.forEach(input => {
-  input.setAttribute('disabled', true);
-  input.style.cursor = 'not-allowed';
-});
-
-// Enable fields on Edit
-editBtn.addEventListener('click', () => {
-  inputs.forEach(input => {
-    input.removeAttribute('disabled');
-    input.style.cursor = 'text'; // normal cursor for editing
+// Disable all general inputs initially
+function disableGeneralInputs() {
+  generalInputs.forEach(input => {
+    input.setAttribute('disabled', true);
+    if (input.type !== 'checkbox') input.style.cursor = 'not-allowed';
   });
+}
 
+// Enable general inputs
+function enableGeneralInputs() {
+  generalInputs.forEach(input => {
+    input.removeAttribute('disabled');
+    if (input.type !== 'checkbox') input.style.cursor = 'text';
+  });
+}
+
+// Load settings from backend
+async function loadSettings() {
+  disableGeneralInputs();
+  disableAlertInputs();
+
+  try {
+    const response = await fetch("/system-settings");
+    if (!response.ok) throw new Error("Failed to fetch settings");
+
+    const data = await response.json();
+    console.log("Loaded settings:", data);
+
+    // Populate General Settings
+    const generalFields = [
+      ["input[name='business_name']", data.business_name || ""],
+      ["input[name='address']", data.address || ""],
+      ["select[name='currency']", data.currency || "PHP"],
+      ["select[name='language']", data.language || "English"]
+    ];
+
+    generalFields.forEach(([selector, value]) => {
+      const el = document.querySelector(selector);
+      if (el) el.value = value;
+    });
+
+    // Populate Alert Settings
+    const alertFields = [
+      ["input[name='low_stock_threshold']", data.low_stock_threshold ?? 10],
+      ["input[name='critical_stock_threshold']", data.critical_stock_threshold ?? 10],
+      ["input[name='warning_stock_threshold']", data.warning_stock_threshold ?? 10]
+    ];
+
+    alertFields.forEach(([selector, value]) => {
+      const el = document.querySelector(selector);
+      if (el) el.value = value;
+    });
+
+    // Populate recipients checkboxes
+    document.querySelectorAll('.alert-card input[type="checkbox"]').forEach(cb => {
+      const label = cb.parentNode.textContent.trim();
+      cb.checked = (data.recipients || []).includes(label);
+    });
+
+    // Store original values
+    generalOriginalValues = generalInputs.map(input => input.value);
+    alertOriginalValues = alertInputs.map(input =>
+      input.type === 'checkbox' ? input.checked : input.value
+    );
+
+  } catch (err) {
+    console.error("❌ Error loading settings:", err);
+   showStatusMessage(result.message || "Failed to Update!");
+
+  }
+}
+
+window.addEventListener("DOMContentLoaded", loadSettings);
+
+// Edit General
+editBtn?.addEventListener('click', () => {
+  enableGeneralInputs();
   editBtn.style.display = 'none';
   saveBtn.style.display = 'inline-block';
   cancelBtn.style.display = 'inline-block';
 });
 
-// Cancel button: revert values and disable fields
-cancelBtn.addEventListener('click', () => {
-  inputs.forEach((input, index) => {
-    input.value = originalValues[index];
-    input.setAttribute('disabled', true);
-    input.style.cursor = 'not-allowed';
+// Cancel General
+cancelBtn?.addEventListener('click', () => {
+  generalInputs.forEach((input, i) => {
+    input.value = generalOriginalValues[i];
   });
-
+  disableGeneralInputs();
   editBtn.style.display = 'inline-block';
   saveBtn.style.display = 'none';
   cancelBtn.style.display = 'none';
 });
 
-// Save button: save values and disable fields
-saveBtn.addEventListener('click', () => {
-  inputs.forEach((input, index) => {
-    originalValues[index] = input.value;
+// Save General
+saveBtn?.addEventListener('click', async () => {
+  const data = {
+    business_name: document.querySelector("input[name='business_name']")?.value || "",
+    address: document.querySelector("input[name='address']")?.value || "",
+    currency: document.querySelector("select[name='currency']")?.value || "PHP",
+    language: document.querySelector("select[name='language']")?.value || "English"
+  };
+
+  try {
+    const response = await fetch("/system-settings/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) throw new Error("Failed to save settings");
+    const result = await response.json();
+
+    generalOriginalValues = generalInputs.map(input => input.value);
+    disableGeneralInputs();
+    editBtn.style.display = 'inline-block';
+    saveBtn.style.display = 'none';
+    cancelBtn.style.display = 'none';
+
+    showStatusMessage(result.message || "General settings saved successfully!");
+
+  } catch (err) {
+    console.error("❌ Error saving general settings:", err);
+  showStatusMessage("Failed to save general settings. Try again.", true);
+
+
+  }
+});
+
+// ============================
+// ALERT RECIPIENTS SECTION
+// ============================
+const editAlertBtn = document.getElementById('editAlertBtn');
+const saveAlertBtn = document.getElementById('saveAlertBtn');
+const cancelAlertBtn = document.getElementById('cancelAlertBtn');
+
+const alertInputs = [
+  ...document.querySelectorAll('.alert-card input[type="number"], .alert-card input[type="checkbox"]')
+];
+let alertOriginalValues = [];
+
+// Disable all alert inputs initially
+function disableAlertInputs() {
+  alertInputs.forEach(input => {
     input.setAttribute('disabled', true);
-    input.style.cursor = 'not-allowed';
+    if (input.type !== 'checkbox') input.style.cursor = 'not-allowed';
+  });
+}
+
+// Enable alert inputs
+function enableAlertInputs() {
+  alertInputs.forEach(input => {
+    input.removeAttribute('disabled');
+    if (input.type !== 'checkbox') input.style.cursor = 'text';
+  });
+}
+
+// Edit Alert
+editAlertBtn?.addEventListener('click', () => {
+  enableAlertInputs();
+  editAlertBtn.style.display = 'none';
+  saveAlertBtn.style.display = 'inline-block';
+  cancelAlertBtn.style.display = 'inline-block';
+
+  alertOriginalValues = alertInputs.map(input =>
+    input.type === 'checkbox' ? input.checked : input.value
+  );
+});
+
+// Cancel Alert
+cancelAlertBtn?.addEventListener('click', () => {
+  alertInputs.forEach((input, i) => {
+    if (input.type === 'checkbox') input.checked = alertOriginalValues[i];
+    else input.value = alertOriginalValues[i];
   });
 
-  editBtn.style.display = 'inline-block';
-  saveBtn.style.display = 'none';
-  cancelBtn.style.display = 'none';
-
-  // Optionally add your save logic here (AJAX, form submission, etc.)
-  alert('Changes saved!');
+  disableAlertInputs();
+  editAlertBtn.style.display = 'inline-block';
+  saveAlertBtn.style.display = 'none';
+  cancelAlertBtn.style.display = 'none';
 });
+
+// Save Alert
+saveAlertBtn?.addEventListener('click', async () => {
+  const data = {
+    low_stock_threshold: Number(document.querySelector("input[name='low_stock_threshold']")?.value ?? 10),
+    critical_stock_threshold: Number(document.querySelector("input[name='critical_stock_threshold']")?.value ?? 10),
+    warning_stock_threshold: Number(document.querySelector("input[name='warning_stock_threshold']")?.value ?? 10),
+    recipients: Array.from(document.querySelectorAll('.alert-card input[type="checkbox"]:checked'))
+      .map(cb => cb.parentNode.textContent.trim())
+  };
+
+  try {
+    const response = await fetch("/system-settings/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) throw new Error("Failed to save alert settings");
+    const result = await response.json();
+
+    alertOriginalValues = alertInputs.map(input =>
+      input.type === 'checkbox' ? input.checked : input.value
+    );
+
+    disableAlertInputs();
+    editAlertBtn.style.display = 'inline-block';
+    saveAlertBtn.style.display = 'none';
+    cancelAlertBtn.style.display = 'none';
+
+    showStatusMessage(result.message || "Alert settings saved successfully!");
+
+  } catch (err) {
+    console.error("❌ Error saving alert settings:", err);
+    showStatusMessage("Failed to save alert settings. Try again.", true);
+
+  }
+});
+// ============================
+// CENTER STATUS MESSAGE
+// ============================
+function showStatusMessage(message, isError = false) {
+  const status = document.getElementById('saveStatus');
+  status.textContent = message;
+  status.classList.add('show');
+  status.classList.toggle('error', isError);
+
+  // Hide after 2.5 seconds
+  setTimeout(() => {
+    status.classList.remove('show', 'error');
+  }, 2500);
+}
+
 </script>
+
 
 </body>
 </html>

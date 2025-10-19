@@ -4,11 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Alerts Dashboard</title>
-  <link rel="stylesheet" href="alert.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="alert.css" />
 </head>
 <body>
   <div class="alerts-container">
+    <!-- 🔹 FILTERS -->
     <div class="filters">
       <div class="search-box">
         <i class="fa fa-search"></i>
@@ -28,6 +29,7 @@
       </select>
     </div>
 
+    <!-- 🔹 TABLE -->
     <div class="table-container">
       <table class="alerts-table">
         <thead>
@@ -36,3 +38,214 @@
             <th>Type</th>
             <th>Product</th>
             <th>Severity</th>
+            <th>Triggered At</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- 🔹 PAGINATION -->
+   <div class="pagination">
+  <p>Showing 1 to 5 of 10 alerts</p>
+  <div class="pages">
+    <button disabled>Previous</button>
+    <button class="active">1</button>
+    <button>2</button>
+    <button>3</button>
+    <button>Next</button>
+  </div>
+</div>
+
+  </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const tableBody = document.querySelector(".alerts-table tbody");
+  const searchInput = document.querySelector(".search-box input");
+  const severityFilter = document.querySelectorAll("select")[0];
+  const statusFilter = document.querySelectorAll("select")[1];
+  const paginationContainer = document.querySelector(".pages");
+  const paginationInfo = document.querySelector(".pagination p");
+
+  let alerts = [];
+  let currentPage = 1;
+  const rowsPerPage = 5;
+
+  // ✅ Fetch alerts from backend
+  async function loadAlerts() {
+    try {
+      const response = await fetch("http://localhost:3000/alert");
+      if (!response.ok) throw new Error("Failed to fetch alerts");
+      alerts = await response.json();
+      console.log("✅ Alerts fetched:", alerts);
+      renderTable();
+    } catch (error) {
+      console.error("❌ Error fetching alerts:", error);
+      tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:red;">Error loading alerts</td></tr>`;
+    }
+  }
+
+  // ✅ Determine severity based on stock
+  function getSeverity(stock) {
+    if (stock === 0) return "Critical";
+    if (stock <= 5) return "Warning";
+    return "Info";
+  }
+
+  // ✅ Render alerts table
+  function renderTable() {
+    tableBody.innerHTML = "";
+
+    // Filtering
+    const filtered = alerts.filter(alert => {
+      const searchMatch = alert.name?.toLowerCase().includes(searchInput.value.toLowerCase());
+      const severity = getSeverity(alert.stock);
+      const severityMatch = !severityFilter.value || severity === severityFilter.value;
+      const statusMatch = !statusFilter.value || alert.status === statusFilter.value;
+      return searchMatch && severityMatch && statusMatch;
+    });
+
+    // Pagination slice
+    const start = (currentPage - 1) * rowsPerPage;
+    const paginated = filtered.slice(start, start + rowsPerPage);
+
+    // Display alerts or message
+    if (paginated.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No alerts found</td></tr>`;
+    } else {
+      paginated.forEach((alert, index) => {
+        const severity = getSeverity(alert.stock);
+        const status = alert.status || "New";
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td><a href="#" class="view-link">ALT-${start + index + 1}</a></td>
+          <td>${alert.stock === 0 ? "No Stock" : "Low Stock"}</td>
+          <td>${alert.name || "N/A"}</td>
+          <td><span class="badge ${severity.toLowerCase()}">${severity}</span></td>
+          <td>${new Date(alert.createdAt).toLocaleString()}</td>
+          <td><span class="status ${status.toLowerCase()}">${status}</span></td>
+          <td>
+            ${
+              status === "New"
+                ? `<button class="action-btn acknowledge">Acknowledge</button>`
+                : status === "Acknowledged"
+                ? `<button class="action-btn resolve">Resolve</button>`
+                : `<span class="no-action">No action needed</span>`
+            }
+          </td>
+        `;
+        tableBody.appendChild(tr);
+
+        // Action buttons
+        const ackBtn = tr.querySelector(".acknowledge");
+        const resolveBtn = tr.querySelector(".resolve");
+
+        if (ackBtn) {
+          ackBtn.addEventListener("click", () => {
+            alert.status = "Acknowledged";
+            renderTable();
+          });
+        }
+        if (resolveBtn) {
+          resolveBtn.addEventListener("click", () => {
+            alert.status = "Resolved";
+            renderTable();
+          });
+        }
+      });
+    }
+
+    // ✅ Update pagination info and buttons
+    updatePaginationInfo(filtered.length);
+    renderPagination(filtered.length);
+  }
+
+  // ✅ Pagination rendering (always shows, even if less than 5)
+  function renderPagination(total) {
+    paginationContainer.innerHTML = "";
+    const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
+
+    // Previous button
+    const prev = document.createElement("button");
+    prev.textContent = "Previous";
+    prev.disabled = currentPage === 1 || total <= rowsPerPage;
+    prev.style.opacity = prev.disabled ? "0.5" : "1";
+    prev.style.cursor = prev.disabled ? "not-allowed" : "pointer";
+    prev.addEventListener("click", () => {
+      if (!prev.disabled && currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    });
+    paginationContainer.appendChild(prev);
+
+    // Always show page 1
+    const page1 = document.createElement("button");
+    page1.textContent = "1";
+    if (currentPage === 1) page1.classList.add("active");
+    page1.addEventListener("click", () => {
+      currentPage = 1;
+      renderTable();
+    });
+    paginationContainer.appendChild(page1);
+
+    // More page numbers if needed
+    if (totalPages > 1) {
+      for (let i = 2; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = i;
+        if (i === currentPage) btn.classList.add("active");
+        btn.addEventListener("click", () => {
+          currentPage = i;
+          renderTable();
+        });
+        paginationContainer.appendChild(btn);
+      }
+    }
+
+    // Next button
+    const next = document.createElement("button");
+    next.textContent = "Next";
+    next.disabled = currentPage === totalPages || total <= rowsPerPage;
+    next.style.opacity = next.disabled ? "0.5" : "1";
+    next.style.cursor = next.disabled ? "not-allowed" : "pointer";
+    next.addEventListener("click", () => {
+      if (!next.disabled && currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+      }
+    });
+    paginationContainer.appendChild(next);
+  }
+
+  // ✅ Update “Showing X to Y of Z alerts” text
+  function updatePaginationInfo(total) {
+    const start = total === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
+    const end = Math.min(currentPage * rowsPerPage, total);
+    paginationInfo.textContent = `Showing ${start} to ${end} of ${total} alerts`;
+  }
+
+  // ✅ Filter and search listeners
+  searchInput.addEventListener("input", () => {
+    currentPage = 1;
+    renderTable();
+  });
+  severityFilter.addEventListener("change", () => {
+    currentPage = 1;
+    renderTable();
+  });
+  statusFilter.addEventListener("change", () => {
+    currentPage = 1;
+    renderTable();
+  });
+
+  loadAlerts();
+});
+</script>
+
+</body>
+</html>

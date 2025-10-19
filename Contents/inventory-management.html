@@ -72,91 +72,37 @@
               <option>All Categories</option>
               <option>Electronics</option>
               <option>Accessories</option>
+              <option>Cables</option>
             </select>
           </div>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Product Name</th>
-              <th>SKU</th>
-              <th>Category</th>
-              <th>Current Quantity</th>
-              <th>Stock Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Wireless Bluetooth Headphones</td>
-              <td>WBH-001</td>
-              <td>Electronics</td>
-              <td>5</td>
-              <td><span class="badge low">Low Stock</span></td>
-            </tr>
-            <tr>
-              <td>Gaming Mechanical Keyboard</td>
-              <td>GMK-205</td>
-              <td>Electronics</td>
-              <td>3</td>
-              <td><span class="badge low">Low Stock</span></td>
-            </tr>
-            <tr>
-              <td>USB-C Cable 3ft</td>
-              <td>USC-003</td>
-              <td>Cables</td>
-              <td>0</td>
-              <td><span class="badge out">Out of Stock</span></td>
-            </tr>
-            <tr>
-              <td>Wireless Mouse</td>
-              <td>WM-102</td>
-              <td>Electronics</td>
-              <td>45</td>
-              <td><span class="badge normal">Normal</span></td>
-            </tr>
-            <tr>
-              <td>Laptop Stand Adjustable</td>
-              <td>LSA-078</td>
-              <td>Accessories</td>
-              <td>28</td>
-              <td><span class="badge normal">Normal</span></td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>Product Name</th>
+        <th>SKU</th>
+        <th>Category</th>
+        <th>Current Quantity</th>
+        <th>Stock Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- dynamically loaded rows -->
+    </tbody>
+  </table>
+</div>
       </div>
-
-      <!-- Low Stock Alerts -->
-      <div class="low-stock-alerts">
+      
+<!-- Low Stock Alerts -->
+<div class="low-stock-alerts">
   <h3>Low Stock Alerts</h3>
-
-  <div class="alert-item">
-    <img src="../images/exclamation.svg" alt="Headphones" class="alert-icon">
-    <div class="details">
-      <p>Wireless Bluetooth Headphones</p>
-      <small>SKU: WBH-001</small>
-    </div>
-    <div class="units">5 units left</div>
-  </div>
-
-  <div class="alert-item">
-    <img src="../images/exclamation.svg" alt="Keyboard" class="alert-icon">
-    <div class="details">
-      <p>Gaming Mechanical Keyboard</p>
-      <small>SKU: GMK-205</small>
-    </div>
-    <div class="units">3 units left</div>
-  </div>
-
-  <div class="alert-item">
-    <img src="../images/exclamation.svg" alt="USB Cable" class="alert-icon">
-    <div class="details">
-      <p>USB-C Cable 3ft</p>
-      <small>SKU: USC-003</small>
-    </div>
-    <div class="units">0 units left</div>
+  <div class="alert-scrollable">
+    <!-- JS will insert .alert-item here -->
   </div>
 </div>
+
 
     </section>
 
@@ -164,19 +110,228 @@
     <section class="charts">
       <div class="chart-card">
         <h3>Stock Distribution by Category</h3>
-        <div class="chart-placeholder">
-          <i class="fa-solid fa-chart-pie"></i> Pie Chart Placeholder
-        </div>
+       <div class="chart-placeholder">
+          <canvas id="categoryChart"></canvas>
+       </div>
       </div>
 
       <div class="chart-card">
         <h3>Stock Levels Trend</h3>
-        <div class="chart-placeholder">
-          <i class="fa-solid fa-chart-line"></i> Line Chart Placeholder
-        </div>
+      <div class="chart-placeholder">
+        <canvas id="stockTrendChart"></canvas>
       </div>
+      </div>
+
     </section>
   </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let allProducts = [];
+let categoryChart;
+let stockTrendChart;
+
+// 🧩 Load all products once
+async function loadProducts() {
+  try {
+    const res = await fetch("/products");
+    const products = await res.json();
+    allProducts = products;
+
+    updateDashboard(products);
+    displayProducts(products);
+    displayLowStock(products); // initial low stock alerts
+    const categories = renderCategoryChart(products);
+    renderStockTrendChart(products, categories);
+  } catch (err) {
+    console.error("Error loading products:", err);
+  }
+}
+
+// 📊 Dashboard Counters
+function updateDashboard(products) {
+  const totalQuantity = products.reduce((sum, p) => sum + (p.stock || 0), 0);
+  const inStock = products.filter(p => p.stock > 10).length;
+  const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;
+  const outStock = products.filter(p => p.stock === 0).length;
+
+  document.querySelector(".total p").textContent = totalQuantity;
+  document.querySelector(".in-stock p").textContent = inStock;
+  document.querySelector(".low-stock p").textContent = lowStock;
+  document.querySelector(".out-stock p").textContent = outStock;
+}
+
+// 📋 Product Table
+function displayProducts(products) {
+  const tbody = document.querySelector("tbody");
+  tbody.innerHTML = "";
+
+  if (!products.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No products found</td></tr>`;
+    return;
+  }
+
+  products.forEach(p => {
+    const tr = document.createElement("tr");
+    let statusClass = "", statusText = "";
+
+    if (p.stock === 0) { statusClass = "out"; statusText = "Out of Stock"; }
+    else if (p.stock <= 10) { statusClass = "low"; statusText = "Low Stock"; }
+    else { statusClass = "normal"; statusText = "Normal"; }
+
+    tr.innerHTML = `
+      <td>${p.name}</td>
+      <td>${p.sku || "-"}</td>
+      <td>${p.category || "Uncategorized"}</td>
+      <td>${p.stock}</td>
+      <td><span class="badge ${statusClass}">${statusText}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// 🚨 Low Stock Alerts — only respect category filter
+function displayLowStock(products) {
+  const scrollable = document.querySelector(".low-stock-alerts .alert-scrollable");
+  scrollable.innerHTML = ""; // clear only the scrollable area
+
+  const lowProducts = products.filter(p => p.stock > 0 && p.stock <= 10);
+
+  if (!lowProducts.length) {
+    scrollable.innerHTML = `<p style="text-align:center;">All stocks are sufficient 🎉</p>`;
+    return;
+  }
+
+  lowProducts.forEach(p => {
+    const div = document.createElement("div");
+    div.classList.add("alert-item");
+    div.innerHTML = `
+      <img src="../images/exclamation.svg" class="alert-icon" alt="alert">
+      <div class="details">
+        <p>${p.name}</p>
+        <small>SKU: ${p.sku || "N/A"}</small>
+      </div>
+      <div class="units">${p.stock} units left</div>
+    `;
+    scrollable.appendChild(div);
+  });
+}
+
+
+// 🎨 Custom Colors
+const customColors = ["#E8F1FF", "#A3BADA", "#164285"];
+
+// 🥧 Pie Chart
+function renderCategoryChart(products) {
+  const ctx = document.getElementById("categoryChart");
+  if (!ctx) return [];
+
+  const categoryTotals = {};
+  products.forEach(p => {
+    const category = p.category || "Uncategorized";
+    categoryTotals[category] = (categoryTotals[category] || 0) + (p.stock || 0);
+  });
+
+  const labels = Object.keys(categoryTotals);
+  const data = Object.values(categoryTotals);
+  const colors = labels.map((_, i) => customColors[i % customColors.length]);
+
+  if (categoryChart) categoryChart.destroy();
+
+  categoryChart = new Chart(ctx, {
+    type: "pie",
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderColor: "#fff", borderWidth: 2 }] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: "bottom", labels: { color: "#333", font: { size: 14 } } },
+        tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.formattedValue} units` } }
+      }
+    }
+  });
+
+  return labels;
+}
+
+// 📈 Line Chart (Stock Trend)
+function renderStockTrendChart(products, categories) {
+  const ctx = document.getElementById("stockTrendChart");
+  if (!ctx) return;
+
+  const monthlyData = {};
+  categories.forEach(cat => monthlyData[cat] = {});
+
+  products.forEach(p => {
+    const category = p.category || "Uncategorized";
+    const updatedAt = new Date(p.updatedAt || p.createdAt || Date.now());
+    const monthKey = updatedAt.toLocaleString('default', { month: 'short' });
+    monthlyData[category][monthKey] = (monthlyData[category][monthKey] || 0) + (p.stock || 0);
+  });
+
+  const allMonths = Array.from(new Set(Object.values(monthlyData).flatMap(obj => Object.keys(obj))))
+                        .sort((a,b) => new Date(`2024 ${a} 1`) - new Date(`2024 ${b} 1`));
+
+  const datasets = categories.map((cat, i) => ({
+    label: cat,
+    data: allMonths.map(month => monthlyData[cat][month] || 0),
+    borderWidth: 3,
+    borderColor: customColors[i % customColors.length],
+    backgroundColor: "transparent",
+    fill: false,
+    tension: 0.3,
+    pointRadius: 5,
+    pointHoverRadius: 7,
+    pointBackgroundColor: "#fff",
+    pointBorderColor: "#333",
+    pointBorderWidth: 2
+  }));
+
+  if (stockTrendChart) stockTrendChart.destroy();
+
+  stockTrendChart = new Chart(ctx, {
+    type: "line",
+    data: { labels: allMonths, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 0 },
+      plugins: {
+        legend: { position: "bottom", labels: { color: "#333", font: { size: 13 } } },
+        tooltip: { mode: "nearest", intersect: false, callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.formattedValue} units` } }
+      },
+      scales: {
+        x: { grid: { color: "rgba(0,0,0,0.05)" }, ticks: { color: "#333", padding: 14 } },
+        y: { beginAtZero: true, grid: { color: "rgba(0,0,0,0.1)" }, ticks: { color: "#333", padding: 10 } }
+      }
+    }
+  });
+}
+
+// 🔍 Filter — table uses search+category, alerts only category
+function filterProducts() {
+  const searchInput = document.querySelector(".search-box input").value.toLowerCase();
+  const selectedCategory = document.querySelector("select").value;
+
+  // Table filtered by search + category
+  const filteredTable = allProducts.filter(p =>
+    (p.name.toLowerCase().includes(searchInput) || (p.sku && p.sku.toLowerCase().includes(searchInput))) &&
+    (selectedCategory === "All Categories" || p.category === selectedCategory)
+  );
+  displayProducts(filteredTable);
+
+
+  displayLowStock(filteredAlerts);
+}
+
+// ⚙️ Initialize
+document.addEventListener("DOMContentLoaded", () => {
+  loadProducts();
+  document.querySelector(".search-box input").addEventListener("input", filterProducts);
+  document.querySelector("select").addEventListener("change", filterProducts);
+});
+</script>
+
+
 
 </body>
 </html>

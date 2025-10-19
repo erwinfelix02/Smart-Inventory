@@ -12,12 +12,17 @@ body {
   color: #333;
 }
 
+/* ===== Dashboard Container ===== */
 .dashboard-container {
-  max-width: none;
+  max-width: 100%;
   margin: auto;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  background: #FFFFFF;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
 }
 
 /* ===== Top Section Layout ===== */
@@ -30,49 +35,32 @@ body {
 /* ===== General Card Style ===== */
 .card {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: 0.3s ease;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
 }
 
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 }
-/* 🎨 Background for the whole summary section */
+
+/* ===== Summary Section ===== */
 .summary-card {
   flex: 2;
-  background: #EEEEEE;
-  border: none;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background: #f9fafb;
+  border: 1px solid #dcdcdc;
   border-radius: 16px;
   padding: 20px;
-  transition: transform 0.3s ease; /* Keep only transform for smooth hover lift */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
 }
 
-/* Hover effect (only lift, no color change) */
 .summary-card:hover {
   transform: translateY(-3px);
-}
-
-/* Each metric card inside remains colored as before */
-.metric-item.sales {
-  background: linear-gradient(135deg, #42a5f5, #1e88e5);
-}
-
-.metric-item.transactions {
-  background: linear-gradient(135deg, #66bb6a, #43a047);
-}
-
-.metric-item.avg {
-  background: linear-gradient(135deg, #ffb300, #fb8c00);
-}
-
-/* ===== Custom Card Backgrounds ===== */
-
-.alerts-card {
-  background: #EEEEEE;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 }
 
 /* ===== Summary Metrics ===== */
@@ -90,45 +78,32 @@ body {
   align-items: center;
   border-radius: 10px;
   padding: 15px;
-  transition: 0.3s ease;
-}
-
-/* Default cards */
-.metric-item.sales {
   background: #F9FAFB;
+  border: 1px solid #e0e0e0;
   transition: all 0.3s ease;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
 }
 
-.metric-item.transactions {
-  background: #F9FAFB;
-  transition: all 0.3s ease;
-}
-
-.metric-item.avg-order {
-  background: #F9FAFB;
-  transition: all 0.3s ease;
-}
-
-/* 🔹 Hover Effects */
+/* ===== Metric Hover Effects ===== */
 .metric-item.sales:hover {
-  background: #E3F2FD; /* light blue hover */
+  background: #E3F2FD;
   transform: translateY(-4px);
   box-shadow: 0 4px 10px rgba(66, 165, 245, 0.3);
 }
 
 .metric-item.transactions:hover {
-  background: #E8F5E9; /* light green hover */
+  background: #E8F5E9;
   transform: translateY(-4px);
   box-shadow: 0 4px 10px rgba(102, 187, 106, 0.3);
 }
 
 .metric-item.avg-order:hover {
-  background: #FFF3E0; /* light orange hover */
+  background: #FFF3E0;
   transform: translateY(-4px);
   box-shadow: 0 4px 10px rgba(255, 179, 0, 0.3);
 }
 
-
+/* ===== Metric Texts ===== */
 .metric-item h3 {
   font-size: 14px;
   color: #555;
@@ -144,10 +119,6 @@ body {
   font-size: 12px;
 }
 
-.positive { color: #2e7d32; }
-.negative { color: #c62828; }
-.neutral { color: #1565c0; }
-
 .metric-item .icon {
   background: rgba(255, 255, 255, 0.6);
   color: #1a73e8;
@@ -156,7 +127,25 @@ body {
   font-size: 18px;
 }
 
-/* ===== Low Stock Alerts ===== */
+.positive { color: #2e7d32; }
+.negative { color: #c62828; }
+.neutral { color: #1565c0; }
+
+/* ===== Alerts Section ===== */
+.alerts-card {
+  background: #f9fafb;
+  border: 1px solid #dcdcdc;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+}
+
+.alerts-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
 .alerts-card h3 {
   font-size: 15px;
   margin-bottom: 12px;
@@ -174,7 +163,6 @@ body {
 .alert-list::-webkit-scrollbar {
   width: 6px;
 }
-
 .alert-list::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 6px;
@@ -216,7 +204,7 @@ body {
   font-weight: 600;
 }
 
-/* ===== Sales Trend ===== */
+/* ===== Trend Section ===== */
 .trend-header {
   display: flex;
   justify-content: space-between;
@@ -238,11 +226,7 @@ body {
   transition: 0.3s;
 }
 
-.btn:hover {
-  background: #1a73e8;
-  color: #fff;
-}
-
+.btn:hover,
 .btn.active {
   background: #1a73e8;
   color: #fff;
@@ -260,7 +244,7 @@ body {
   margin-bottom: 8px;
 }
 
-/* ===== Recent Transactions ===== */
+/* ===== Transactions Section ===== */
 .transactions-header {
   display: flex;
   justify-content: space-between;
@@ -277,6 +261,11 @@ body {
 table {
   width: 100%;
   border-collapse: collapse;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
 }
 
 th, td {
@@ -295,6 +284,7 @@ tr:hover {
   background: #f9f9ff;
 }
 
+/* ===== Table Badges ===== */
 .badge {
   padding: 4px 8px;
   border-radius: 12px;
@@ -343,11 +333,7 @@ tr:hover {
   transition: 0.3s;
 }
 
-.pagination button:hover {
-  background: #1a73e8;
-  color: #fff;
-}
-
+.pagination button:hover,
 .pagination .active {
   background: #1a73e8;
   color: #fff;
@@ -365,9 +351,7 @@ tr:hover {
     display: block;
   }
 
-  thead {
-    display: none;
-  }
+  thead { display: none; }
 
   tr {
     margin-bottom: 15px;
@@ -400,50 +384,4 @@ tr:hover {
     width: 100%;
     justify-content: flex-start;
   }
-}
-/* ===== Make All Containers More Visible ===== */
-
-/* General card visibility enhancement */
-.card, 
-.summary-card, 
-.alerts-card, 
-.transactions, 
-.metric-item, 
-table tr {
-  border: 1px solid #e0e0e0; /* subtle border for structure */
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08); /* soft shadow for lift */
-  background: #ffffff;
-}
-
-/* Stronger distinction for top-level cards */
-.summary-card, 
-.alerts-card {
-  background: #f9fafb; /* light gray tint for contrast against page */
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  border: 1px solid #dcdcdc;
-}
-
-/* Keep hover lift but add smooth glow */
-.card:hover,
-.summary-card:hover,
-.alerts-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
-}
-
-/* Table container refinement */
-table {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
-}
-
-/* Add background tint to dashboard layout */
-.dashboard-container {
-  background: #FFFFFF; /* soft neutral backdrop */
-  padding: 25px;
-  border-radius: 14px;
-  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
 }

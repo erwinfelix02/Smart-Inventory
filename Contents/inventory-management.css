@@ -89,15 +89,36 @@ body {
 }
 
 .info h3 {
-  font-size: 13px;
-  color: #666;
-  font-weight: 500;
+  font-size: 16px;        /* Make the title more dominant */
+  color: #222;            /* Stronger color for titles */
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase; /* Optional: all caps for dashboard feel */
 }
 
 .info p {
-  font-size: 18px;
+  font-size: 16px;        /* Slightly smaller than title now */
   font-weight: 600;
-  color: #222;
+  color: #555;
+  margin: 0;
+}
+
+/* 🎯 Unique title colors per card */
+.total .info h3 {
+  color: #1e88e5; /* Blue for Total Products */
+}
+
+.in-stock .info h3 {
+  color: #43a047; /* Green for In Stock */
+}
+
+.low-stock .info h3 {
+  color: #fb8c00; /* Orange for Low Stock */
+}
+
+.out-stock .info h3 {
+  color: #e53935; /* Red for Out of Stock */
 }
 
 /* ===== Product Inventory + Alerts Side by Side ===== */
@@ -110,14 +131,23 @@ body {
 
 .product-inventory,
 .low-stock-alerts {
-  background: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 400px;       /* fixed height is essential */
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+
+.alert-scrollable {
+  flex: 1 1 auto;
+  min-height: 0;       /* allows scrolling */
+  overflow-y: auto;
+  padding-right: 6px;
+  scroll-behavior: smooth;
+}
+
 
 /* ===== Product Inventory ===== */
 .inventory-header {
@@ -406,3 +436,80 @@ th {
   border-color: #cbd5e1;
 }
 
+/* Scrollable Table Section */
+.table-wrapper {
+  max-height: 280px; /* enough for ~5 rows */
+  overflow-y: auto;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-top: 10px;
+  scroll-behavior: smooth;
+}
+
+/* Make header sticky */
+.table-wrapper table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f7f7f7;
+  z-index: 2;
+  text-align: left;
+}
+
+/* Optional: smoother scroll look */
+.table-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+.product-inventory table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.product-inventory th, .product-inventory td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.product-inventory th {
+  background: #f2f2f2;
+  font-weight: 600;
+}
+/* ===== Clean, Centered Line Chart Style ===== */
+.chart-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;              /* steady height */
+  padding: 15px 0;
+  background: #f9fafb;        /* subtle neutral background like the screenshot */
+  border-radius: 12px;
+}
+
+#lineChart {
+  width: 90% !important;      /* proportional inside card */
+  max-width: 600px;           /* balanced width */
+  height: 250px !important;
+  margin: 0 auto;
+  display: block;
+  background: #fff;            /* white canvas area */
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); /* soft depth */
+  padding: 10px;
+}
+
+/* Chart.js tweak for better line clarity */
+canvas#lineChart {
+  border-radius: 8px;
+}
+
+/* Adjust chart options (JS side tweak) */
+#stockTrendChart {
+  height: 300px; /* taller chart */
+  width: 100%;   /* full width */
+}

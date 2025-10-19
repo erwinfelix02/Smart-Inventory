@@ -133,12 +133,21 @@ loginForm.addEventListener("submit", async (e) => {
       hideLoading(loading);
 
       if (response.ok) {
-        window.location.href = `email.html?email=${encodeURIComponent(email)}&role=${encodeURIComponent(data.role)}`;
-      } else {
-        emailInput.classList.add("input-error");
-        passwordInput.classList.add("input-error");
-        emailError.textContent = "Incorrect email or password.";
-      }
+  // Successful login
+  window.location.href = `email.html?email=${encodeURIComponent(email)}&role=${encodeURIComponent(data.role)}`;
+} else {
+  // Show proper error message from backend
+  emailInput.classList.add("input-error");
+  passwordInput.classList.add("input-error");
+
+  // Check if backend returned a custom message (like disabled)
+  if (data.msg) {
+    emailError.textContent = data.msg;
+  } else {
+    emailError.textContent = "Incorrect email or password.";
+  }
+}
+
     }, 800);
 
   } catch (err) {

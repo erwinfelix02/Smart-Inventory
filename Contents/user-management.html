@@ -84,8 +84,8 @@
         </tbody>
       </table>
 
-      <div class="pagination">
-        <p>Showing 1 to 5 of 10 users</p>
+            <div class="pagination">
+        <p>Showing 1 to 5 of 10 alerts</p>
         <div class="pages">
           <button disabled>Previous</button>
           <button class="active">1</button>
@@ -93,6 +93,7 @@
           <button>3</button>
           <button>Next</button>
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -142,6 +143,8 @@
     </form>
   </div>
 </div>
+<!-- Save Status Message -->
+<div id="saveStatus"></div>
 
 <script>
 let signedInUserRole = "guest"; // default if not logged in
@@ -380,13 +383,14 @@ addUserForm.addEventListener("submit", async (e) => {
       if (!res.ok) throw new Error("Failed to update user");
       await loadUsers();
       closeModal();
+      showStatusMessage("User updated successfully!");
     } else {
       // Add new user
       const checkRes = await fetch(`http://localhost:3000/users?email=${encodeURIComponent(email)}`);
       const users = await checkRes.json();
       const existingUser = users.find(u => u.email.toLowerCase() === email);
       if (existingUser) {
-        alert("An account with this email already exists!");
+        showStatusMessage("An account with this email already exists!", true);
         return;
       }
 
@@ -403,10 +407,11 @@ addUserForm.addEventListener("submit", async (e) => {
       if (!res.ok) throw new Error("Failed to save user");
       await loadUsers();
       closeModal();
+      showStatusMessage("User added successfully!");
     }
   } catch (err) {
     console.error("Error saving/updating user:", err);
-    alert("Failed to save user. Check console for details.");
+    showStatusMessage("Failed to save user. Check console for details.", true);
   }
 });
 
@@ -470,9 +475,15 @@ tbody.addEventListener("click", (e) => {
         statusSpan.textContent = newStatus ? "Disabled" : "Active";
         statusSpan.className = `status ${newStatus ? "disabled" : "active"}`;
         icon.className = `fa ${newStatus ? "fa-check" : "fa-ban"}`;
+          // ✅ Show top message
+        showStatusMessage(
+          newStatus
+            ? "User has been disabled successfully!"
+            : "User has been re-enabled successfully!"
+        );
       } catch (err) {
         console.error(err);
-        alert("Failed to update user status. Check console.");
+        showStatusMessage("Failed to update user status. Please try again.", true);
       } finally {
         icon.style.pointerEvents = "auto";
         icon.classList.remove("fa-spin");
@@ -514,6 +525,22 @@ document.addEventListener("DOMContentLoaded", loadUsers);
 searchInput.addEventListener("input", applyFilters);
 roleSelect.addEventListener("change", applyFilters);
 statusSelect.addEventListener("change", applyFilters);
+
+// ============================
+// TOP-CENTER STATUS MESSAGE
+// ============================
+function showStatusMessage(message, isError = false) {
+  const status = document.getElementById('saveStatus');
+  status.textContent = message;
+  status.classList.add('show');
+  status.classList.toggle('error', isError);
+
+  // Auto-hide after 2.5s
+  setTimeout(() => {
+    status.classList.remove('show', 'error');
+  }, 2500);
+}
+
 </script>
 
 
