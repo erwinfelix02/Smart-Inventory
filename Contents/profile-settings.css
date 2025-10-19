@@ -186,4 +186,33 @@ input:disabled {
 .btn.cancel:hover {
   background-color: #4b5563; /* darker gray on hover */
 }
- 
+ /* 🔹 Status message style */
+.status-message {
+  position: fixed;
+  top: 20px;              /* shows at top, not middle */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4CAF50;  /* default success color */
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  z-index: 9999;
+  display: none;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  animation: fadeInOut 3s ease;
+}
+
+/* 🔹 Error variant */
+.status-message.error {
+  background-color: #f44336;
+}
+
+/* 🔹 Animation for fade in/out */
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, -20px); }
+  10% { opacity: 1; transform: translate(-50%, 0); }
+  90% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -20px); }
+}

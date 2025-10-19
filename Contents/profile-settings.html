@@ -84,9 +84,19 @@
   </div>
 </div>
 
+<div id="statusMessage" class="status-message"></div>
 
     
  <script>
+  // 🔹 Function to show success/error message at top
+function showStatusMessage(message, isError = false) {
+  const statusDiv = document.getElementById("statusMessage");
+  statusDiv.textContent = message;
+  statusDiv.className = isError ? "status-message error" : "status-message";
+  statusDiv.style.display = "block";
+  setTimeout(() => { statusDiv.style.display = "none"; }, 3000);
+}
+
 const userData = localStorage.getItem("user");
 let user = null;
 
@@ -165,27 +175,34 @@ function saveChanges() {
   const payload = {
     email: document.getElementById("email").value,
     phone: document.getElementById("phone").value,
-    currentPassword: document.getElementById("current-password").value,
-    newPassword: document.getElementById("new-password").value,
-    confirmPassword: document.getElementById("confirm-password").value
+    currentPassword: document.getElementById("current-password").value.trim(),
+    newPassword: document.getElementById("new-password").value.trim(),
+    confirmPassword: document.getElementById("confirm-password").value.trim()
   };
 
-  // Password validation
+  // 🔹 Check if no fields are filled
+  if (!payload.currentPassword && !payload.newPassword && !payload.confirmPassword) {
+    showStatusMessage("⚠️ No changes to save. Please enter your current and new password.", true);
+    return;
+  }
+
+  // 🔹 Password validation
   if (payload.newPassword || payload.confirmPassword) {
     if (!payload.currentPassword) {
-      alert("⚠️ Please enter your current password.");
+      showStatusMessage("⚠️ Please enter your current password.", true);
       return;
     }
     if (payload.newPassword !== payload.confirmPassword) {
-      alert("⚠️ New password and confirmation do not match.");
+      showStatusMessage("⚠️ New password and confirmation do not match.", true);
       return;
     }
     if (payload.newPassword.length < 6) {
-      alert("⚠️ New password must be at least 6 characters.");
+      showStatusMessage("⚠️ New password must be at least 6 characters.", true);
       return;
     }
   }
 
+  // 🔹 Proceed with update
   fetch("http://localhost:3000/settings/update", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -193,25 +210,30 @@ function saveChanges() {
   })
     .then(res => res.json())
     .then(data => {
-      alert(data.message);
       if (data.success) {
+        showStatusMessage("✅ Profile updated successfully!");
         const updatedUser = { ...user, phone: payload.phone };
         localStorage.setItem("user", JSON.stringify(updatedUser));
 
-        // Clear password fields and disable again
+        // Clear password fields and disable them again
         passwordFields.forEach(f => {
           f.value = "";
           f.disabled = true;
         });
 
-        // Hide Save/Cancel, show Edit
         cancelBtn.classList.add("hidden");
         saveBtn.classList.add("hidden");
         editBtn.classList.remove("hidden");
+      } else {
+        showStatusMessage("❌ " + data.message, true);
       }
     })
-    .catch(err => console.error("Error updating profile:", err));
+    .catch(err => {
+      console.error("Error updating profile:", err);
+      showStatusMessage("❌ Failed to update profile. Please try again.", true);
+    });
 }
+
 
 // Save button
 saveBtn.addEventListener("click", (e) => { e.preventDefault(); saveChanges(); });
