@@ -1,4 +1,3 @@
-// models/Product.js
 const mongoose = require("mongoose");
 
 const ProductSchema = new mongoose.Schema(
@@ -8,6 +7,7 @@ const ProductSchema = new mongoose.Schema(
     price: { type: Number },
     stock: { type: Number, required: true, default: 0 },
     supplier: { type: String },
+    sku: { type: String, unique: true }, // ✅ Added SKU field
 
     stockHistory: [
       {
@@ -17,11 +17,11 @@ const ProductSchema = new mongoose.Schema(
     ],
   },
   {
-    timestamps: true, // adds createdAt and updatedAt
+    timestamps: true,
   }
 );
 
-// 🔹 Virtual property for easy stock status checking
+// 🔹 Virtual for stock status
 ProductSchema.virtual("status").get(function () {
   if (this.stock === 0) return "No Stock";
   if (this.stock <= 10) return "Low Stock";
@@ -29,5 +29,27 @@ ProductSchema.virtual("status").get(function () {
 });
 
 ProductSchema.set("toJSON", { virtuals: true });
+
+// 🧠 Auto-generate SKU before saving
+ProductSchema.pre("save", async function (next) {
+  // Only generate SKU if it doesn’t exist
+  if (!this.sku && this.name) {
+    const prefix = this.name.replace(/[^A-Za-z]/g, "").substring(0, 3).toUpperCase() || "PRD";
+
+    // Find the latest SKU with same prefix
+    const lastProduct = await mongoose.model("Product").findOne({ sku: new RegExp(`^${prefix}-`) })
+      .sort({ createdAt: -1 });
+
+    let nextNumber = 2001;
+    if (lastProduct && lastProduct.sku) {
+      const parts = lastProduct.sku.split("-");
+      const lastNum = parseInt(parts[1]);
+      if (!isNaN(lastNum)) nextNumber = lastNum + 1;
+    }
+
+    this.sku = `${prefix}-${nextNumber}`;
+  }
+  next();
+});
 
 module.exports = mongoose.model("Product", ProductSchema, "products");

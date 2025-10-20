@@ -24,6 +24,7 @@
         <input type="text" placeholder="Search by SKU or Product Name">
         <i class="fa fa-search"></i>
       </div>
+      <ul id="productSuggestions" class="suggestions"></ul>
     </div>
 
     <div class="form-group half customer-name">
@@ -56,13 +57,13 @@
 
     <div class="form-group half tax">
       <label>Tax (%)</label>
-      <input type="number" value="12">
+      <input type="number" value="3">
     </div>
 
   </div>
 
   <div class="buttons">
-    <button class="btn cancel">Cancel</button>
+   
     <button class="btn save"><i class="fa fa-floppy-disk"></i> Save Transaction</button>
   </div>
 </section>
@@ -122,6 +123,232 @@
       </table>
     </section>
   </div>
+
+<script>
+let allProducts = [];
+let currentStaffName = ""; // Will be fetched dynamically
+
+// 🧩 Fetch current logged-in staff name from localStorage
+// 🧩 Get current staff name directly from localStorage (same as sidebar)
+function loadCurrentStaff() {
+  const userData = localStorage.getItem("user");
+  if (!userData) {
+    console.warn("User not found in localStorage.");
+    currentStaffName = "Unknown User";
+    return;
+  }
+
+  try {
+    const user = JSON.parse(userData);
+    currentStaffName = user.fullName || "Unknown User";
+
+    // Optional: display in console for debugging
+    console.log("✅ Current Staff:", currentStaffName);
+  } catch (e) {
+    console.error("Error parsing user data:", e);
+    currentStaffName = "Unknown User";
+  }
+}
+
+
+// 🧩 Fetch all products from backend
+async function loadProducts() {
+  try {
+    const res = await fetch("/products");
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    allProducts = await res.json();
+  } catch (err) {
+    console.error("Error loading products:", err);
+    alert("Failed to load products. Check console for details.");
+  }
+}
+
+// 🧩 Fetch recent transactions from backend
+async function loadRecentTransactions() {
+  try {
+    const res = await fetch("/transactions");
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const transactions = await res.json();
+
+    const tbody = document.querySelector(".recent-transactions tbody");
+    tbody.innerHTML = ""; // Clear existing rows
+
+    transactions.reverse().forEach(tx => {
+      addTransactionToTable(tx);
+    });
+  } catch (err) {
+    console.error("Error loading recent transactions:", err);
+    alert("Failed to load recent transactions. Check console.");
+  }
+}
+
+// 🧮 Calculate and update total amount
+function updateTotal(selectedProduct, priceInput, quantityInput, discountInput, taxInput, totalInput) {
+  if (!selectedProduct) {
+    totalInput.value = "";
+    return;
+  }
+
+  const price = parseFloat(priceInput.value) || 0;
+  const qty = Math.min(parseInt(quantityInput.value) || 1, selectedProduct.stock);
+  const discount = parseFloat(discountInput.value) || 0;
+  const tax = parseFloat(taxInput.value) || 0;
+
+  const subtotal = price * qty;
+  const discountAmount = subtotal * (discount / 100);
+  const taxAmount = (subtotal - discountAmount) * (tax / 100);
+  const total = subtotal - discountAmount + taxAmount;
+
+  totalInput.value = `₱${total.toFixed(2)} (Available: ${selectedProduct.stock})`;
+}
+
+// 📝 Add transaction to recent transactions table
+function addTransactionToTable(transaction) {
+  const tbody = document.querySelector(".recent-transactions tbody");
+  const tr = document.createElement("tr");
+
+  // Determine status color
+  let statusClass = "green";
+  if (transaction.status === "Pending") statusClass = "yellow";
+  else if (transaction.status === "Requires Approval") statusClass = "red";
+
+  tr.innerHTML = `
+    <td>#${transaction._id.slice(-6).toUpperCase()}</td>
+    <td>${new Date(transaction.date).toLocaleString()}</td>
+    <td>${transaction.staffName}</td>
+    <td>${transaction.quantity} item(s)</td>
+    <td>₱${transaction.total.toFixed(2)}</td>
+    <td><span class="status ${statusClass}">${transaction.status}</span></td>
+    <td><button class="icon-btn"><i class="fa fa-eye"></i></button></td>
+  `;
+  tbody.prepend(tr);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadCurrentStaff();
+  loadProducts();
+  loadRecentTransactions();
+
+  const searchInput = document.querySelector(".product-search input");
+  const priceInput = document.querySelector(".unit-price input");
+  const quantityInput = document.querySelector(".quantity input");
+  const totalInput = document.querySelector(".payment-method input");
+  const discountInput = document.querySelector(".discount input");
+  const taxInput = document.querySelector(".tax input");
+  const customerInput = document.querySelector(".customer-name input");
+  const saveBtn = document.querySelector(".btn.save");
+
+  let selectedProduct = null;
+
+  // Suggestions dropdown
+  const suggestions = document.createElement("ul");
+  suggestions.classList.add("suggestions");
+  searchInput.parentElement.parentElement.appendChild(suggestions);
+
+  function showSuggestions() {
+    const query = searchInput.value.toLowerCase().trim();
+    suggestions.innerHTML = "";
+
+    if (!query) {
+      selectedProduct = null;
+      priceInput.value = "";
+      totalInput.value = "";
+      return;
+    }
+
+    const matched = allProducts.filter(p =>
+      (p.name && p.name.toLowerCase().includes(query)) ||
+      (p.sku && p.sku.toLowerCase().includes(query))
+    );
+
+    matched.slice(0, 8).forEach(p => {
+      const li = document.createElement("li");
+      li.textContent = `${p.name} (${p.sku})`;
+      li.addEventListener("click", () => {
+        searchInput.value = p.name;
+        selectedProduct = p;
+        priceInput.value = p.price;
+        quantityInput.max = p.stock;
+        quantityInput.value = 1;
+        discountInput.value = 0;
+        taxInput.value = 3;
+        updateTotal(selectedProduct, priceInput, quantityInput, discountInput, taxInput, totalInput);
+        suggestions.innerHTML = "";
+      });
+      suggestions.appendChild(li);
+    });
+  }
+
+  searchInput.addEventListener("input", showSuggestions);
+  searchInput.addEventListener("focus", showSuggestions);
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".product-search")) suggestions.innerHTML = "";
+  });
+
+  [quantityInput, discountInput, taxInput].forEach(input =>
+    input.addEventListener("input", () =>
+      updateTotal(selectedProduct, priceInput, quantityInput, discountInput, taxInput, totalInput)
+    )
+  );
+
+  // 💾 Save transaction
+  saveBtn.addEventListener("click", async () => {
+    if (!selectedProduct) return alert("Select a product first");
+    if (!customerInput.value.trim()) return alert("Enter customer name");
+
+    const quantity = parseInt(quantityInput.value);
+    if (quantity > selectedProduct.stock) return alert(`Only ${selectedProduct.stock} item(s) available.`);
+
+    const payload = {
+      productId: selectedProduct._id,
+      customerName: customerInput.value.trim(),
+      staffName: currentStaffName,
+      quantity,
+      discount: parseFloat(discountInput.value) || 0,
+      tax: parseFloat(taxInput.value) || 0
+    };
+
+    try {
+      const res = await fetch("/transactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Server error:", text);
+        return alert("Server error. Check console.");
+      }
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Transaction saved successfully!");
+        addTransactionToTable(data.transaction);
+
+        // Reset form
+        searchInput.value = "";
+        priceInput.value = "";
+        quantityInput.value = 1;
+        discountInput.value = 0;
+        taxInput.value = 3;
+        totalInput.value = "";
+        selectedProduct = null;
+      } else {
+        alert(data.message || "Failed to save transaction");
+      }
+    } catch (err) {
+      console.error("Error saving transaction:", err);
+      alert("Error saving transaction. Check console.");
+    }
+  });
+});
+</script>
+
+
+
 
 </body>
 </html>

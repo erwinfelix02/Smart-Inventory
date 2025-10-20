@@ -384,3 +384,73 @@ tr:hover {
   border-color: #1a73e8;
   box-shadow: 0 0 6px rgba(26, 115, 232, 0.3);
 }
+.suggestions {
+  position: absolute;
+  width: 92%;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  list-style: none;
+  margin-top: 2px;
+  padding: 0;
+  max-height: 160px;
+  overflow-y: auto;
+  border-radius: 0 0 8px 8px;
+  z-index: 100;
+}
+
+.suggestions li {
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #333;
+}
+
+.suggestions li:hover {
+  background: #f3f6ff;
+}
+.suggestions:empty {
+  display: none;
+}
+.product-search {
+  position: relative; /* This makes the suggestions box align under this container */
+  width: 100%; /* Or a specific width if needed */
+}
+
+.product-search input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%; /* Appear directly below input */
+  left: 0;
+  width: 100%; /* Same width as input */
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  list-style: none;
+  margin-top: 0;
+  padding: 0;
+  max-height: 160px;
+  overflow-y: auto;
+  border-radius: 0 0 8px 8px;
+  z-index: 100;
+}
+
+.suggestions li {
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #333;
+}
+
+.suggestions li:hover {
+  background: #f3f6ff;
+}
+
+.suggestions:empty {
+  display: none;
+}
