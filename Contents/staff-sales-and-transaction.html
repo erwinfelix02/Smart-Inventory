@@ -40,7 +40,7 @@
 
     <div class="form-group half quantity">
       <label>Quantity</label>
-      <input type="number" value="1">
+      <input type="number" value="0">
     </div>
 
     <!-- Row 3: Payment Method under Customer Name -->
@@ -57,7 +57,7 @@
 
     <div class="form-group half tax">
       <label>Tax (%)</label>
-      <input type="number" value="3">
+      <input type="number" value="0">
     </div>
 
   </div>
@@ -70,66 +70,64 @@
 
 
     <!-- Recent Transactions -->
-    <section class="recent-transactions card">
-      <div class="header">
-        <h2>Recent Transactions</h2>
-        <div class="search-box">
-          <input type="text" placeholder="Search transactions...">
-          <button><i class="fa fa-filter"></i></button>
-        </div>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>TRANS ID</th>
-            <th>DATE/TIME</th>
-            <th>SALES REP</th>
-            <th>ITEMS</th>
-            <th>TOTAL</th>
-            <th>PAYMENT STATUS</th>
-            <th>ACTIONS</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>#TXN-001</td>
-            <td>2024-01-15 14:30</td>
-            <td>John Smith</td>
-            <td>3 items</td>
-            <td>₱1,250.00</td>
-            <td><span class="status red">Requires Approval</span></td>
-            <td><button class="icon-btn"><i class="fa fa-eye"></i></button></td>
-          </tr>
-          <tr>
-            <td>#TXN-002</td>
-            <td>2024-01-16 10:45</td>
-            <td>John Smith</td>
-            <td>2 items</td>
-            <td>₱1,000.00</td>
-            <td><span class="status green">Completed</span></td>
-            <td><button class="icon-btn"><i class="fa fa-eye"></i></button></td>
-          </tr>
-          <tr>
-            <td>#TXN-003</td>
-            <td>2024-01-17 09:20</td>
-            <td>John Smith</td>
-            <td>5 items</td>
-            <td>₱1,750.00</td>
-            <td><span class="status yellow">Pending</span></td>
-            <td><button class="icon-btn"><i class="fa fa-eye"></i></button></td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+   <section class="recent-transactions card">
+  <div class="header">
+    <h2>Recent Transactions</h2>
+    <div class="search-box">
+  <input type="text" placeholder="Search transactions...">
+  <div class="filter-dropdown">
+    <button id="filterBtn"><i class="fa fa-filter"></i></button>
+    <ul id="statusOptions" class="status-options">
+      <li data-status="">All</li>
+      <li data-status="Pending">Pending</li>
+      <li data-status="Completed">Completed</li>
+      <li data-status="Requires Approval">Requires Approval</li>
+    </ul>
   </div>
+</div>
+
+    
+  </div>
+
+
+<div class="table-container">
+  <table class="transactions-table">
+    <thead>
+      <tr>
+        <th>TRANS ID</th>
+        <th>DATE/TIME</th>
+        <th>SALES REP</th>
+        <th>ITEMS</th>
+        <th>TOTAL</th>
+        <th>PAYMENT STATUS</th>
+        <th>ACTIONS</th>
+      </tr>
+    </thead>
+    <tbody class="table-body">
+      <tr>
+        <td>#TXN-001</td>
+        <td>2024-01-15 14:30</td>
+        <td>John Smith</td>
+        <td>3 items</td>
+        <td>₱1,250.00</td>
+        <td><span class="status red">Requires Approval</span></td>
+        <td><button class="icon-btn"><i class="fa fa-eye"></i></button></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+  </div>
+</section>
+
+  </div>
+<div id="saveStatus"></div>
 
 <script>
 let allProducts = [];
 let currentStaffName = ""; // Will be fetched dynamically
 
 // 🧩 Fetch current logged-in staff name from localStorage
-// 🧩 Get current staff name directly from localStorage (same as sidebar)
 function loadCurrentStaff() {
   const userData = localStorage.getItem("user");
   if (!userData) {
@@ -141,15 +139,12 @@ function loadCurrentStaff() {
   try {
     const user = JSON.parse(userData);
     currentStaffName = user.fullName || "Unknown User";
-
-    // Optional: display in console for debugging
     console.log("✅ Current Staff:", currentStaffName);
   } catch (e) {
     console.error("Error parsing user data:", e);
     currentStaffName = "Unknown User";
   }
 }
-
 
 // 🧩 Fetch all products from backend
 async function loadProducts() {
@@ -207,7 +202,6 @@ function addTransactionToTable(transaction) {
   const tbody = document.querySelector(".recent-transactions tbody");
   const tr = document.createElement("tr");
 
-  // Determine status color
   let statusClass = "green";
   if (transaction.status === "Pending") statusClass = "yellow";
   else if (transaction.status === "Requires Approval") statusClass = "red";
@@ -224,10 +218,34 @@ function addTransactionToTable(transaction) {
   tbody.prepend(tr);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+// 🔍 Search function for Recent Transactions
+function setupSearch() {
+  const searchBox = document.querySelector(".recent-transactions .search-box input");
+  const tableBody = document.querySelector(".recent-transactions tbody");
+
+  if (!searchBox || !tableBody) return;
+
+  searchBox.addEventListener("input", () => {
+    const query = searchBox.value.toLowerCase().trim();
+    const rows = tableBody.querySelectorAll("tr");
+
+    rows.forEach(row => {
+      const rowText = Array.from(row.querySelectorAll("td"))
+        .map(td => td.textContent.toLowerCase())
+        .join(" ");
+      row.style.display = rowText.includes(query) ? "" : "none";
+    });
+  });
+}
+
+// 🧩 Initialize everything
+document.addEventListener("DOMContentLoaded", async () => {
   loadCurrentStaff();
   loadProducts();
-  loadRecentTransactions();
+
+  // Load transactions first, then enable search
+  await loadRecentTransactions();
+  setupSearch();
 
   const searchInput = document.querySelector(".product-search input");
   const priceInput = document.querySelector(".unit-price input");
@@ -293,59 +311,153 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   // 💾 Save transaction
-  saveBtn.addEventListener("click", async () => {
-    if (!selectedProduct) return alert("Select a product first");
-    if (!customerInput.value.trim()) return alert("Enter customer name");
+saveBtn.addEventListener("click", async () => {
+  if (!selectedProduct) return alert("Select a product first");
+  if (!customerInput.value.trim()) return alert("Enter customer name");
 
-    const quantity = parseInt(quantityInput.value);
-    if (quantity > selectedProduct.stock) return alert(`Only ${selectedProduct.stock} item(s) available.`);
+  const quantity = parseInt(quantityInput.value);
+  if (quantity > selectedProduct.stock)
+    return alert(`Only ${selectedProduct.stock} item(s) available.`);
 
-    const payload = {
-      productId: selectedProduct._id,
-      customerName: customerInput.value.trim(),
-      staffName: currentStaffName,
-      quantity,
-      discount: parseFloat(discountInput.value) || 0,
-      tax: parseFloat(taxInput.value) || 0
-    };
+  const payload = {
+    productId: selectedProduct._id,
+    customerName: customerInput.value.trim(),
+    staffName: currentStaffName,
+    quantity,
+    discount: parseFloat(discountInput.value) || 0,
+    tax: parseFloat(taxInput.value) || 0
+  };
 
-    try {
-      const res = await fetch("/transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+  try {
+    const res = await fetch("/transactions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("Server error:", text);
-        return alert("Server error. Check console.");
-      }
-
-      const data = await res.json();
-
-      if (data.success) {
-        alert("Transaction saved successfully!");
-        addTransactionToTable(data.transaction);
-
-        // Reset form
-        searchInput.value = "";
-        priceInput.value = "";
-        quantityInput.value = 1;
-        discountInput.value = 0;
-        taxInput.value = 3;
-        totalInput.value = "";
-        selectedProduct = null;
-      } else {
-        alert(data.message || "Failed to save transaction");
-      }
-    } catch (err) {
-      console.error("Error saving transaction:", err);
-      alert("Error saving transaction. Check console.");
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("Server error:", text);
+      return alert("Server error. Check console.");
     }
+
+    const data = await res.json();
+
+    if (data.success) {
+      showSaveStatus("Transaction saved successfully!", "success");
+      addTransactionToTable(data.transaction);
+
+      // ✅ Reset all inputs
+      searchInput.value = "";
+      priceInput.value = "";
+      quantityInput.value = 1;
+      discountInput.value = 0;
+      taxInput.value = 3;
+      totalInput.value = "";
+      customerInput.value = "";
+      selectedProduct = null;
+      suggestions.innerHTML = ""; // hide suggestion box
+    } else {
+      alert(data.message || "Failed to save transaction");
+    }
+  } catch (err) {
+    console.error("Error saving transaction:", err);
+    showSaveStatus("Failed to save transaction.", "error");
+  }
+});
+});
+function showSaveStatus(message, type = "success") {
+  const statusDiv = document.getElementById("saveStatus");
+  statusDiv.textContent = message;
+
+  // Set color based on type
+  statusDiv.classList.remove("error");
+  if (type === "error") statusDiv.classList.add("error");
+
+  // Show the message
+  statusDiv.classList.add("show");
+
+  // Hide after 3 seconds
+  setTimeout(() => {
+    statusDiv.classList.remove("show");
+  }, 3000);
+}
+const filterBtn = document.getElementById("filterBtn");
+const statusOptions = document.getElementById("statusOptions");
+const tableBody = document.querySelector(".recent-transactions tbody");
+
+// Toggle dropdown visibility
+filterBtn.addEventListener("click", (e) => {
+  e.stopPropagation(); // prevent closing immediately
+  statusOptions.style.display = statusOptions.style.display === "block" ? "none" : "block";
+});
+
+// Filter rows when option clicked
+statusOptions.querySelectorAll("li").forEach(li => {
+  li.addEventListener("click", () => {
+    const selectedStatus = li.dataset.status.toLowerCase();
+    const rows = tableBody.querySelectorAll("tr");
+
+    rows.forEach(row => {
+      const statusCell = row.querySelector("td:nth-child(6) span");
+      const statusText = statusCell.textContent.toLowerCase();
+      row.style.display = !selectedStatus || statusText === selectedStatus ? "" : "none";
+    });
+
+    statusOptions.style.display = "none"; // hide dropdown after click
   });
 });
+
+// Hide dropdown when clicking outside
+document.addEventListener("click", () => {
+  statusOptions.style.display = "none";
+});
+
+
+// 🔍 Fetch and display transaction details in modal
+document.addEventListener("click", async (e) => {
+  // Click on eye icon
+  if (e.target.closest(".view-btn")) {
+    const row = e.target.closest("tr");
+    const txnId = row.dataset.id;
+    if (!txnId) return alert("Transaction ID not found");
+
+    try {
+      const res = await fetch(`/transactions/${txnId}`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const tx = await res.json();
+
+      // Fill modal fields
+      document.getElementById("modalTxnId").textContent = `#${tx._id.slice(-6).toUpperCase()}`;
+      document.getElementById("modalCustomer").textContent = tx.customerName;
+      document.getElementById("modalStaff").textContent = tx.staffName;
+      document.getElementById("modalItems").textContent = `${tx.quantity} item(s)`;
+      document.getElementById("modalTotal").textContent = `₱${tx.total.toFixed(2)}`;
+      document.getElementById("modalStatus").textContent = tx.status;
+      document.getElementById("modalDate").textContent = new Date(tx.date).toLocaleString();
+
+      // Show modal
+      document.getElementById("transactionModal").style.display = "block";
+    } catch (err) {
+      console.error("Failed to fetch transaction details:", err);
+      alert("Failed to fetch transaction details. Check console.");
+    }
+  }
+});
+
+// Close modal
+document.getElementById("closeModal").addEventListener("click", () => {
+  document.getElementById("transactionModal").style.display = "none";
+});
+
+// Optional: close modal when clicking outside content
+window.addEventListener("click", (e) => {
+  const modal = document.getElementById("transactionModal");
+  if (e.target === modal) modal.style.display = "none";
+});
+
 </script>
+
 
 
 

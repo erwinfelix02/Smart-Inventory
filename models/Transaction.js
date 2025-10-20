@@ -17,5 +17,4 @@ const transactionSchema = new mongoose.Schema({
 transactionSchema.virtual("formattedTotal").get(function () {
   return `₱${this.total.toFixed(2)}`;
 });
-
 module.exports = mongoose.model("Transaction", transactionSchema, "transactions");

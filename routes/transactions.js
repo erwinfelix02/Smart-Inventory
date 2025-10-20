@@ -22,6 +22,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+
 // ------------------------
 // POST new transaction (no session required)
 // ------------------------
@@ -82,5 +83,10 @@ router.post("/", async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+
+
+
+document.querySelector(".cards .card:nth-child(3) .count").textContent = stats.pendingApprovals;
 
 module.exports = router;

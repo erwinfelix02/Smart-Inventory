@@ -129,6 +129,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  min-height: 400px;
   color: #9ca3af;
 }
 
@@ -160,4 +161,65 @@ body {
   .transactions td {
     font-size: 12px;
   }
+}
+.transactions table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* crucial for alignment */
+}
+
+/* Scrollable tbody */
+.transactions tbody {
+  display: block;
+  padding-top: 5px;
+  max-height: 100px; /* show 3 rows */
+  overflow-y: auto;
+}
+
+.transactions thead, 
+.transactions tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Fix individual column widths */
+.transactions th, 
+.transactions td {
+  width: 20%; /* 5 columns, each gets 20% */
+  padding: 6px 4px;
+  text-align: left;
+}
+
+/* Optional: header styling */
+.transactions thead {
+  background: #f3f4f6;
+  font-weight: 600;
+  display: table;
+  width: calc(100% - 16px); /* adjust based on scrollbar width (usually 15-17px) */
+  table-layout: fixed;
+}
+/* ===== SALES TREND CARD ===== */
+.sales-trend {
+  margin-top: 30px;
+}
+
+.sales-trend .chart-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sales-trend .chart-card h4 {
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.sales-trend canvas {
+  width: 100% !important;
+  max-height: 400px;
 }

@@ -65,28 +65,7 @@
               <td>3</td>
               <td>$450.00</td>
               <td><span class="status completed">Completed</span></td>
-            </tr>
-            <tr>
-              <td>#TXN-002</td>
-              <td>Mike Chen</td>
-              <td>1</td>
-              <td>$120.00</td>
-              <td><span class="status pending">Pending</span></td>
-            </tr>
-            <tr>
-              <td>#TXN-003</td>
-              <td>Emma Davis</td>
-              <td>5</td>
-              <td>$890.00</td>
-              <td><span class="status completed">Completed</span></td>
-            </tr>
-            <tr>
-              <td>#TXN-004</td>
-              <td>Alex Wilson</td>
-              <td>2</td>
-              <td>$340.00</td>
-              <td><span class="status delayed">Delayed</span></td>
-            </tr>
+            </tr>        
           </tbody>
         </table>
       </div>
@@ -96,12 +75,213 @@
     <div class="sales-trend">
       <h4>Sales Trend</h4>
       <div class="chart-placeholder">
-        <i class="fa-solid fa-chart-line"></i>
-        <p>Sales Chart Placeholder</p>
+       <canvas id="salesChart"></canvas>
       </div>
     </div>
 
   </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+async function loadDashboard() {
+  try {
+    const txnRes = await fetch("/transactions");
+    const transactions = await txnRes.json();
+
+    const tbody = document.querySelector(".transactions tbody");
+    tbody.innerHTML = "";
+
+    let pendingCount = 0;
+    let completedCount = 0;
+    let todaySales = 0;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    let yesterdaySales = 0;
+    let yesterdayCompleted = 0;
+
+    // Aggregate daily sales
+    const dailySalesMap = {}; // { 'YYYY-MM-DD': total }
+
+    transactions.forEach(txn => {
+      const txnStatus = txn.status.toLowerCase();
+      const txnDate = new Date(txn.date);
+      const dateKey = txnDate.toISOString().split('T')[0]; // YYYY-MM-DD
+
+      // Count pending and completed
+      if (txnStatus === "pending") pendingCount++;
+      if (txnStatus === "completed") completedCount++;
+
+      // Today's sales
+      if (txnStatus === "completed" && txnDate >= today) todaySales += txn.total;
+
+      // Yesterday's sales
+      if (txnStatus === "completed" && txnDate >= yesterday && txnDate < today) {
+        yesterdaySales += txn.total;
+        yesterdayCompleted++;
+      }
+
+      // Aggregate daily sales
+      if (txnStatus === "completed") {
+        dailySalesMap[dateKey] = (dailySalesMap[dateKey] || 0) + txn.total;
+      }
+
+      // Populate table row
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>#${txn._id.slice(-6).toUpperCase()}</td>
+        <td>${txn.customerName}</td>
+        <td>${txn.quantity}</td>
+        <td>₱${txn.total.toFixed(2)}</td>
+        <td><span class="status ${txnStatus}">${txn.status}</span></td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    // Update cards
+    document.querySelector(".cards .card:nth-child(1) .amount").textContent = `₱${todaySales.toFixed(2)}`;
+    document.querySelector(".cards .card:nth-child(2) .count").textContent = completedCount;
+    document.querySelector(".cards .card:nth-child(3) .count").textContent = pendingCount;
+
+    // Update change texts
+    const salesChangeEl = document.querySelector(".cards .card:nth-child(1) .change");
+    let salesChange = todaySales - yesterdaySales;
+    let salesPercent = yesterdaySales > 0 ? (salesChange / yesterdaySales) * 100 : 100;
+    salesChangeEl.textContent = salesChange >= 0 
+      ? `▲ +${salesPercent.toFixed(1)}% vs yesterday`
+      : `▼ ${Math.abs(salesPercent).toFixed(1)}% vs yesterday`;
+
+    const completedDiff = completedCount - yesterdayCompleted;
+    const completedChangeEl = document.querySelector(".cards .card:nth-child(2) .change");
+    completedChangeEl.textContent = completedDiff >= 0 
+      ? `${completedDiff} more than yesterday` 
+      : `${Math.abs(completedDiff)} less than yesterday`;
+
+    const pendingChangeEl = document.querySelector(".cards .card:nth-child(3) .change");
+    pendingChangeEl.textContent = pendingCount > 0 
+      ? "Requires attention" 
+      : "No pending approvals";
+
+    // ------------------------------
+    // Prepare Chart.js line chart (chronological)
+    // ------------------------------
+    const chartLabels = Object.keys(dailySalesMap)
+      .sort((a, b) => new Date(a) - new Date(b)); // sort dates chronologically
+    const chartData = chartLabels.map(date => dailySalesMap[date]);
+
+    const ctx = document.getElementById("salesChart").getContext("2d");
+
+    // Destroy previous chart if exists
+    if (window.salesChartInstance) window.salesChartInstance.destroy();
+    // Animation offset
+let offset = 0;
+
+// Function to create moving gradient
+function getGradient() {
+  const width = ctx.canvas.width;
+  const gradient = ctx.createLinearGradient(0, 0, width, 0);
+
+  const phase = (offset % 100) / 100; 
+
+  gradient.addColorStop((0 + phase) % 1, 'rgba(0,123,255,1)');
+  gradient.addColorStop((0.25 + phase) % 1, 'rgba(0,200,255,1)');
+  gradient.addColorStop((0.5 + phase) % 1, 'rgba(0,123,255,1)');
+  gradient.addColorStop((0.75 + phase) % 1, 'rgba(0,200,255,1)');
+  gradient.addColorStop((1 + phase) % 1, 'rgba(0,123,255,1)');
+
+  return gradient;
+}
+
+    window.salesChartInstance = new Chart(ctx, {
+  type: "line",
+  data: {
+    labels: chartLabels,
+    datasets: [{
+      label: "Daily Sales",
+      data: chartData,
+      borderColor: "#2563eb",
+      tension: 0.3,
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      borderWidth: 6
+    }]
+  },
+  options: {
+    responsive: true,
+    layout: {
+      padding: {
+        top: 50,
+        right: 20,
+        bottom: 60, // extra space for total sales label
+        left: 20
+      }
+    },
+    plugins: {
+      legend: { display: true, position: "bottom" },
+      tooltip: {
+        mode: "index",
+        intersect: false,
+        callbacks: {
+          label: function(context) {
+            const value = context.raw;
+            return `₱${value.toFixed(2)}`;
+          }
+        }
+      },
+      
+      // Custom plugin to display todaySales below the chart
+      afterDraw: chart => {
+        const { ctx, chartArea: { bottom, left, right } } = chart;
+        ctx.save();
+        ctx.font = "bold 14px Inter";
+        ctx.fillStyle = "#111827";
+        ctx.textAlign = "center";
+        const centerX = (left + right) / 2;
+        ctx.fillText(`Total Today: ₱${todaySales.toFixed(2)}`, centerX, bottom + 25);
+        ctx.restore();
+      }
+    },
+   scales: {
+  x: {
+    ticks: {
+      callback: function(value, index) {
+        const date = new Date(this.getLabelForValue(index));
+        return date.toLocaleString('default', { month: 'short', day: 'numeric' });
+      }
+    }
+  },
+  y: { 
+    title: { display: true, text: "Sales (₱)" }, 
+    beginAtZero: true 
+  }
+},
+     animation: false
+  }
+});
+// Animate gradient
+function animateGradient() {
+  offset += 1; // adjust speed here
+  window.salesChartInstance.data.datasets[0].borderColor = getGradient();
+  window.salesChartInstance.update('none'); // update without anim
+  requestAnimationFrame(animateGradient);
+}
+animateGradient();
+
+  } catch (err) {
+    console.error("Error loading dashboard:", err);
+  }
+}
+
+// Load dashboard
+window.addEventListener("DOMContentLoaded", loadDashboard);
+</script>
+
+
 
 </body>
 </html>
