@@ -223,3 +223,157 @@ body {
   width: 100% !important;
   max-height: 400px;
 }
+
+
+/* Modal background */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  inset: 0; /* top, right, bottom, left */
+  backdrop-filter: blur(3px); /* nice blur effect */
+  animation: fadeIn 0.3s ease;
+}
+
+/* Modal box */
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 0;
+  border-radius: 12px;
+  width: 85%;
+  max-width: 1000px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  animation: slideIn 0.4s ease;
+}
+
+/* Header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  background: linear-gradient(90deg, #2563eb, #00c8ff);
+  color: #fff;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.modal-header .close {
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.modal-header .close:hover {
+  transform: rotate(90deg);
+  color: #ff4d4d;
+}
+
+/* Body with scrollable table */
+.modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+/* Table styling */
+.modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Inter', sans-serif;
+  table-layout: fixed; /* ensures consistent column widths */
+}
+
+.modal-table thead {
+  position: sticky;
+  top: 0;
+  background-color: #e0e7ff;
+  z-index: 2;
+}
+.modal-table th, 
+.modal-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  width: 20%; /* or adjust according to your number of columns */
+  box-sizing: border-box; /* ensures width includes padding */
+}
+
+
+.modal-table tbody tr:hover {
+  background-color: #f1f5f9;
+  transition: background 0.2s;
+}
+
+.status.completed {
+   background: #e8f5e9;
+  color: #2e7d32;             /* white text */
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.status.pending {
+ background: #fff8e1;
+  color: #f57f17;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.status.cancelled {
+  background: #ffebee;
+  color: #c62828;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+
+/* Animations */
+@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+@keyframes slideIn { from {transform: translateY(-50px);} to {transform: translateY(0);} }
+.modal-table thead {
+  position: sticky;
+  top: 0;
+  background-color: #e0e7ff;
+  z-index: 1;
+}
+
+.modal-table tbody {
+  display: block;
+  max-height: 300px; /* adjust height */
+  overflow-y: auto;
+}
+
+.modal-table thead, 
+.modal-table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+.transactions .header a {
+  color: #2563eb; /* primary blue */
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.transactions .header a:hover {
+  color: #fff; /* text turns white */
+  background-color: #2563eb; /* background highlights */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* subtle shadow */
+  transform: translateY(-2px); /* slight lift effect */
+}

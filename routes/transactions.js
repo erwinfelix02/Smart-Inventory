@@ -87,6 +87,5 @@ router.post("/", async (req, res) => {
 
 
 
-document.querySelector(".cards .card:nth-child(3) .count").textContent = stats.pendingApprovals;
 
 module.exports = router;

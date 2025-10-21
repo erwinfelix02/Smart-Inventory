@@ -123,6 +123,23 @@
   </div>
 <div id="saveStatus"></div>
 
+<div id="transactionModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Transaction Details</h3>
+      <span id="modalClose" class="close">&times;</span>
+    </div>
+    <div class="modal-body">
+      <p><strong>ID:</strong> <span id="modalTxnId"></span></p>
+      <p><strong>Items:</strong> <span id="modalItems"></span></p>
+      <p><strong>Total:</strong> <span id="modalTotal"></span></p>
+      <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+      <p><strong>Date:</strong> <span id="modalDate"></span></p>
+    </div>
+  </div>
+</div>
+
+
 <script>
 let allProducts = [];
 let currentStaffName = ""; // Will be fetched dynamically
@@ -202,13 +219,15 @@ function addTransactionToTable(transaction) {
   const tbody = document.querySelector(".recent-transactions tbody");
   const tr = document.createElement("tr");
 
+  tr.dataset.id = transaction._id.slice(-6); 
+
   let statusClass = "green";
   if (transaction.status === "Pending") statusClass = "yellow";
   else if (transaction.status === "Requires Approval") statusClass = "red";
 
   tr.innerHTML = `
     <td>#${transaction._id.slice(-6).toUpperCase()}</td>
-    <td>${new Date(transaction.date).toLocaleString()}</td>
+    <td>${formatDate(transaction.date)}</td>
     <td>${transaction.staffName}</td>
     <td>${transaction.quantity} item(s)</td>
     <td>₱${transaction.total.toFixed(2)}</td>
@@ -217,6 +236,18 @@ function addTransactionToTable(transaction) {
   `;
   tbody.prepend(tr);
 }
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleString("en-US", {
+    month: "short",  // e.g. Oct
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true     // shows AM/PM
+  });
+}
+
 
 // 🔍 Search function for Recent Transactions
 function setupSearch() {
@@ -315,10 +346,17 @@ saveBtn.addEventListener("click", async () => {
   if (!selectedProduct) return alert("Select a product first");
   if (!customerInput.value.trim()) return alert("Enter customer name");
 
-  const quantity = parseInt(quantityInput.value);
-  if (quantity > selectedProduct.stock)
-    return alert(`Only ${selectedProduct.stock} item(s) available.`);
 
+   const quantity = parseInt(quantityInput.value) || 0;
+
+  // ✅ Check stock availability
+  if (selectedProduct.stock === 0) {
+    return showSaveStatus(`No stock available for ${selectedProduct.name}`, "error");
+  }
+
+  if (quantity > selectedProduct.stock) {
+    return showSaveStatus(`Only ${selectedProduct.stock} item(s) available.`, "error");
+  }
   const payload = {
     productId: selectedProduct._id,
     customerName: customerInput.value.trim(),
@@ -350,9 +388,9 @@ saveBtn.addEventListener("click", async () => {
       // ✅ Reset all inputs
       searchInput.value = "";
       priceInput.value = "";
-      quantityInput.value = 1;
+      quantityInput.value = 0;
       discountInput.value = 0;
-      taxInput.value = 3;
+      taxInput.value = 0;
       totalInput.value = "";
       customerInput.value = "";
       selectedProduct = null;
@@ -413,47 +451,44 @@ document.addEventListener("click", () => {
   statusOptions.style.display = "none";
 });
 
+document.addEventListener("click", (e) => {
+  const eyeBtn = e.target.closest(".icon-btn");
+  if (!eyeBtn) return;
 
-// 🔍 Fetch and display transaction details in modal
-document.addEventListener("click", async (e) => {
-  // Click on eye icon
-  if (e.target.closest(".view-btn")) {
-    const row = e.target.closest("tr");
-    const txnId = row.dataset.id;
-    if (!txnId) return alert("Transaction ID not found");
+  const row = eyeBtn.closest("tr");
 
-    try {
-      const res = await fetch(`/transactions/${txnId}`);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const tx = await res.json();
+  // Grab info directly from the row cells
+  const txnId = row.querySelector("td:nth-child(1)").textContent;
+  const date = row.querySelector("td:nth-child(2)").textContent;
+  const staff = row.querySelector("td:nth-child(3)").textContent;
+  const items = row.querySelector("td:nth-child(4)").textContent;
+  const total = row.querySelector("td:nth-child(5)").textContent;
+  const statusSpan = row.querySelector("td:nth-child(6) span");
+  const status = statusSpan.textContent;
+  const statusClass = statusSpan.className;
 
-      // Fill modal fields
-      document.getElementById("modalTxnId").textContent = `#${tx._id.slice(-6).toUpperCase()}`;
-      document.getElementById("modalCustomer").textContent = tx.customerName;
-      document.getElementById("modalStaff").textContent = tx.staffName;
-      document.getElementById("modalItems").textContent = `${tx.quantity} item(s)`;
-      document.getElementById("modalTotal").textContent = `₱${tx.total.toFixed(2)}`;
-      document.getElementById("modalStatus").textContent = tx.status;
-      document.getElementById("modalDate").textContent = new Date(tx.date).toLocaleString();
+  // Fill modal
+  document.getElementById("modalTxnId").textContent = txnId;
+  document.getElementById("modalItems").textContent = items;
+  document.getElementById("modalTotal").textContent = total;
+  document.getElementById("modalStatus").textContent = status;
+  document.getElementById("modalStatus").className = statusClass; // apply color
+  document.getElementById("modalDate").textContent = date;
 
-      // Show modal
-      document.getElementById("transactionModal").style.display = "block";
-    } catch (err) {
-      console.error("Failed to fetch transaction details:", err);
-      alert("Failed to fetch transaction details. Check console.");
-    }
-  }
+  // Show modal
+  document.getElementById("transactionModal").style.display = "block";
 });
 
 // Close modal
-document.getElementById("closeModal").addEventListener("click", () => {
+document.getElementById("modalClose").addEventListener("click", () => {
   document.getElementById("transactionModal").style.display = "none";
 });
 
-// Optional: close modal when clicking outside content
+// Close if clicking outside modal content
 window.addEventListener("click", (e) => {
-  const modal = document.getElementById("transactionModal");
-  if (e.target === modal) modal.style.display = "none";
+  if (e.target.id === "transactionModal") {
+    document.getElementById("transactionModal").style.display = "none";
+  }
 });
 
 </script>
