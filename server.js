@@ -34,7 +34,11 @@ const productRoutes = require("./routes/productRoutes");
 const alertRoute = require("./routes/alert");
 const systemsettingsRoutes = require("./routes/system-settings");
 const transactionsRoutes = require("./routes/transactions");
+const salesRoutes = require("./routes/sales");
 
+
+
+app.use("/sales", salesRoutes);
 app.use("/transactions", transactionsRoutes);
 app.use("/system-settings", systemsettingsRoutes);
 app.use("/alert", alertRoute);

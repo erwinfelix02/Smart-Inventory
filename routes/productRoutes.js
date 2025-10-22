@@ -39,4 +39,14 @@ router.patch("/:id/stock", async (req, res) => {
   }
 });
 
+
+// GET low-stock products
+router.get("/low-stock", async (req, res) => {
+  try {
+    const products = await Product.find({ stock: { $gt: 0, $lte: 10 } });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 module.exports = router;

@@ -133,9 +133,17 @@ loginForm.addEventListener("submit", async (e) => {
       hideLoading(loading);
 
       if (response.ok) {
-  // Successful login
+  // ✅ Save user info to localStorage
+  localStorage.setItem("email", email);
+  localStorage.setItem("role", data.role); // 🔹 this is the key line
+  localStorage.setItem("token", data.token || ""); // optional if your backend returns one
+
+  console.log("✅ Login success:", data.role);
+
+  // ✅ Redirect after storing role
   window.location.href = `email.html?email=${encodeURIComponent(email)}&role=${encodeURIComponent(data.role)}`;
-} else {
+}
+ else {
   // Show proper error message from backend
   emailInput.classList.add("input-error");
   passwordInput.classList.add("input-error");

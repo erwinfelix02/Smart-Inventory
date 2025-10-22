@@ -81,7 +81,7 @@
       <li data-status="">All</li>
       <li data-status="Pending">Pending</li>
       <li data-status="Completed">Completed</li>
-      <li data-status="Requires Approval">Requires Approval</li>
+      <li data-status="Cancelled">Cancelled</li>
     </ul>
   </div>
 </div>
@@ -219,11 +219,23 @@ function addTransactionToTable(transaction) {
   const tbody = document.querySelector(".recent-transactions tbody");
   const tr = document.createElement("tr");
 
-  tr.dataset.id = transaction._id.slice(-6); 
+  tr.dataset.id = transaction._id.slice(-6);
 
-  let statusClass = "green";
-  if (transaction.status === "Pending") statusClass = "yellow";
-  else if (transaction.status === "Requires Approval") statusClass = "red";
+  // ✅ Map status to color
+  let statusClass = "";
+  switch (transaction.status) {
+    case "Pending":
+      statusClass = "yellow";
+      break;
+    case "Completed":
+      statusClass = "green";
+      break;
+    case "Cancelled":
+      statusClass = "red";
+      break;
+    default:
+      statusClass = "gray";
+  }
 
   tr.innerHTML = `
     <td>#${transaction._id.slice(-6).toUpperCase()}</td>
@@ -232,7 +244,9 @@ function addTransactionToTable(transaction) {
     <td>${transaction.quantity} item(s)</td>
     <td>₱${transaction.total.toFixed(2)}</td>
     <td><span class="status ${statusClass}">${transaction.status}</span></td>
-    <td><button class="icon-btn"><i class="fa fa-eye"></i></button></td>
+    <td>
+      <button class="icon-btn"><i class="fa fa-eye"></i></button>
+    </td>
   `;
   tbody.prepend(tr);
 }
