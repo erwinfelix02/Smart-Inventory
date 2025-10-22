@@ -141,32 +141,30 @@ router.put("/:id", async (req, res) => {
 });
 
 
+
 // ------------------------
-// Delete transaction (old version, before fix)
+// DELETE transaction by ID 
 // ------------------------
-router.delete("/delete-by-last6/:last6", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
-    const { last6 } = req.params;
+    const { id } = req.params;
 
-    if (!last6 || last6.length !== 6) {
-      return res.status(400).json({ success: false, message: "Last 6 characters required" });
-    }
-
-    const lowerLast6 = last6.toLowerCase();
-
-    const txnToDelete = await Transaction.findOne({
-      _id: { $regex: lowerLast6 + "$", $options: "i" }
-    });
-
-    if (!txnToDelete) {
+    const txn = await Transaction.findById(id);
+    if (!txn) {
       return res.status(404).json({ success: false, message: "Transaction not found" });
     }
 
-    await Transaction.deleteOne({ _id: txnToDelete._id });
+    const product = await Product.findById(txn.product);
+    if (product) {
+      product.stock += txn.quantity;
+      await product.save();
+    }
+
+    await txn.deleteOne();
 
     res.json({ success: true, message: "Transaction deleted successfully" });
   } catch (err) {
-    console.error("DELETE /transactions/delete-by-last6/:last6 error:", err);
+    console.error("DELETE /transactions/:id error:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });

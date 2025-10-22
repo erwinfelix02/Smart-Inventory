@@ -701,3 +701,99 @@ tr:hover {
   background: #ffebee;
   color: #c62828;
 }
+
+
+/* ==========================
+   Delete Confirmation Popup
+========================== */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  font-family: 'Poppins', sans-serif;
+}
+
+.popup-overlay.active {
+  display: flex;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.popup-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 320px;
+  animation: popUp 0.25s ease;
+}
+
+.popup-box i {
+  font-size: 40px;
+  color: #ff9800;
+  margin-bottom: 10px;
+}
+
+.popup-box h3 {
+  margin: 10px 0;
+}
+
+.popup-box p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.popup-buttons button {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#confirmDelete {
+  background: #e74c3c;
+  color: #fff;
+}
+
+#cancelDelete {
+  background: #bdc3c7;
+  color: #333;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popUp {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+/* Hover Effects */
+.popup-buttons button {
+  transition: all 0.2s ease;
+}
+
+#confirmDelete:hover {
+  background: #c0392b;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
+#cancelDelete:hover {
+  background: #aeb6bf;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
