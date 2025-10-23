@@ -424,3 +424,146 @@ body {
 /* Subtle lock + dimmed look for restricted buttons */
 
 
+
+/* ===== Enhanced Top Selling Products ===== */
+.top-products {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.top-products h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #1e3a8a;
+}
+
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  transition: 0.3s;
+}
+
+.product-item:hover {
+  background: #eef2ff;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.product-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.product-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #3B5CA8, #1E3A8A);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-icon img {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(1);
+}
+
+.product-item span {
+  font-size: 14px;
+  color: #111827;
+}
+/* Initialize counter */
+.top-products {
+  counter-reset: product-rank;
+}
+
+.top-products .product-item {
+  counter-increment: product-rank;
+}
+
+.product-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #eee; /* existing box color */
+  border-radius: 8px;
+  width: 40px; /* adjust as needed */
+  height: 40px; /* adjust as needed */
+  font-weight: bold;
+  color: #fff; /* text color */
+  font-size: 16px;
+}
+
+/* Number inside the box */
+.top-products .product-item .product-icon::after {
+  content: counter(product-rank);
+  position: absolute;
+  font-weight: bold;
+  font-size: 16px;
+  color: #fff;
+}
+
+/* Different colors for top 3 */
+.top-products .product-item:nth-child(1) .product-icon {
+  background-color: #ff4d4f; /* 1st - red */
+}
+
+.top-products .product-item:nth-child(2) .product-icon {
+  background-color: #ffa940; /* 2nd - orange */
+}
+
+.top-products .product-item:nth-child(3) .product-icon {
+  background-color: #52c41a; /* 3rd - green */
+}
+
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Scrollable alerts list */
+.right-panel .alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 106px; /* show ~2 alerts */
+  overflow-y: auto;
+  padding-right: 5px; /* for scrollbar */
+}
+
+/* Scrollbar styling */
+.right-panel .alerts-list::-webkit-scrollbar {
+  width: 6px;
+}
+.right-panel .alerts-list::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+.right-panel .alerts-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Keep buttons below fixed and clickable */
+.button-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn.settings {
+  margin-top: 5px;
+}

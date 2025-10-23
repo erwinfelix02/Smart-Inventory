@@ -55,13 +55,11 @@
 
         <!-- CHART + TOP PRODUCTS SIDE BY SIDE -->
         <div class="chart-products-row">
-          <div class="chart-card">
-            <h3>Recent Alerts</h3>
-            <div class="chart-placeholder">
-              <i class="fa-solid fa-chart-line"></i>
-              <p>Alerts Overview Chart</p>
-            </div>
-          </div>
+         <div class="chart-card">
+  <h3>Recent Alerts</h3>
+  <canvas id="alertsChart" width="400" height="150"></canvas>
+</div>
+
 
           <div class="top-products">
             <h3>Top Selling Products</h3>
@@ -90,68 +88,56 @@
         </div>
       </div>
 
-      <!-- RIGHT PANEL -->
-      <div class="right-panel">
-        <h3>Recent Alerts</h3>
-        <div class="alert-item">
-          <div class="dot blue"></div>
-          <div>
-            <p><strong>Low Stock Alert!</strong></p>
-            <small>Product A is running low (5 units left)</small><br>
-            <small>2 hours ago</small>
-          </div>
-        </div>
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <h3>Recent Alerts</h3>
+  
+  <!-- Scrollable alerts -->
+  <div class="alerts-list">
+    <div class="alert-item">
+      <div class="dot blue"></div>
+      <div>
+        <p><strong>Low Stock Alert!</strong></p>
+        <small>Product A is running low (5 units left)</small><br>
+        <small>2 hours ago</small>
+      </div>
+    </div>
 
-        <div class="alert-item">
-          <div class="dot green"></div>
-          <div>
-            <p><strong>Restock Complete</strong></p>
-            <small>Product B restocked with 10 units</small><br>
-            <small>4 hours ago</small>
-          </div>
-        </div>
+    <div class="alert-item">
+      <div class="dot green"></div>
+      <div>
+        <p><strong>Restock Complete</strong></p>
+        <small>Product B restocked with 10 units</small><br>
+        <small>4 hours ago</small>
+      </div>
+    </div>
+  </div>
 
-        <h4 class="quick-title">Quick Actions</h4>
-        <div class="button-row">
-  <button class="btn add" id="add-product">
-    <img src="../images/add.svg" class="btn-icon"> Add New Product
-  </button>
-  <button class="btn add" id="add-user">
-    <img src="../images/adduser.svg" class="btn-icon"> Add New User
-  </button>
-  <button class="btn add" id="export-data">
-    <img src="../images/export.svg" class="btn-icon"> Export Report
+  <!-- Non-scrollable actions below -->
+  <h4 class="quick-title">Quick Actions</h4>
+  <div class="button-row">
+    <button class="btn add" id="add-product">
+      <img src="../images/add.svg" class="btn-icon"> Add New Product
+    </button>
+    <button class="btn add" id="add-user">
+      <img src="../images/adduser.svg" class="btn-icon"> Add New User
+    </button>
+    <button class="btn add" id="export-data">
+      <img src="../images/export.svg" class="btn-icon"> Export Report
+    </button>
+  </div>
+
+  <button class="btn settings">
+    <img src="../images/settings.svg" alt="Settings" class="btn-icon">
+    Alert Settings
   </button>
 </div>
 
-        <button class="btn settings">
-          <img src="../images/settings.svg" alt="Settings" class="btn-icon">
-          Alert Settings
-        </button>
 
-      </div>
-    </div>
-
-    <!-- RECENT ACTIVITY -->
-    <div class="activity-section">
-      <h3>Recent Activity</h3>
-      <div class="activity-item">
-        <div class="dot blue"></div>
-        <div>
-          <p><strong>Sinigang Mix</strong> updated inventory thresholds</p>
-          <small>2 hours ago</small>
-        </div>
-      </div>
-      <div class="activity-item">
-        <div class="dot blue"></div>
-        <div>
-          <p><strong>Adobong Kambing</strong> acknowledged low stock alert</p>
-          <small>4 hours ago</small>
-        </div>
-      </div>
-    </div>
 
   </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   // 🧩 Get user object from localStorage (used by sidebar)
@@ -242,6 +228,279 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 });
+
+
+
+
+
+// Fetch all available products
+fetch("/products/available")
+  .then(res => res.json())
+  .then(products => {
+    console.log("📦 Available products:", products);
+    // You can render them on the page
+  })
+  .catch(err => console.error("❌ Failed to fetch available products:", err));
+
+// ⚠️ Load Low-Stock Products
+fetch("/products/low-stock")
+  .then(res => res.json())
+  .then(data => {
+    const lowStockElem = document.querySelector(".summary-card.low-stock h2");
+    if (lowStockElem) lowStockElem.textContent = data.length;
+  })
+  .catch(err => console.error("❌ Failed to load low stock count:", err));
+
+
+// 🧾 Fetch all products and compute total stock dynamically
+fetch("/products")
+  .then(res => res.json())
+  .then(products => {
+    console.log("All products:", products);
+
+    // Compute total stock
+    const totalStock = products.reduce((sum, p) => sum + (p.stock || 0), 0);
+
+    // Update Total Products card
+    const totalElem = document.querySelector(".summary-card.total h2");
+    if (totalElem) totalElem.textContent = totalStock;
+  })
+  .catch(err => console.error("❌ Failed to fetch products:", err));
+
+
+  // 🧾 Fetch today's completed sales
+fetch("/transactions")
+  .then(res => res.json())
+  .then(data => {
+    const transactions = data.transactions || data; // handle your route returning just array or object
+
+    // Get today's date boundaries
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    // Filter for completed transactions today
+    const todaysSales = transactions.filter(txn => {
+      const txnDate = new Date(txn.date);
+      return txn.status === "Completed" && txnDate >= start && txnDate <= end;
+    });
+
+    // Sum totals
+    const totalSales = todaysSales.reduce((sum, txn) => sum + (txn.total || 0), 0);
+
+    // Update the card
+    const salesElem = document.querySelector(".summary-card.sales h2");
+    if (salesElem) salesElem.textContent = `₱${totalSales.toLocaleString()}`;
+  })
+  .catch(err => console.error("❌ Failed to fetch today's sales:", err));
+
+// 🧾 Fetch today's completed sales grouped by product
+fetch("/transactions")
+  .then(res => res.json())
+  .then(data => {
+    const transactions = data.transactions || data; // handle object/array
+
+    // Filter only completed transactions
+    const completedTxns = transactions.filter(txn => txn.status === "Completed");
+
+    // Aggregate by product
+    const productSales = {};
+    let totalSold = 0; // total count of products sold
+    completedTxns.forEach(txn => {
+      const name = txn.product?.name || "Unknown Product";
+      const qty = txn.quantity || 0;
+
+      totalSold += qty;
+
+      if (productSales[name]) {
+        productSales[name] += qty;
+      } else {
+        productSales[name] = qty;
+      }
+    });
+
+    // Convert to array and sort descending by quantity
+    const topProducts = Object.entries(productSales)
+      .map(([name, qty]) => ({ name, qty }))
+      .sort((a, b) => b.qty - a.qty)
+      .slice(0, 3); // top 3 products
+
+    // Render into dashboard
+    const topProductsContainer = document.querySelector(".top-products");
+    if (topProductsContainer) {
+      // Clear existing items except header
+      topProductsContainer.querySelectorAll(".product-item").forEach(el => el.remove());
+
+      topProducts.forEach(product => {
+        const div = document.createElement("div");
+        div.classList.add("product-item");
+
+        div.innerHTML = `
+          <div class="product-left">
+            <div class="product-icon"></div>
+            <span>${product.name}</span>
+          </div>
+          <span>${product.qty} sold</span>
+        `;
+
+        topProductsContainer.appendChild(div);
+      });
+
+      
+    }
+  })
+  .catch(err => console.error("❌ Failed to fetch top selling products:", err));
+
+// Fetch all alerts and populate dashboard recent alerts + count active alerts
+async function loadDashboardAlerts() {
+  try {
+    const response = await fetch("http://localhost:3000/alert"); // backend endpoint
+    if (!response.ok) throw new Error("Failed to fetch alerts");
+    const alerts = await response.json();
+
+    const container = document.querySelector(".right-panel .alerts-list");
+    const activeAlertsCountElem = document.querySelector(".summary-card.active-alerts h2");
+
+    if (!container) return;
+
+    container.innerHTML = ""; // clear existing alerts
+
+    // Sort alerts by createdAt descending
+    const sortedAlerts = alerts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // Update Active Alerts count
+    if (activeAlertsCountElem) {
+      activeAlertsCountElem.textContent = sortedAlerts.length;
+    }
+
+    // Loop through all alerts
+    sortedAlerts.forEach(alert => {
+      const severity = alert.stock === 0 ? "Critical" : (alert.stock <= 5 ? "Warning" : "Info");
+      const dotColor = severity === "Critical" ? "red" : (severity === "Warning" ? "orange" : "blue");
+
+      const div = document.createElement("div");
+      div.classList.add("alert-item");
+
+      div.innerHTML = `
+        <div class="dot ${dotColor}"></div>
+        <div>
+          <p><strong>${alert.stock === 0 ? "No Stock Alert!" : "Low Stock Alert!"}</strong></p>
+          <small>${alert.name || "Unknown Product"} ${alert.stock === 0 ? "is out of stock" : `has ${alert.stock} units left`}</small><br>
+          <small>${new Date(alert.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
+        </div>
+      `;
+
+      container.appendChild(div);
+    });
+  } catch (err) {
+    console.error("❌ Failed to load dashboard alerts:", err);
+  }
+}
+
+// Call on page load
+document.addEventListener("DOMContentLoaded", loadDashboardAlerts);
+
+
+let alertsChart; // store chart instance globally
+
+async function loadDashboardAlerts() {
+  try {
+    const response = await fetch("http://localhost:3000/alert"); 
+    if (!response.ok) throw new Error("Failed to fetch alerts");
+    const alerts = await response.json();
+
+    const container = document.querySelector(".right-panel .alerts-list");
+    const activeAlertsCountElem = document.querySelector(".summary-card.active-alerts h2");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    // Sort alerts by newest first
+    const sortedAlerts = alerts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // Update Active Alerts count
+    if (activeAlertsCountElem) activeAlertsCountElem.textContent = sortedAlerts.length;
+
+    // Populate recent alerts list
+    sortedAlerts.forEach(alert => {
+      const severity = alert.stock === 0 ? "Critical" : (alert.stock <= 5 ? "Warning" : "Info");
+      const dotColor = severity === "Critical" ? "red" : (severity === "Warning" ? "orange" : "blue");
+
+      const div = document.createElement("div");
+      div.classList.add("alert-item");
+      div.innerHTML = `
+        <div class="dot ${dotColor}"></div>
+        <div>
+          <p><strong>${alert.stock === 0 ? "No Stock Alert!" : "Low Stock Alert!"}</strong></p>
+          <small>${alert.name || "Unknown Product"} ${alert.stock === 0 ? "is out of stock" : `has ${alert.stock} units left`}</small><br>
+          <small>${new Date(alert.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+
+// ===============================
+// Prepare data for line chart (last 7 days)
+// ===============================
+const days = [];
+const counts = [];
+
+for (let i = 6; i >= 0; i--) {
+  const date = new Date();
+  date.setDate(date.getDate() - i);
+
+  // Human-readable date for x-axis
+  const dateText = date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  days.push(dateText);
+
+  // Count alerts for that day
+  const count = sortedAlerts.filter(a => new Date(a.createdAt).toDateString() === date.toDateString()).length;
+  counts.push(count);
+}
+
+// Get canvas context
+const ctx = document.getElementById("alertsChart").getContext("2d");
+
+// Destroy previous chart if exists
+if (alertsChart) alertsChart.destroy();
+
+alertsChart = new Chart(ctx, {
+  type: "line",
+  data: {
+    labels: days, // human-readable dates
+    datasets: [{
+      label: "Number of Alerts",
+      data: counts,
+      fill: false,
+      borderColor: "#3498db",
+      tension: 0.3,
+      pointBackgroundColor: "#3498db",
+      pointRadius: 5
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: "Alerts in the Last 7 Days" }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { stepSize: 1 }
+      }
+    }
+  }
+});
+
+  } catch (err) {
+    console.error("❌ Failed to load dashboard alerts:", err);
+  }
+}
+  
+
 </script>
 
 </body>

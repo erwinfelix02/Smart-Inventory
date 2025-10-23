@@ -391,38 +391,38 @@ function renderTransactionsPage() {
   if (!pageItems.length) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No transactions found</td></tr>`;
   } else {
-    pageItems.forEach(tx => {
-      const dateTime = new Date(tx.date).toLocaleString("en-PH", { dateStyle: "medium", timeStyle: "short" });
-      const productName = tx.product?.name || "Unknown Product";
-      const itemsSummary = `${productName} x${tx.quantity}`;
-      const badgeClassMap = {
-  "Completed": "paid",
-  "Pending": "pending",
-  "Cancelled": "cancelled"
-};
+   pageItems.forEach(tx => {
+  const dateTime = new Date(tx.date).toLocaleString("en-PH", { dateStyle: "medium", timeStyle: "short" });
+  const productName = tx.product?.name || "Unknown Product";
+  const itemsSummary = `${productName} x${tx.quantity}`;
+  const badgeClassMap = {
+    "Completed": "paid",
+    "Pending": "pending",
+    "Cancelled": "cancelled"
+  };
+  const statusClass = badgeClassMap[tx.status] || "pending";
 
-const statusClass = badgeClassMap[tx.status] || "pending";
+  // Only show edit icon if status is Pending
+  const editIcon = tx.status === "Pending" ? `<i class="fa fa-pen"></i>` : "";
 
-      const tr = document.createElement("tr");
-      tr.dataset.id = tx._id.toLowerCase();
-      tr.innerHTML = `
-       <td>#${tx._id.slice(-6).toUpperCase()}</td>
-        <td>${dateTime}</td>
-        <td>${tx.staffName}</td>
-        <td>${itemsSummary}</td>
-        <td>₱${tx.total.toLocaleString()}</td>
-        <td>
-  <span class="badge ${statusClass}">${tx.status}</span>
-</td>
+  const tr = document.createElement("tr");
+  tr.dataset.id = tx._id.toLowerCase();
+  tr.innerHTML = `
+    <td>#${tx._id.slice(-6).toUpperCase()}</td>
+    <td>${dateTime}</td>
+    <td>${tx.staffName}</td>
+    <td>${itemsSummary}</td>
+    <td>₱${tx.total.toLocaleString()}</td>
+    <td><span class="badge ${statusClass}">${tx.status}</span></td>
+    <td class="actions">
+      <i class="fa fa-eye"></i>
+      ${editIcon}
+      <i class="fa fa-trash"></i>
+    </td>
+  `;
+  tbody.appendChild(tr);
+});
 
-        <td class="actions">
-          <i class="fa fa-eye"></i>
-          <i class="fa fa-pen"></i>
-          <i class="fa fa-trash"></i>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
   }
 
   const footerText = document.querySelector(".table-footer p");
@@ -783,8 +783,16 @@ editForm.addEventListener("submit", async (e) => {
     const data = await res.json();
     if (!data.success) throw new Error(data.message || "Update failed");
 
+    // Update status badge
     const badgeClass = badgeClassMap[newStatus] || "pending";
     currentEditingRow.children[5].innerHTML = `<span class="badge ${badgeClass}">${newStatus}</span>`;
+
+    // ✅ Update action icons
+    const actionsCell = currentEditingRow.children[6];
+    actionsCell.innerHTML = `<i class="fa fa-eye"></i> <i class="fa fa-trash"></i>`;
+    if (newStatus === "Pending") {
+      actionsCell.innerHTML = `<i class="fa fa-eye"></i> <i class="fa fa-pen"></i> <i class="fa fa-trash"></i>`;
+    }
 
     editModal.style.display = "none";
   } catch (err) {
@@ -792,6 +800,7 @@ editForm.addEventListener("submit", async (e) => {
     alert("Failed to update status. Please try again.");
   }
 });
+
 
 </script>
 

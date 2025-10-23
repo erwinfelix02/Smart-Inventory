@@ -482,7 +482,7 @@ tr:hover {
 /* Make tbody scrollable */
 .transactions-table tbody {
   display: block;       /* make tbody scrollable */
-  max-height: 180px;    /* height of scrollable area */
+  max-height: 190px;    /* height of scrollable area */
   overflow-y: auto;
   width: 100%;
 }

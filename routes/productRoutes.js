@@ -13,6 +13,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+
 // ➕ POST add new product
 router.post("/", async (req, res) => {
   try {
@@ -49,4 +50,7 @@ router.get("/low-stock", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+
+
 module.exports = router;
