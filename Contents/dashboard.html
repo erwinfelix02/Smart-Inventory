@@ -191,15 +191,38 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===============================
   // 🧷 ROLE PERMISSIONS LOGIC
   // ===============================
-  if (role.includes("admin")) {
-    console.log("✅ Admin detected: Export allowed");
+  // Replace your current exportDataBtn listener with this:
+if (role.includes("admin")) {
+  const exportDataBtn = document.getElementById("export-data");
+  if (exportDataBtn) {
+    exportDataBtn.addEventListener("click", async () => {
+      try {
+        // Fetch the Excel file as a blob
+        const res = await fetch("/live-export");
+        if (!res.ok) throw new Error("Failed to fetch live export");
 
-    if (exportDataBtn) {
-      exportDataBtn.addEventListener("click", () =>
-        openPage("Export Report", "Export and download data", "../Contents/export-report.html")
-      );
-    }
-  } else if (role.includes("manager")) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+
+        // Create a temporary link to trigger download
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "live_export_report.xlsx"; // filename for Tableau
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(url);
+
+        alert("✅ Excel downloaded! Open it in Tableau.");
+      } catch (err) {
+        console.error("❌ Failed to export Excel:", err);
+        alert("Failed to export Excel. Check console for details.");
+      }
+    });
+  }
+}
+ else if (role.includes("manager")) {
     console.log("⚠️ Manager detected: Export disabled");
     disableButton(exportDataBtn, "Managers cannot export reports");
   } else {
@@ -346,8 +369,6 @@ fetch("/transactions")
 
         topProductsContainer.appendChild(div);
       });
-
-      
     }
   })
   .catch(err => console.error("❌ Failed to fetch top selling products:", err));

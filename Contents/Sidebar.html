@@ -80,8 +80,19 @@
         </div>
       </div>
       <div class="icons">
-        <img src="../images/bell.svg" alt="Notification Bell" class="bell" onclick="toggleBell(this)">
+      <div class="bell-container" onclick="toggleBell(this)">
+        <img src="../images/bell.svg" alt="Notification Bell" class="bell">
+        <span class="bell-badge" id="bellBadge">0</span>
+
+        <!--  Dropdown for alerts -->
+        <div id="alertDropdown" class="alert-dropdown hidden">
+          <h4>Recent Alerts</h4>
+          <ul id="alertList"></ul>
+        </div>
       </div>
+
+    </div>
+
     </div>
 
     <div id="page-content">
@@ -208,10 +219,69 @@
       window.location.href = "../Landing Page/signin.html";
     }
 
-    // --- Toggle notification bell ---
-    function toggleBell(element) {
-      if (element) element.classList.toggle("active");
+
+
+   function toggleBell(element) {
+  if (!element) return;
+  element.classList.toggle("active");
+
+  const dropdown = document.getElementById("alertDropdown");
+  dropdown.classList.toggle("hidden");
+}
+
+async function fetchAlerts() {
+  try {
+    const res = await fetch("http://localhost:3000/alert");
+    if (!res.ok) throw new Error("Failed to fetch alerts");
+
+    const alerts = await res.json();
+    const activeAlerts = alerts.filter(alert => Number(alert.stock) <= 10);
+    const badge = document.getElementById("bellBadge");
+    const alertList = document.getElementById("alertList");
+
+    // Update badge count
+    const totalCount = activeAlerts.length;
+    badge.textContent = totalCount;
+    badge.style.display = totalCount > 0 ? "flex" : "none";
+
+    // Update dropdown list
+    alertList.innerHTML = "";
+    if (activeAlerts.length === 0) {
+      alertList.innerHTML = `<li style="text-align:center;color:#777;">No active alerts</li>`;
+    } else {
+      activeAlerts.forEach(a => {
+        const li = document.createElement("li");
+        li.className = a.severity === "Critical" ? "critical" : "";
+        li.innerHTML = `
+          <span>${a.name}</span>
+          <small>${a.type}</small>
+        `;
+        alertList.appendChild(li);
+      });
     }
+
+    console.log("🎯 Active alerts:", activeAlerts);
+  } catch (err) {
+    console.error("❌ Error fetching alerts:", err);
+  }
+}
+
+fetchAlerts();
+setInterval(fetchAlerts, 30000);
+
+// Click outside to close the alert dropdown
+document.addEventListener("click", (event) => {
+  const bellContainer = document.querySelector(".bell-container");
+  const dropdown = document.getElementById("alertDropdown");
+
+  // If click is NOT inside the bell container or the dropdown, hide dropdown
+  if (!bellContainer.contains(event.target) && !dropdown.contains(event.target)) {
+    bellContainer.classList.remove("active");
+    dropdown.classList.add("hidden");
+  }
+});
+
+
   </script>
 </body>
 </html>

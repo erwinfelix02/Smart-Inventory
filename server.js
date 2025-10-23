@@ -35,9 +35,14 @@ const alertRoute = require("./routes/alert");
 const systemsettingsRoutes = require("./routes/system-settings");
 const transactionsRoutes = require("./routes/transactions");
 const salesRoutes = require("./routes/sales");
+const liveExportRoutes = require("./routes/liveExport");
 
 
 
+
+
+
+app.use("/live-export", liveExportRoutes);
 app.use("/sales", salesRoutes);
 app.use("/transactions", transactionsRoutes);
 app.use("/system-settings", systemsettingsRoutes);
