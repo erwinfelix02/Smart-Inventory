@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Transactions</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="customer-transactions.css" />
+</head>
+<body>
+  <div class="transactions-container">
+    <!-- FILTERS -->
+    <div class="filters">
+      <div class="search-box">
+        <i class="fa fa-search"></i>
+        <input type="text" placeholder="Search transactions..." />
+      </div>
+      <select id="statusFilter">
+        <option value="">All Status</option>
+        <option value="Completed">Completed</option>
+        <option value="Pending">Pending</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-container">
+      <table class="transactions-table">
+        <thead>
+          <tr>
+            <th>Transaction ID</th>
+            <th>Customer</th>
+            <th>Staff</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination">
+      <p>Showing 1 to 5 of 0 transactions</p>
+      <div class="pages">
+        <button disabled>Previous</button>
+        <button class="active">1</button>
+        <button>Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="transactionModal">
+    <div class="modal">
+      <button class="close-btn" id="closeModal">&times;</button>
+      <h2>Transaction Details</h2>
+      <div id="modalContent" class="info-grid"></div>
+    </div>
+  </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const tableBody = document.querySelector(".transactions-table tbody");
+  const searchInput = document.querySelector(".search-box input");
+  const statusFilter = document.getElementById("statusFilter");
+  const modalOverlay = document.getElementById("transactionModal");
+  const modalContent = document.getElementById("modalContent");
+  const closeModalBtn = document.getElementById("closeModal");
+  const paginationContainer = document.querySelector(".pages");
+  const paginationInfo = document.querySelector(".pagination p");
+
+  let transactions = [];
+  let currentPage = 1;
+  const rowsPerPage = 5;
+
+  // --- PARSE AND FORMAT DATE ---
+  function parseDate(input) {
+    if (!input) return null;
+    if (typeof input === "object" && "$date" in input) return new Date(input.$date);
+    return new Date(input);
+  }
+
+  function formatDate(input) {
+  const d = parseDate(input);
+  if (!d || isNaN(d)) return "-";
+
+  // Example: "Oct 23, 2025 11:45"
+  const datePart = d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+
+  const timePart = d.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  });
+
+  return `${datePart} at ${timePart}`;
+}
+
+  // --- MODAL ---
+  closeModalBtn.addEventListener("click", () => modalOverlay.style.display = "none");
+  modalOverlay.addEventListener("click", e => { if(e.target === modalOverlay) modalOverlay.style.display = "none"; });
+
+  // --- LOAD DATA ---
+  async function loadTransactions() {
+    try {
+      const res = await fetch("http://localhost:3000/transactions");
+      if (!res.ok) throw new Error("Failed to fetch transactions");
+      transactions = await res.json();
+      renderTable();
+    } catch(e) {
+      console.error(e);
+      tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:red;">Error loading transactions</td></tr>`;
+    }
+  }
+
+  // --- RENDER TABLE ---
+  function renderTable() {
+    tableBody.innerHTML = "";
+
+    const filtered = transactions.filter(txn => {
+      const searchMatch = txn.customerName?.toLowerCase().includes(searchInput.value.toLowerCase());
+      const statusMatch = !statusFilter.value || txn.status === statusFilter.value;
+      return searchMatch && statusMatch;
+    });
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const paginated = filtered.slice(start, start + rowsPerPage);
+
+    if (paginated.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">No transactions found</td></tr>`;
+      updatePaginationInfo(0);
+      renderPagination(0);
+      return;
+    }
+
+    paginated.forEach((txn, idx) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><a href="#" class="view-link">TXN-${start + idx + 1}</a></td>
+        <td>${txn.customerName || "-"}</td>
+        <td>${txn.staffName || "-"}</td>
+        <td>${txn.product?.name || "Unknown"}</td>
+        <td>${txn.quantity || 0}</td>
+        <td>₱${txn.total?.toLocaleString() || 0}</td>
+        <td><span class="status ${txn.status?.toLowerCase() || ""}">${txn.status || "-"}</span></td>
+        <td>${formatDate(txn.date)}</td>
+        <td><button class="action-btn view"><i class="fa fa-eye"></i></button></td>
+      `;
+      tableBody.appendChild(tr);
+
+      const viewBtn = tr.querySelector(".view");
+      viewBtn.addEventListener("click", () => {
+        modalContent.innerHTML = `
+          <div class="info-box"><span class="info-title">Customer</span><span class="info-value">${txn.customerName || "-"}</span></div>
+          <div class="info-box"><span class="info-title">Staff</span><span class="info-value">${txn.staffName || "-"}</span></div>
+          <div class="info-box"><span class="info-title">Product</span><span class="info-value">${txn.product?.name || "Unknown"}</span></div>
+          <div class="info-box"><span class="info-title">SKU</span><span class="info-value">${txn.product?.sku || "-"}</span></div>
+          <div class="info-box"><span class="info-title">Unit Price</span><span class="info-value">${txn.product?.price || 0}</span></div>
+          <div class="info-box"><span class="info-title">Quantity</span><span class="info-value">${txn.quantity || 0}</span></div>
+          <div class="info-box"><span class="info-title">Discount</span><span class="info-value">${txn.discount || 0}</span></div>
+          <div class="info-box"><span class="info-title">Tax</span><span class="info-value">${txn.tax || 0}</span></div>
+          <div class="info-box"><span class="info-title">Total</span><span class="info-value">${txn.total || 0}</span></div>
+          <div class="info-box"><span class="info-title">Status</span><span class="info-value status ${txn.status?.toLowerCase() || ""}">${txn.status || "-"}</span></div>
+          <div class="info-box"><span class="info-title">Date</span><span class="info-value">${formatDate(txn.date)}</span></div>
+        `;
+        modalOverlay.style.display = "flex";
+      });
+    });
+
+    updatePaginationInfo(filtered.length);
+    renderPagination(filtered.length);
+  }
+
+  // --- PAGINATION ---
+  function renderPagination(total) {
+    paginationContainer.innerHTML = "";
+    const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
+
+    const prev = document.createElement("button");
+    prev.textContent = "Previous";
+    prev.disabled = currentPage === 1;
+    prev.addEventListener("click", () => { currentPage--; renderTable(); });
+    paginationContainer.appendChild(prev);
+
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement("button");
+      btn.textContent = i;
+      if (i === currentPage) btn.classList.add("active");
+      btn.addEventListener("click", () => { currentPage = i; renderTable(); });
+      paginationContainer.appendChild(btn);
+    }
+
+    const next = document.createElement("button");
+    next.textContent = "Next";
+    next.disabled = currentPage === totalPages;
+    next.addEventListener("click", () => { currentPage++; renderTable(); });
+    paginationContainer.appendChild(next);
+  }
+
+  function updatePaginationInfo(total) {
+    const start = total === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
+    const end = Math.min(currentPage * rowsPerPage, total);
+    paginationInfo.textContent = `Showing ${start} to ${end} of ${total} transactions`;
+  }
+
+  searchInput.addEventListener("input", () => { currentPage = 1; renderTable(); });
+  statusFilter.addEventListener("change", () => { currentPage = 1; renderTable(); });
+
+  loadTransactions();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,373 @@
+/* ===== BASE STYLES ===== */
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  background: #f8fafc;
+  color: #333;
+  padding: 25px;
+}
+
+.transactions-container {
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== FILTERS ===== */
+.filters {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+/* Search Box */
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  flex: 1;
+  min-width: 280px;
+  max-width: 400px;
+}
+
+.search-box i {
+  color: #6b7280;
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  background: transparent;
+  flex: 1;
+  font-size: 14px;
+  color: #374151;
+}
+
+/* Dropdown Selects */
+select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  background: #fff;
+  cursor: pointer;
+  color: #374151;
+  transition: all 0.2s ease;
+  min-width: 160px;
+}
+
+select:hover {
+  border-color: #2563eb;
+}
+
+select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+/* ===== TABLE ===== */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transactions-table th,
+.transactions-table td {
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.transactions-table th {
+  font-weight: 600;
+  background: #f9fafb;
+  color: #374151;
+}
+
+.transactions-table tr:hover {
+  background: #f3f4f6;
+}
+
+/* ===== STATUS BADGES ===== */
+.status {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status.completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status.cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.action-btn {
+  border: none;
+  outline: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn.view {
+  background: transparent;
+  color: #2563eb;
+  font-size: 16px;
+}
+
+.action-btn.view:hover {
+  color: #0056b3;
+}
+
+.action-btn.view i {
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.action-btn.view:hover i {
+  transform: scale(1.2);
+  color: #0056b3;
+}
+
+/* ===== NO ACTION ===== */
+.no-action {
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+/* ===== PAGINATION ===== */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  flex-wrap: wrap;
+  border-top: 1px solid #ddd;
+}
+
+.pagination p {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.pages {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pages button {
+  border: 1px solid #ccc;
+  background: #f9fafb;
+  color: #374151;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pages button.active {
+  background: #1d4ed8;
+  color: white;
+  border-color: #1d4ed8;
+}
+
+.pages button:hover:not(:disabled) {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.pages button:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  border-color: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  background-color: rgba(0,0,0,0.3);
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.modal {
+  background: #fff;
+  width: 90%;
+  max-width: 750px;
+  border-radius: 16px;
+  overflow: hidden;
+  animation: slideIn 0.4s ease forwards;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.modal h2 {
+  background: linear-gradient(90deg, #2563eb, #00c8ff);
+  color: #fff;
+  margin: 0;
+  padding: 14px 22px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.close-btn:hover {
+  transform: rotate(90deg);
+  color: #ff4d4d;
+}
+
+/* Modal Content */
+#modalContent {
+  background: #f9fafb;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Info Grid */
+#modalContent .info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.info-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.info-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.info-title {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.info-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* ===== MODAL ANIMATIONS ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+/* ===== TABLE HEADER SPACING ===== */
+.transactions-table th {
+  font-weight: 600;
+  background: #f9fafb;
+  color: #374151;
+  text-align: center;          /* center the header text */
+  padding: 14px 20px;          /* increase padding for better spacing */
+  letter-spacing: 0.5px;       /* subtle letter spacing */
+}
+
+/* ===== TABLE CELLS ALIGNMENT ===== */
+.transactions-table td {
+  text-align: center;           /* center the cell content under header */
+  padding: 12px 16px;           /* slightly more padding */
+  vertical-align: middle;       /* vertically center content */
+}
+
+/* Optional: Make first column (Transaction ID) a bit wider */
+.transactions-table th:first-child,
+.transactions-table td:first-child {
+  min-width: 140px;             /* gives extra space to TXN ID */
+}
+
+/* Optional: Add some spacing to Customer Name and Staff */
+.transactions-table th:nth-child(2),
+.transactions-table td:nth-child(2),
+.transactions-table th:nth-child(3),
+.transactions-table td:nth-child(3) {
+  min-width: 120px;
+}
+
+/* Keep links in TXN ID nicely centered without underline */
+.transactions-table td a {
+  text-decoration: none;
+  color: #2563eb;
+  font-weight: 500;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+}
+
+.transactions-table td a:hover {
+  color: #0056b3;
+  text-decoration: none;
+}
