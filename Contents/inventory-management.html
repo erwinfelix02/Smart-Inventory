@@ -74,6 +74,7 @@
               <option>Accessories</option>
               <option>Cables</option>
             </select>
+              <button class="add-btn"><i class="fa fa-plus"></i> Add Product</button>
           </div>
         </div>
 
@@ -124,11 +125,119 @@
 
     </section>
   </div>
+
+<!-- 🪟 Add / Update Stock Modal -->
+<div id="addProductModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+
+    <!-- 🧭 Tabs -->
+    <div class="modal-tabs">
+      <button id="tab-update" class="active" data-target="addProductForm">Add / Update Stock</button>
+      <button id="tab-add" data-target="newProductForm">Add New Product</button>
+    </div>
+
+    <!-- 🧩 Wrapper for both sections -->
+    <div class="modal-sections-wrapper">
+      <!-- ========== UPDATE STOCK FORM ========== -->
+      <form id="addProductForm" class="modal-section active">
+        <h3>Add or Update Stock</h3>
+
+        <div class="form-group">
+          <label>Search Product</label>
+          <input type="text" id="searchProduct" placeholder="Type product name..." autocomplete="off" />
+          <ul id="searchResults"></ul>
+        </div>
+
+        <hr />
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Product Name</label>
+            <input type="text" id="productName" readonly />
+          </div>
+          <div class="form-group">
+            <label>Current Stock</label>
+            <input type="number" id="currentStock" readonly />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>SKU</label>
+            <input type="text" id="productSKU" readonly />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <input type="text" id="productCategory" readonly />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Add Stock</label>
+            <input type="number" id="addStockAmount" min="1" placeholder="Enter quantity to add" required />
+          </div>
+        </div>
+
+        <button type="submit" class="save-btn">Add Stock</button>
+      </form>
+
+      <!-- ========== ADD NEW PRODUCT FORM ========== -->
+     <form id="newProductForm" class="modal-section">
+  <h3>Add New Product</h3>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label>Product Name</label>
+      <input type="text" id="newProductName" placeholder="Enter product name" required />
+    </div>
+   <div class="form-group">
+  <label>Category</label>
+  <select id="newProductCategory" required>
+    <option value="" disabled selected>Select category</option>
+    <option value="Accessories">Accessories</option>
+    <option value="Electronics">Electronics</option>
+    <option value="Cables">Cables</option>
+  </select>
+</div>
+
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label>Initial Stock</label>
+      <input type="number" id="newProductStock" placeholder="0" min="0" required />
+    </div>
+    <div class="form-group">
+      <label>Price</label>
+      <input type="number" id="newProductPrice" placeholder="Enter price" min="0" required />
+    </div>
+  </div>
+
+  <button type="submit" class="save-btn">Add Product</button>
+</form>
+
+
+  
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let allProducts = [];
 let categoryChart;
 let stockTrendChart;
+
+
+// 🧩 Fix modal expansion issue
+function updateModalHeight() {
+  const wrapper = document.querySelector(".modal-sections-wrapper");
+  if (!wrapper) return;
+
+  const activeSection = wrapper.querySelector(".modal-section.active");
+  if (!activeSection) return;
+
+  // set wrapper height to active section's height
+  wrapper.style.height = activeSection.scrollHeight + "px";
+}
 
 // 🧩 Load all products once
 async function loadProducts() {
@@ -329,6 +438,261 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelector(".search-box input").addEventListener("input", filterProducts);
   document.querySelector("select").addEventListener("change", filterProducts);
 });
+
+
+
+
+// ================================
+// 🧩 Add / Update Stock Modal Logic
+// ================================
+const addBtn = document.querySelector(".add-btn");
+const modal = document.getElementById("addProductModal");
+const closeBtn = modal.querySelector(".close");
+const form = document.getElementById("addProductForm");
+const searchInput = document.getElementById("searchProduct");
+const resultsList = document.getElementById("searchResults");
+
+let selectedProduct = null;
+
+// Open modal
+addBtn.addEventListener("click", () => {
+  modal.style.display = "flex";
+
+  // Default tab → Add / Update Stock
+  document.getElementById("tab-update").click();
+
+  // Clear both forms
+  form.reset();
+  newProductForm.reset();
+
+  // Clear search results
+  resultsList.innerHTML = "";
+  selectedProduct = null;
+
+  // Clear display fields
+  document.getElementById("productName").value = "";
+  document.getElementById("productSKU").value = "";
+  document.getElementById("productCategory").value = "";
+  document.getElementById("currentStock").value = "";
+
+  // Update modal height properly
+  setTimeout(updateModalHeight, 150);
+});
+
+// Close modal
+closeBtn.addEventListener("click", () => {
+  modal.style.display = "none";
+});
+
+// Close when clicking outside
+window.addEventListener("click", (e) => {
+  if (e.target === modal) modal.style.display = "none";
+});
+
+// 🔍 Search product in database
+searchInput.addEventListener("input", async () => {
+  const query = searchInput.value.trim().toLowerCase();
+  resultsList.innerHTML = "";
+  if (query.length < 2) return;
+
+  try {
+    const res = await fetch(`/products`);
+    const products = await res.json();
+
+    const matches = products.filter(p =>
+      p.name.toLowerCase().includes(query)
+    );
+
+    if (matches.length === 0) {
+      resultsList.innerHTML = "<li>No products found</li>";
+      return;
+    }
+
+    matches.forEach(p => {
+      const li = document.createElement("li");
+      li.textContent = `${p.name} (${p.sku || "N/A"})`;
+      li.addEventListener("click", () => selectProduct(p));
+      resultsList.appendChild(li);
+    });
+  } catch (err) {
+    console.error("Search error:", err);
+  }
+});
+
+// ✅ When clicking an item in search results
+function selectProduct(p) {
+  selectedProduct = p;
+  document.getElementById("productName").value = p.name;
+  document.getElementById("productSKU").value = p.sku || "N/A";
+  document.getElementById("productCategory").value = p.category || "Uncategorized";
+  document.getElementById("currentStock").value = p.stock ?? 0;
+
+  resultsList.innerHTML = "";
+  searchInput.value = p.name;
+}
+
+// 💾 Add stock to selected product
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!selectedProduct) {
+    alert("Please select a product first.");
+    return;
+  }
+
+  const addAmount = parseInt(document.getElementById("addStockAmount").value);
+  if (isNaN(addAmount) || addAmount <= 0) {
+    alert("Enter a valid stock quantity to add.");
+    return;
+  }
+
+  const newStock = (selectedProduct.stock || 0) + addAmount;
+
+  try {
+    const res = await fetch(`/products/${selectedProduct._id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stock: newStock }),
+    });
+
+    if (res.ok) {
+      alert(`✅ Added ${addAmount} stock to ${selectedProduct.name}`);
+      modal.style.display = "none";
+      loadProducts();
+    } else {
+      alert("❌ Failed to update stock.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("⚠️ Error connecting to server.");
+  }
+});
+
+// 🧩 Modal tab switching with auto-clear inactive form
+const modalSectionsWrapper = document.querySelector(".modal-sections-wrapper");
+const tabs = document.querySelectorAll(".modal-tabs button");
+const sections = document.querySelectorAll(".modal-section");
+
+
+
+
+
+
+// 🪄 Simpler Tab Switching (no height animation)
+tabs.forEach(btn => {
+  btn.addEventListener("click", () => {
+    // switch active tab
+    tabs.forEach(t => t.classList.remove("active"));
+    btn.classList.add("active");
+
+    // switch visible form
+    const targetId = btn.dataset.target;
+    sections.forEach(sec => sec.classList.toggle("active", sec.id === targetId));
+
+    // keep modal size fixed (remove height animation)
+    modalSectionsWrapper.style.height = "auto";
+  });
+});
+
+
+// 🎯 Initialize height when modal opens
+function openModal() {
+  modal.style.display = "flex";
+  setTimeout(updateModalHeight, 100);
+}
+
+// 🧹 Close modal
+function closeModal() {
+  modal.style.display = "none";
+}
+
+// Example open button trigger (if you have one)
+document.querySelectorAll("[data-open='addProductModal']").forEach(btn => {
+  btn.addEventListener("click", openModal);
+});
+
+// Close when clicking X
+modal.querySelector(".close").addEventListener("click", closeModal);
+
+// 🪟 Adjust dynamically on resize
+window.addEventListener("resize", updateModalHeight);
+
+
+// ==========================
+// 🧩 Handle Add New Product (Clean Version)
+// ==========================
+const newProductForm = document.getElementById("newProductForm");
+
+newProductForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  // Collect form values
+  const name = document.getElementById("newProductName").value.trim();
+  const category = document.getElementById("newProductCategory").value;
+  const stock = parseInt(document.getElementById("newProductStock").value);
+  const price = parseFloat(document.getElementById("newProductPrice").value);
+
+  // Validate
+  if (!name) return alert("⚠️ Product name is required.");
+  if (isNaN(stock) || stock < 0) return alert("⚠️ Please enter a valid initial stock quantity.");
+  if (isNaN(price) || price < 0) return alert("⚠️ Please enter a valid price.");
+  if (!category) return alert("⚠️ Please select a category.");
+
+  try {
+    // Send to backend
+    const res = await fetch("/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, category, stock, price }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.message || "Failed to add product.");
+    }
+
+    // Success
+    const newProduct = await res.json();
+    alert(`✅ Product "${newProduct.name}" added successfully!`);
+
+    // Refresh list
+    await loadProducts();
+
+    // Reset and close modal
+    newProductForm.reset();
+    modal.style.display = "none";
+
+    // Switch back to Add / Update Stock tab
+    document.getElementById("tab-update").click();
+
+  } catch (err) {
+    console.error("Add product error:", err);
+    alert(`❌ ${err.message}`);
+  }
+});
+
+// ===============================
+// 🧩 Role-based UI visibility (case-insensitive)
+// ===============================
+let userRole = "";
+
+try {
+  const userData = JSON.parse(localStorage.getItem("user"));
+  userRole = (userData?.role || "").toLowerCase().trim();
+} catch (err) {
+  console.warn("No valid user data found in localStorage:", err);
+}
+
+const addProductButton = document.querySelector(".add-btn");
+
+if (addProductButton) {
+  if (userRole === "admin" || userRole === "manager") {
+    addProductButton.style.display = "inline-flex";
+  } else {
+    addProductButton.style.display = "none";
+  }
+}
+
+
 </script>
 
 

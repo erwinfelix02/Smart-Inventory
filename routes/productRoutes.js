@@ -14,17 +14,6 @@ router.get("/", async (req, res) => {
 });
 
 
-// ➕ POST add new product
-router.post("/", async (req, res) => {
-  try {
-    const product = new Product(req.body);
-    await product.save();
-    res.status(201).json(product);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
 // 🔄 PATCH stock update
 router.patch("/:id/stock", async (req, res) => {
   try {
@@ -51,6 +40,63 @@ router.get("/low-stock", async (req, res) => {
   }
 });
 
+// ============================
+// ✅ PUT /products/:id — update existing product
+// ============================
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { new: true });
+
+    if (!updatedProduct)
+      return res.status(404).json({ message: "Product not found" });
+
+    res.json(updatedProduct);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ➕ POST Add New Product (Auto-generate SKU)
+router.post("/", async (req, res) => {
+  try {
+    const { name, category, stock, price } = req.body;
+
+    // Validate input
+    if (!name) return res.status(400).json({ message: "Product name is required." });
+
+    // Get last product to find next SKU number
+    const lastProduct = await Product.findOne().sort({ _id: -1 });
+
+    let nextNumber = 2000; // starting base
+    if (lastProduct && lastProduct.sku) {
+      const match = lastProduct.sku.match(/WIR-(\d+)/);
+      if (match) nextNumber = parseInt(match[1]);
+    }
+
+    // Generate new SKU
+    const newSku = `WIR-${nextNumber + 1}`;
+
+    // Create product
+    const product = new Product({
+      name,
+      category,
+      stock,
+      price,
+      sku: newSku,
+    });
+
+    await product.save();
+    res.status(201).json(product);
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "A product with this SKU already exists." });
+    }
+    res.status(400).json({ message: err.message });
+  }
+});
 
 
 module.exports = router;

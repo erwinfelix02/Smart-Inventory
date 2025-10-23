@@ -513,3 +513,445 @@ canvas#lineChart {
   height: 300px; /* taller chart */
   width: 100%;   /* full width */
 }
+.add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #3b4ed8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.add-btn:hover {
+  background: #2f3bbf;
+  transform: translateY(-2px);
+}
+
+.add-btn i {
+  font-size: 14px;
+}
+#searchResults {
+  list-style: none;
+  margin: 4px 0 8px 0;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  max-height: 150px;
+  overflow-y: auto;
+  background: #fff;
+  display: none;
+}
+
+#searchResults li {
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#searchResults li:hover {
+  background: #f2f4f8;
+}
+
+#searchResults:empty {
+  display: none;
+}
+
+/* show only when list has content */
+#searchResults:not(:empty) {
+  display: block;
+}
+/* ============================= */
+/* 🪟 Add / Update Stock Modal UI */
+/* ============================= */
+.modal {
+  display: none; /* hidden by default */
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  position: relative;
+  background: #ffffff;
+  padding: 30px 25px;
+  border-radius: 12px;
+  width: 420px;
+  max-width: 90%;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Close button (×) */
+.modal-content .close {
+  position: absolute;
+  top: 10px;
+  right: 18px;
+  font-size: 22px;
+  color: #777;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.modal-content .close:hover {
+  color: #000;
+}
+
+/* Modal Title */
+.modal-content h3 {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #1a1a1a;
+}
+
+/* Form styling */
+#addProductForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#addProductForm label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+#addProductForm input {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+#addProductForm input:focus {
+  border-color: #007bff;
+}
+
+/* Search result dropdown */
+#searchResults {
+  list-style: none;
+  margin: 5px 0 0 0;
+  padding: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+}
+
+#searchResults li {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#searchResults li:hover {
+  background: #f0f6ff;
+}
+
+/* Divider */
+#addProductForm hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 15px 0;
+}
+
+/* Add Stock Button */
+.save-btn {
+  margin-top: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.save-btn:hover {
+  background: #0056b3;
+}
+/* ========== MODAL BASE ========== */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: rgba(0, 0, 0, 0.4);
+  overflow-y: auto;
+  padding-top: 60px;
+  transition: opacity 0.3s ease;
+}
+
+/* ========== MODAL CONTENT ========== */
+.modal-content {
+  background: #fff;
+  padding: 25px 30px;
+  border-radius: 16px;
+  width: 500px;
+  max-width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  position: relative;
+  transition: height 0.3s ease;
+  margin-bottom: 80px;
+  overflow: hidden;
+}
+
+/* ========== CLOSE BUTTON ========== */
+.close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 22px;
+  color: #555;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.close:hover {
+  color: #000;
+}
+
+/* ========== TABS ========== */
+.modal-tabs {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 15px;
+}
+
+.modal-tabs button {
+  flex: 1;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: #555;
+  transition: color 0.2s ease, border-bottom 0.2s ease;
+}
+
+.modal-tabs button.active {
+  color: #164285;
+  border-bottom: 3px solid #164285;
+}
+
+/* ========== SECTIONS WRAPPER ========== */
+.modal-sections-wrapper {
+  position: relative;
+  width: 100%;
+  transition: height 0.3s ease;
+}
+
+/* ========== MODAL SECTIONS ========== */
+.modal-section {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+
+.modal-section.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: all;
+  position: relative;
+}
+
+/* ========== FORM ROWS & INPUTS ========== */
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.form-group input {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #164285;
+  outline: none;
+}
+
+/* ========== SEARCH RESULTS ========== */
+#searchResults {
+  list-style: none;
+  margin: 6px 0 0 0;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  max-height: 150px;
+  overflow-y: auto;
+  background: #fff;
+  animation: fadeIn 0.2s ease;
+}
+
+#searchResults li {
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#searchResults li:hover {
+  background: #f0f4ff;
+}
+
+/* ========== BUTTONS ========== */
+.save-btn {
+  background: #164285;
+  color: #fff;
+  border: none;
+  padding: 10px 0;
+  width: 100%;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 10px;
+}
+
+.save-btn:hover {
+  background: #1f56b3;
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ========== FIX: Prevent modal from expanding when search results appear ========== */
+.form-group {
+  position: relative; /* allows the ul to position absolutely inside */
+}
+
+/* Make search results float over content instead of expanding modal */
+#searchResults {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  list-style: none;
+  margin: 4px 0 0 0;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  max-height: 150px;
+  overflow-y: auto;
+  background: #fff;
+  animation: fadeIn 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+form select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+/* ========== UNIFORM INPUT & SELECT SIZING FIX ========== */
+.modal-content input,
+.modal-content select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #fff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  appearance: none; /* removes browser default dropdown arrow */
+}
+
+/* Custom dropdown arrow for visual balance */
+.modal-content select {
+  background-image: url("data:image/svg+xml,%3Csvg fill='none' stroke='%23333' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+.modal-content input:focus,
+.modal-content select:focus {
+  border-color: #164285;
+  box-shadow: 0 0 0 2px rgba(22, 66, 133, 0.15);
+}
+
+/* Ensure label spacing stays consistent */
+.form-group label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 6px;
+  display: block;
+}
+.add-btn {
+  display: none;
+}
