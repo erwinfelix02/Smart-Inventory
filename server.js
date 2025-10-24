@@ -36,12 +36,11 @@ const systemsettingsRoutes = require("./routes/system-settings");
 const transactionsRoutes = require("./routes/transactions");
 const salesRoutes = require("./routes/sales");
 const liveExportRoutes = require("./routes/liveExport");
+const storedAlertsRoute = require("./routes/stored-alerts");
 
 
 
-
-
-
+app.use("/stored-alerts", storedAlertsRoute);
 app.use("/live-export", liveExportRoutes);
 app.use("/sales", salesRoutes);
 app.use("/transactions", transactionsRoutes);

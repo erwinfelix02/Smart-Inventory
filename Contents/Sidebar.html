@@ -231,56 +231,75 @@
 
 async function fetchAlerts() {
   try {
-    const res = await fetch("http://localhost:3000/alert");
+    // Fetch alerts from backend
+    const res = await fetch("http://localhost:3000/stored-alerts");
     if (!res.ok) throw new Error("Failed to fetch alerts");
 
     const alerts = await res.json();
+
+    // Filter active alerts (low stock alerts)
     const activeAlerts = alerts.filter(alert => Number(alert.stock) <= 10);
+
+    // Count of active alerts
+    const alertCount = activeAlerts.length;
+
+    // Update the bell badge
     const badge = document.getElementById("bellBadge");
+    badge.textContent = alertCount;
+    badge.style.display = alertCount > 0 ? "flex" : "none";
+
+    // Update the dropdown list
     const alertList = document.getElementById("alertList");
-
-    // Update badge count
-    const totalCount = activeAlerts.length;
-    badge.textContent = totalCount;
-    badge.style.display = totalCount > 0 ? "flex" : "none";
-
-    // Update dropdown list
     alertList.innerHTML = "";
-    if (activeAlerts.length === 0) {
+
+    if (alertCount === 0) {
       alertList.innerHTML = `<li style="text-align:center;color:#777;">No active alerts</li>`;
     } else {
+      // Sort alerts by severity: Critical > Warning > Info
+      activeAlerts.sort((a, b) => getSeverityScore(a.stock) - getSeverityScore(b.stock));
+
       activeAlerts.forEach(a => {
         const li = document.createElement("li");
-        li.className = a.severity === "Critical" ? "critical" : "";
+        const severity = getSeverityText(a.stock);
+        li.className = getSeverityClass(a.stock);
         li.innerHTML = `
-          <span>${a.name}</span>
-          <small>${a.type}</small>
+          <span>${a.name || "N/A"}</span>
+          <small>${severity}</small>
         `;
         alertList.appendChild(li);
       });
     }
 
-    console.log("🎯 Active alerts:", activeAlerts);
+    console.log(`🎯 ${alertCount} Active alerts:`, activeAlerts);
   } catch (err) {
     console.error("❌ Error fetching alerts:", err);
   }
 }
 
+// Helper: returns CSS class for severity
+function getSeverityClass(stock) {
+  if (stock === 0) return "critical";
+  if (stock <= 5) return "warning";
+  return "info";
+}
+
+// Helper: returns human-readable severity text
+function getSeverityText(stock) {
+  if (stock === 0) return "Critical";
+  if (stock <= 5) return "Warning";
+  return "Info";
+}
+
+// Helper: numeric score for sorting (Critical=1, Warning=2, Info=3)
+function getSeverityScore(stock) {
+  if (stock === 0) return 1;
+  if (stock <= 5) return 2;
+  return 3;
+}
+
+// Initial fetch + repeat every 30 seconds
 fetchAlerts();
 setInterval(fetchAlerts, 30000);
-
-// Click outside to close the alert dropdown
-document.addEventListener("click", (event) => {
-  const bellContainer = document.querySelector(".bell-container");
-  const dropdown = document.getElementById("alertDropdown");
-
-  // If click is NOT inside the bell container or the dropdown, hide dropdown
-  if (!bellContainer.contains(event.target) && !dropdown.contains(event.target)) {
-    bellContainer.classList.remove("active");
-    dropdown.classList.add("hidden");
-  }
-});
-
 
   </script>
 </body>

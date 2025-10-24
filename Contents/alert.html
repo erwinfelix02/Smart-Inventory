@@ -94,24 +94,96 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentPage = 1;
   const rowsPerPage = 5;
 
-  async function loadAlerts() {
+  // -----------------------------
+  // SAVE ALERT TO DATABASE
+  // -----------------------------
+  async function saveAlert(alert) {
     try {
-      const response = await fetch("http://localhost:3000/alert");
-      if (!response.ok) throw new Error("Failed to fetch alerts");
-      alerts = await response.json();
-      renderTable();
-    } catch (error) {
-      console.error("❌ Error fetching alerts:", error);
-      tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:red;">Error loading alerts</td></tr>`;
+      console.log("📤 Sending alert to backend:", alert);
+      const res = await fetch("http://localhost:3000/stored-alerts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: alert.name,
+          stock: alert.stock,
+          status: alert.status || "New",
+          createdAt: alert.createdAt,
+        }),
+      });
+      console.log("✅ Response status:", res.status);
+      const data = await res.json();
+      console.log("✅ Response data:", data);
+    } catch (err) {
+      console.error("❌ Failed to store alert:", err);
     }
   }
 
+  // -----------------------------
+  // LOAD ALERTS
+  // -----------------------------
+  async function loadAlerts() {
+    try {
+      // Fetch dynamic alerts (based on low stock)
+      const response = await fetch("http://localhost:3000/alert");
+      if (!response.ok) throw new Error("Failed to fetch alerts");
+      alerts = await response.json();
+
+      // Fetch stored alerts to avoid duplicates
+      const storedResponse = await fetch("http://localhost:3000/stored-alerts");
+      if (!storedResponse.ok) throw new Error("Failed to fetch stored alerts");
+      const storedAlerts = await storedResponse.json();
+
+      const existingKeys = storedAlerts.map(a => `${a.name}-${a.stock}`);
+
+      // Save only new alerts (not already stored)
+      for (const alert of alerts) {
+        const key = `${alert.name}-${alert.stock}`;
+        if (!existingKeys.includes(key)) {
+          await saveAlert(alert);
+        }
+      }
+
+      renderTable();
+    } catch (error) {
+      console.error("❌ Error fetching alerts:", error);
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align:center;color:red;">Error loading alerts</td>
+        </tr>`;
+    }
+  }
+
+  // -----------------------------
+  // SEVERITY HELPER
+  // -----------------------------
   function getSeverity(stock) {
     if (stock === 0) return "Critical";
     if (stock <= 5) return "Warning";
     return "Info";
   }
 
+  // -----------------------------
+  // OPEN INVENTORY PAGE
+  // -----------------------------
+  function openInventoryPage() {
+    if (parent && typeof parent.changePage === "function") {
+      const inventoryMenu = parent.document.querySelector(
+        "li[onclick*='inventory-management.html']"
+      );
+      parent.changePage(
+        "Inventory Management",
+        "Track and manage inventory",
+        inventoryMenu,
+        "../Contents/inventory-management.html"
+      );
+    } else {
+      console.warn("⚠️ parent.changePage not found.");
+    }
+  }
+
+  // -----------------------------
+  // RENDER ALERT TABLE
+  // -----------------------------
   function renderTable() {
     tableBody.innerHTML = "";
 
@@ -128,6 +200,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (paginated.length === 0) {
       tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No alerts found</td></tr>`;
+      updatePaginationInfo(0);
+      renderPagination(0);
       return;
     }
 
@@ -136,22 +210,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const severity = getSeverity(alert.stock);
       const tr = document.createElement("tr");
 
-      let actionButtons = "";
-      if ((userRole === "admin" || userRole === "manager") && (severity === "Critical" || severity === "Warning")) {
-        actionButtons = `
-          <button class="action-btn resolve" title="Resolve Alert">
-            <i class="fa fa-check"></i> Resolve
-          </button>`;
-      } else if (userRole === "staff") {
-        actionButtons = `
-          <button class="action-btn view" title="View Details">
-            <i class="fa fa-eye"></i>
-          </button>`;
-      } else {
-        actionButtons = `<span class="no-action">No action</span>`;
-      }
+      const actionButtons = `
+        <button class="action-btn resolve" title="Resolve Alert">
+          <i class="fa fa-check"></i> Resolve
+        </button>
+      `;
 
-      // 👇 make Resolved status clickable
       const clickableStatus =
         status === "Resolved"
           ? `<span class="status resolved clickable-status">${status}</span>`
@@ -173,83 +237,30 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${clickableStatus}</td>
         <td>${actionButtons}</td>
       `;
+
       tableBody.appendChild(tr);
 
-      // 👁 Staff view modal
-      const viewBtn = tr.querySelector(".view");
-      if (viewBtn) {
-        viewBtn.addEventListener("click", () => {
-          modalContent.innerHTML = `
-            <div class="info-box"><span class="info-title">Product</span><span class="info-value">${alert.name || "N/A"}</span></div>
-            <div class="info-box"><span class="info-title">Type</span><span class="info-value">${alert.stock === 0 ? "No Stock" : "Low Stock"}</span></div>
-            <div class="info-box"><span class="info-title">Severity</span><span class="info-value severity ${severity.toLowerCase()}">${severity}</span></div>
-            <div class="info-box"><span class="info-title">Status</span><span class="info-value status ${status.toLowerCase()}">${status}</span></div>
-            <div class="info-box"><span class="info-title">Stock</span><span class="info-value">${alert.stock}</span></div>
-            <div class="info-box"><span class="info-title">Triggered At</span>
-              <span class="info-value">${new Date(alert.createdAt).toLocaleString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })}</span>
-            </div>`;
-          modalOverlay.style.display = "flex";
-        });
-      }
+      // Resolve button → open inventory
+      const resolveBtn = tr.querySelector(".resolve");
+      if (resolveBtn) resolveBtn.addEventListener("click", openInventoryPage);
 
-      // ✅ make "Resolved" status clickable → go to inventory
+      // Resolved status → open inventory
       const resolvedStatus = tr.querySelector(".clickable-status");
       if (resolvedStatus) {
         resolvedStatus.style.color = "#007bff";
         resolvedStatus.style.cursor = "pointer";
         resolvedStatus.title = "Go to Inventory Management";
-        resolvedStatus.addEventListener("click", () => {
-          if (parent && typeof parent.changePage === "function") {
-            const inventoryMenu = parent.document.querySelector(
-              "li[onclick*='inventory-management.html']"
-            );
-            parent.changePage(
-              "Inventory Management",
-              "Track and manage inventory",
-              inventoryMenu,
-              "../Contents/inventory-management.html"
-            );
-          } else {
-            console.warn("⚠️ parent.changePage not found.");
-          }
-        });
+        resolvedStatus.addEventListener("click", openInventoryPage);
       }
-
-      // ✅ Handle resolve button
-const resolveBtn = tr.querySelector(".resolve");
-if (resolveBtn) {
-  resolveBtn.addEventListener("click", () => {
-    // ✅ Go directly to Inventory Management
-    if (parent && typeof parent.changePage === "function") {
-      const inventoryMenu = parent.document.querySelector(
-        "li[onclick*='inventory-management.html']"
-      );
-      parent.changePage(
-        "Inventory Management",
-        "Track and manage inventory",
-        inventoryMenu,
-        "../Contents/inventory-management.html"
-      );
-    } else {
-      console.warn("⚠️ parent.changePage not found.");
-    }
-  });
-}
-
-
     });
 
     updatePaginationInfo(filtered.length);
     renderPagination(filtered.length);
   }
 
+  // -----------------------------
+  // PAGINATION
+  // -----------------------------
   function renderPagination(total) {
     paginationContainer.innerHTML = "";
     const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
@@ -294,14 +305,29 @@ if (resolveBtn) {
     paginationInfo.textContent = `Showing ${start} to ${end} of ${total} alerts`;
   }
 
-  searchInput.addEventListener("input", () => { currentPage = 1; renderTable(); });
-  severityFilter.addEventListener("change", () => { currentPage = 1; renderTable(); });
-  statusFilter.addEventListener("change", () => { currentPage = 1; renderTable(); });
+  // -----------------------------
+  // FILTER EVENTS
+  // -----------------------------
+  searchInput.addEventListener("input", () => {
+    currentPage = 1;
+    renderTable();
+  });
+  severityFilter.addEventListener("change", () => {
+    currentPage = 1;
+    renderTable();
+  });
+  statusFilter.addEventListener("change", () => {
+    currentPage = 1;
+    renderTable();
+  });
 
+  // -----------------------------
+  // INITIAL LOAD
+  // -----------------------------
   loadAlerts();
 });
-
 </script>
+
 
 
 </body>
