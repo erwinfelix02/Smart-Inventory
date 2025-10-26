@@ -229,3 +229,14 @@ body, html {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+.input-error {
+  border: 1px solid #e74c3c !important;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 6px;
+  display: none;
+  transition: opacity 0.3s ease;
+}

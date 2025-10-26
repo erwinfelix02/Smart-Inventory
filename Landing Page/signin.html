@@ -142,7 +142,8 @@ loginForm.addEventListener("submit", async (e) => {
   console.log("✅ Login success:", data.role);
 
   // ✅ Redirect after storing role
-  window.location.href = `email.html?email=${encodeURIComponent(email)}&role=${encodeURIComponent(data.role)}`;
+  window.location.href = `../Landing Page/email.html?email=${encodeURIComponent(email)}&role=${encodeURIComponent(data.role)}&source=login`;
+
 }
  else {
   // Show proper error message from backend

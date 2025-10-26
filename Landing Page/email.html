@@ -40,6 +40,8 @@
     </div>
   </div>
 <script>
+
+
 const inputs = document.querySelectorAll(".code-inputs input");
 const continueBtn = document.querySelector(".btn");
 const resendBtn = document.querySelector(".resend");
@@ -47,6 +49,10 @@ const resendBtn = document.querySelector(".resend");
 // Get email from query string
 const params = new URLSearchParams(window.location.search);
 const email = params.get("email");
+const source = params.get("source"); // either "login" or "forgot"
+const role = params.get("role");
+
+if (email) document.getElementById("userEmail").textContent = email;
 
 // Show the full email in the message
 const emailMessage = document.getElementById("userEmail");
@@ -134,9 +140,16 @@ continueBtn.addEventListener("click", async () => {
         msg.textContent = "Verification successful! Redirecting...";
         document.body.appendChild(msg);
 
-        setTimeout(() => {
+       setTimeout(() => {
+        if (source === "forgot") {
+          // ✅ If coming from forgot password →  reset password
+          window.location.href = "../Contents/reset-password.html";
+        } else {
+          // ✅ If from login/signup → go to dashboard
           window.location.href = "../Contents/Sidebar.html";
-        }, 1000);
+        }
+      }, 1000);
+
 
       } else {
         const msg = document.createElement("p");

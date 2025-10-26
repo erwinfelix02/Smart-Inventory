@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
-const { Admin, Manager, Staff } = require("../models/user");
+const { Admin, Manager, Staff } = require("../models/User");
 const SystemLog = require("../models/SystemLog");
 
 
@@ -65,11 +65,37 @@ router.post("/login", async (req, res) => {
     user.codeExpiry = new Date(Date.now() + 5 * 60 * 1000);
     await user.save();
 
+    // ✅ Send styled verification email
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: `"Smart Inventory" <${process.env.EMAIL_USER}>`,
       to: user.email,
-      subject: "Your Verification Code",
-      text: `Your code is ${code}`,
+      subject: "Smart Inventory - Login Verification Code",
+      html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa; padding: 30px;">
+          <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 30px;">
+            <h2 style="color: #007bff; text-align: center;">Smart Inventory Login Verification</h2>
+            <p style="font-size: 16px; color: #333;">Hello <strong>${user.fullName || "User"}</strong>,</p>
+            <p style="font-size: 15px; color: #555;">
+              You are attempting to log in to your Smart Inventory account. Please use the following verification code to complete your login:
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <div style="display: inline-block; background-color: #007bff; color: white; font-size: 28px; letter-spacing: 4px; padding: 15px 30px; border-radius: 8px; font-weight: bold;">
+                ${code}
+              </div>
+            </div>
+            <p style="font-size: 14px; color: #555; text-align: center;">
+              This code will expire in <strong>5 minutes</strong>.
+            </p>
+            <p style="font-size: 14px; color: #777; text-align: center;">
+              If you did not attempt to sign in, you can safely ignore this email.
+            </p>
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+            <p style="font-size: 13px; color: #888; text-align: center;">
+              &copy; ${new Date().getFullYear()} Smart Inventory System. All rights reserved.
+            </p>
+          </div>
+        </div>
+      `
     });
 
     res.json({ msg: "Verification code sent", role });
@@ -141,11 +167,36 @@ router.post("/resend-code", async (req, res) => {
     await user.save();
 
     // Send email
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+await transporter.sendMail({
+      from: `"Smart Inventory" <${process.env.EMAIL_USER}>`,
       to: user.email,
-      subject: "Your Verification Code",
-      text: `Your new code is ${code}`,
+      subject: "Smart Inventory - New Verification Code",
+      html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa; padding: 30px;">
+          <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 30px;">
+            <h2 style="color: #007bff; text-align: center;">New Verification Code</h2>
+            <p style="font-size: 16px; color: #333;">Hello <strong>${user.fullName || "User"}</strong>,</p>
+            <p style="font-size: 15px; color: #555;">
+              Here is your new verification code to complete your Smart Inventory login:
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <div style="display: inline-block; background-color: #007bff; color: white; font-size: 28px; letter-spacing: 4px; padding: 15px 30px; border-radius: 8px; font-weight: bold;">
+                ${code}
+              </div>
+            </div>
+            <p style="font-size: 14px; color: #555; text-align: center;">
+              This code will expire in <strong>5 minutes</strong>.
+            </p>
+            <p style="font-size: 14px; color: #777; text-align: center;">
+              If you did not request this, you can safely ignore this email.
+            </p>
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+            <p style="font-size: 13px; color: #888; text-align: center;">
+              &copy; ${new Date().getFullYear()} Smart Inventory System. All rights reserved.
+            </p>
+          </div>
+        </div>
+      `
     });
 
     res.json({ msg: "Verification code resent successfully", role });

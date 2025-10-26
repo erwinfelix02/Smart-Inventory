@@ -39,9 +39,11 @@ const transactionsRoutes = require("./routes/transactions");
 const salesRoutes = require("./routes/sales");
 const liveExportRoutes = require("./routes/liveExport");
 const storedAlertsRoute = require("./routes/stored-alerts");
+const forgotPasswordRoutes = require("./routes/forgotPassword");
 
 
 
+app.use("/forgot-password", forgotPasswordRoutes);
 app.use("/stored-alerts", storedAlertsRoute);
 app.use("/live-export", liveExportRoutes);
 app.use("/sales", salesRoutes);

@@ -22,8 +22,9 @@ userSchema.pre("save", async function(next) {
   next();
 });
 
-const Admin = mongoose.model("Admin", userSchema, "admins");
-const Manager = mongoose.model("Manager", userSchema, "managers");
-const Staff = mongoose.model("Staff", userSchema, "staff");
+// ✅ Prevent OverwriteModelError
+const Admin = mongoose.models.Admin || mongoose.model("Admin", userSchema, "admins");
+const Manager = mongoose.models.Manager || mongoose.model("Manager", userSchema, "managers");
+const Staff = mongoose.models.Staff || mongoose.model("Staff", userSchema, "staff");
 
 module.exports = { Admin, Manager, Staff };
