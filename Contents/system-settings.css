@@ -500,7 +500,7 @@ input[disabled], select[disabled] {
 }
 /* Make logs table scrollable with fixed height */
 .logs-card .logs-container {
-  max-height: 250px; /* adjust this height as needed */
+  max-height: 150px; /* adjust this height as needed */
   overflow-y: auto;  /* vertical scrollbar if content exceeds height */
   border: 1px solid #ddd; /* optional: border around scroll area */
   border-radius: 6px;      /* optional: rounded corners */

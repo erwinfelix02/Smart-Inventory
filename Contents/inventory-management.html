@@ -206,7 +206,10 @@
 </div>
 
   </div>
-
+<div class="form-group">
+    <label>Supplier</label>
+    <input type="text" id="newProductSupplier" placeholder="Enter supplier name" required />
+  </div>
   <div class="form-row">
     <div class="form-group">
       <label>Initial Stock</label>
@@ -678,20 +681,22 @@ newProductForm.addEventListener("submit", async (e) => {
   const category = document.getElementById("newProductCategory").value;
   const stock = parseInt(document.getElementById("newProductStock").value);
   const price = parseFloat(document.getElementById("newProductPrice").value);
+  const supplier = document.getElementById("newProductSupplier").value.trim();
 
   // Validate
  if (!name) return showStatusMessage("Product name is required.", true);
   if (isNaN(stock) || stock < 0) return showStatusMessage("Please enter a valid initial stock quantity.", true);
   if (isNaN(price) || price < 0) return showStatusMessage("Please enter a valid price.", true);
   if (!category) return showStatusMessage("Please select a category.", true);
+  if (!supplier) return showStatusMessage("Supplier name is required.", true);
 
   try {
     // Send to backend
-    const res = await fetch("/products", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, category, stock, price }),
-    });
+   const res = await fetch("/products", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ name, category, stock, price, supplier }),
+});
 
     if (!res.ok) {
       const data = await res.json();

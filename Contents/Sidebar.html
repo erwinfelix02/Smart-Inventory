@@ -106,6 +106,19 @@
     </div>
   </div>
 
+<!-- Logout Confirmation Modal -->
+<div id="logoutModal" class="modal hidden">
+  <div class="modal-content">
+    <h3>Confirm Logout</h3>
+    <p>Are you sure you want to log out?</p>
+    <div class="modal-buttons">
+      <button id="cancelLogout" class="btn cancel">Cancel</button>
+      <button id="confirmLogout" class="btn confirm">Logout</button>
+    </div>
+  </div>
+</div>
+
+
 
   <!-- Save Status Message -->
 <div id="saveStatus"></div>
@@ -406,6 +419,26 @@ function showStatusMessage(message, isError = false) {
     status.classList.remove('show', 'error');
   }, 2500);
 }
+
+function changeAccount() {
+  const modal = document.getElementById("logoutModal");
+  modal.classList.add("show");
+
+  // Cancel button
+  document.getElementById("cancelLogout").onclick = () => modal.classList.remove("show");
+
+  // Confirm logout
+  document.getElementById("confirmLogout").onclick = () => {
+    localStorage.removeItem("user");
+    window.location.href = "../Landing Page/signin.html";
+  };
+}
+
+// Optional: Close modal when clicking outside content
+window.onclick = (event) => {
+  const modal = document.getElementById("logoutModal");
+  if (event.target === modal) modal.classList.remove("show");
+};
 
 
   </script>

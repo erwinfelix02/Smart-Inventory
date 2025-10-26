@@ -31,25 +31,21 @@ ProductSchema.virtual("status").get(function () {
 ProductSchema.set("toJSON", { virtuals: true });
 
 // 🧠 Auto-generate SKU before saving
-ProductSchema.pre("save", async function (next) {
+ProductSchema.pre("save", function (next) {
   // Only generate SKU if it doesn’t exist
-  if (!this.sku && this.name) {
-    const prefix = this.name.replace(/[^A-Za-z]/g, "").substring(0, 3).toUpperCase() || "PRD";
+  if (!this.sku) {
+    // Generate 3 random uppercase letters
+    const letters = Array.from({ length: 3 }, () =>
+      String.fromCharCode(65 + Math.floor(Math.random() * 26))
+    ).join("");
 
-    // Find the latest SKU with same prefix
-    const lastProduct = await mongoose.model("Product").findOne({ sku: new RegExp(`^${prefix}-`) })
-      .sort({ createdAt: -1 });
+    // Generate 4 random digits
+    const numbers = Math.floor(1000 + Math.random() * 9000); // ensures 4 digits
 
-    let nextNumber = 2001;
-    if (lastProduct && lastProduct.sku) {
-      const parts = lastProduct.sku.split("-");
-      const lastNum = parseInt(parts[1]);
-      if (!isNaN(lastNum)) nextNumber = lastNum + 1;
-    }
-
-    this.sku = `${prefix}-${nextNumber}`;
+    this.sku = `${letters}-${numbers}`;
   }
   next();
 });
+
 
 module.exports = mongoose.model("Product", ProductSchema, "products");
