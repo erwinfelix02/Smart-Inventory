@@ -47,5 +47,16 @@ ProductSchema.pre("save", function (next) {
   next();
 });
 
+// 🧠 Normalize name to lowercase for uniqueness
+ProductSchema.pre("save", function (next) {
+  if (this.isModified("name")) {
+    this.name = this.name.toLowerCase();
+  }
+  next();
+});
+
+// 🔹 Case-insensitive unique index on name
+ProductSchema.index({ name: 1 }, { unique: true, collation: { locale: "en", strength: 2 } });
+
 
 module.exports = mongoose.model("Product", ProductSchema, "products");
