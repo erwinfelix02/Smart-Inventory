@@ -306,30 +306,63 @@ async function loadLowStockAlerts() {
   alertList.innerHTML = `<p style="text-align:center;">Loading...</p>`;
 
   try {
-    const res = await fetch("/products/low-stock");
+    // Fetch system thresholds
+    const settingsRes = await fetch("/system-settings");
+    const settings = await settingsRes.json();
+    const critical = settings.critical_stock_threshold ?? 2;
+    const low = settings.low_stock_threshold ?? 5;
+    const warning = settings.warning_stock_threshold ?? 10;
+
+    // Fetch products
+    const res = await fetch("/products");
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const products = await res.json();
     alertList.innerHTML = "";
 
-    if (!products.length) {
+    // Only include products that are "low" stock according to system thresholds
+    const alertProducts = products.filter(p => {
+      if (p.stock === 0) return false;          // Out of Stock handled elsewhere
+      if (p.stock <= critical) return false;    // Critical handled elsewhere
+      return p.stock <= low;                     // Only low stock
+    });
+
+    if (!alertProducts.length) {
       alertList.innerHTML = `<p style="text-align:center;">All stocks are sufficient 🎉</p>`;
       return;
     }
 
-    products.forEach(p => {
-      if (p.stock > 0) {
-        const div = document.createElement("div");
-        div.classList.add("alert-item");
-        div.innerHTML = `
-          <i class="fa fa-box"></i>
-          <div class="alert-details">
-            <p>${p.name}</p>
-            <small>SKU: ${p.sku || "N/A"}</small>
-          </div>
-          <span class="units">${p.stock} unit${p.stock > 1 ? "s" : ""} left</span>
-        `;
-        alertList.appendChild(div);
+    // Render alerts
+    alertProducts.forEach(p => {
+      let statusClass = "", statusText = "";
+
+      if (p.stock === 0) {
+        statusClass = "out";
+        statusText = "Out of Stock";
+      } else if (p.stock <= critical) {
+        statusClass = "critical";
+        statusText = "Critical Stock";
+      } else if (p.stock <= low) {
+        statusClass = "low";
+        statusText = "Low Stock";
+      } else if (p.stock <= warning) {
+        statusClass = "warning";
+        statusText = "Warning";
+      } else {
+        statusClass = "normal";
+        statusText = "Normal";
       }
+
+      const div = document.createElement("div");
+      div.classList.add("alert-item", statusClass);
+      div.innerHTML = `
+        <i class="fa fa-box"></i>
+        <div class="alert-details">
+          <p>${p.name}</p>
+          <small>SKU: ${p.sku || "N/A"}</small>
+        </div>
+        <span class="units">${p.stock} unit${p.stock !== 1 ? "s" : ""} left - ${statusText}</span>
+      `;
+      alertList.appendChild(div);
     });
 
   } catch (err) {
@@ -337,6 +370,8 @@ async function loadLowStockAlerts() {
     alertList.innerHTML = `<p style="text-align:center; color:red;">Error loading alerts</p>`;
   }
 }
+
+
 
 // ------------------------
 // Load Recent Transactions

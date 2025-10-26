@@ -30,15 +30,26 @@ router.patch("/:id/stock", async (req, res) => {
 });
 
 
-// GET low-stock products
+
+// GET low-stock products based on status field
 router.get("/low-stock", async (req, res) => {
   try {
-    const products = await Product.find({ stock: { $gt: 0, $lte: 10 } });
+    // Fetch products where status is "low" in your inventory management
+    const products = await Product.find({ status: "low" });
+
+    // Optional: sort by stock ascending so lowest stock shows first
+    products.sort((a, b) => a.stock - b.stock);
+
     res.json(products);
   } catch (err) {
+    console.error("Error fetching low stock products:", err);
     res.status(500).json({ message: err.message });
   }
 });
+
+
+
+
 
 // ============================
 // ✅ PUT /products/:id — update existing product
