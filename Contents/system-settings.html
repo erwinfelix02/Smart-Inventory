@@ -110,8 +110,14 @@
 
       <!-- System Logs -->
       <div class="card logs-card">
-        <h3>System Logs</h3>
-        <p class="desc">Recent system activities</p>
+        <div class="logs-header">
+          <div class="logs-title">
+            <h3>System Logs</h3>
+            <p class="desc">Recent system activities</p>
+          </div>
+          <button class="btn primary" id="viewAllLogsBtn">View All Logs</button>
+        </div>
+
         <div class="logs-container">
           <table class="logs-table">
             <thead>
@@ -149,6 +155,40 @@
   </div>
   <!-- Save Status Message -->
 <div id="saveStatus"></div>
+
+
+
+<!-- ===== TRANSACTIONS MODAL ===== -->
+<div id="transactionsModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span> <!-- close button -->
+
+    <div class="modal-header">
+      <h3>All Transactions</h3>
+    </div>
+
+    <div class="modal-body">
+      <div class="table-container">
+        <table class="modal-table">
+          <thead>
+            <tr>
+              <th>TRANS ID</th>
+              <th>CUSTOMER</th>
+              <th>ITEMS</th>
+              <th>TOTAL</th>
+              <th>STATUS</th>
+            </tr>
+          </thead>
+          <tbody id="modalTransactionsBody">
+            <!-- JS populates rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
  <script>
 // ============================
@@ -493,6 +533,63 @@ async function updateSettings(data) {
   }
 }
 
+// Modal Elements
+const viewAllBtn = document.getElementById("viewAllLogsBtn");
+const modal = document.getElementById("transactionsModal"); // ✅ Correct ID
+const closeModal = modal.querySelector(".close");
+const modalBody = document.getElementById("modalTransactionsBody"); // ✅ Correct ID
+
+// Open modal and fetch all logs
+viewAllBtn.addEventListener("click", async () => {
+  try {
+    const response = await fetch("/system-settings/logs"); 
+    if (!response.ok) throw new Error("Failed to fetch logs");
+
+    const logs = await response.json();
+    modalBody.innerHTML = ""; // clear previous rows
+
+    logs.forEach(log => {
+      const tr = document.createElement("tr");
+
+      const dateTd = document.createElement("td");
+      const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+      dateTd.textContent = new Date(log.date).toLocaleDateString('en-US', options);
+      tr.appendChild(dateTd);
+
+      const actionTd = document.createElement("td");
+      actionTd.textContent = log.action.charAt(0).toUpperCase() + log.action.slice(1);
+      tr.appendChild(actionTd);
+
+      const userTd = document.createElement("td");
+      userTd.textContent = log.email;
+      tr.appendChild(userTd);
+
+      const statusTd = document.createElement("td");
+      statusTd.textContent = log.status.charAt(0).toUpperCase() + log.status.slice(1);
+      statusTd.classList.add("status", log.status === "success" ? "success" : "failed");
+      tr.appendChild(statusTd);
+
+      modalBody.appendChild(tr);
+    });
+
+    modal.style.display = "block"; // ✅ Show modal
+  } catch (err) {
+    console.error("❌ Error loading logs:", err);
+    showStatusMessage("Failed to load logs", true);
+  }
+});
+// Close modal when clicking the "×" button
+const closeModalBtn = modal.querySelector(".close");
+closeModalBtn.addEventListener("click", () => {
+  modal.style.display = "none";
+});
+
+// Optional: Close modal when clicking outside the modal content
+window.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    modal.style.display = "none";
+  }
+});
 
 </script>
 

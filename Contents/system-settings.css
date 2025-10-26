@@ -377,3 +377,152 @@ input[disabled], select[disabled] {
 #saveStatus.error {
   background-color: #dc3545; /* Red for error */
 }
+/* ===== MODAL ===== */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(2px);
+  overflow: auto; /* scroll if needed */
+}
+
+/* Modal content */
+.modal-content {
+  position: relative;
+  background-color: #f9f9f9;
+  margin: 3% auto; 
+  padding: 20px 20px 30px 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 80vh;  /* scroll if content exceeds */
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease-in-out;
+}
+
+/* ===== CLOSE BUTTON ===== */
+.modal .close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;          /* default color */
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.modal .close:hover {
+  color: #dc3545;       /* red on hover */
+  transform: scale(1.1); /* slight pop effect */
+}
+
+/* Table container ensures responsive scroll */
+.table-container {
+  width: 100%;
+  overflow-x: auto; /* horizontal scroll if table too wide */
+}
+
+/* Table styling */
+.modal-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.modal-table th, .modal-table td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.modal-table th {
+  background-color: #1c2b4d;
+  color: #fff;
+  font-weight: 600;
+}
+
+.modal-table tbody tr {
+  background-color: #fff;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.modal-table tbody tr:hover {
+  background-color: #f0f8ff;
+  transform: translateX(3px);
+}
+
+.modal-table .status.success {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.modal-table .status.failed {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .modal-table th, .modal-table td {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
+
+.logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.logs-header .desc {
+  margin: 0;
+}
+
+.logs-header .btn {
+  margin: 0; /* remove default margin if any */
+}
+/* Make logs table scrollable with fixed height */
+.logs-card .logs-container {
+  max-height: 250px; /* adjust this height as needed */
+  overflow-y: auto;  /* vertical scrollbar if content exceeds height */
+  border: 1px solid #ddd; /* optional: border around scroll area */
+  border-radius: 6px;      /* optional: rounded corners */
+}
+
+/* Make table full width */
+.logs-card .logs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Table cells padding and borders */
+.logs-card .logs-table th,
+.logs-card .logs-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Optional: fix header when scrolling */
+.logs-card .logs-container thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f9f9f9; /* matches card background */
+  z-index: 1;
+}
