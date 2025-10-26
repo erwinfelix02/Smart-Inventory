@@ -264,9 +264,60 @@ th {
   font-weight: 600;
 }
 
-.badge.low { background: #fff3e0; color: #fb8c00; }
-.badge.out { background: #ffebee; color: #e53935; }
-.badge.normal { background: #e8f5e9; color: #43a047; }
+/* Normal Stock */
+.badge.normal {
+  background: #e8f5e9; /* light green background */
+  color: #43a047;       /* green text */
+}
+
+/* Warning Stock */
+.badge.warning {
+  background: #fff8e1; /* light yellow background */
+  color: #ffb300;      /* amber text */
+}
+
+/* Low Stock */
+.badge.low {
+  background: #ffe0b2; /* soft orange background */
+  color: #fb8c00;      /* orange text */
+}
+
+/* Critical Stock */
+.badge.critical {
+  background: #ffccbc; /* light red/orange background */
+  color: #d84315;      /* darker red text */
+}
+
+/* Out of Stock */
+.badge.out {
+  background: #f44336; /* bright red background */
+  color: #ffffff;      /* white text for contrast */
+}
+
+
+/* Simple and clean "No Low Stock" message */
+.low-stock-alerts .alert-scrollable .no-low-stock {
+  background-color: #f0f4f8;   /* light gray-blue background */
+  color: #2c3e50;              /* dark text for readability */
+  text-align: center;
+  padding: 16px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  margin: 10px 0;
+  border: 1px solid #d1d9e6;  /* subtle border for definition */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Optional icon before text */
+.low-stock-alerts .alert-scrollable .no-low-stock::before {
+  content: "✅";               /* checkmark icon */
+  font-size: 1.2rem;
+}
+
 
 /* ===== Low Stock Alerts ===== */
 .low-stock-alerts h3 {
@@ -708,9 +759,12 @@ canvas#lineChart {
   height: 100%;
   justify-content: center;
   align-items: flex-start;
-  background-color: rgba(0, 0, 0, 0.4);
   overflow-y: auto;
   padding-top: 60px;
+  display: none; /* hidden by default */
+  background-color: rgba(255, 255, 255, 0); /* transparent */
+  backdrop-filter: blur(3px); /* <-- blur effect */
+  z-index: 1000;
   transition: opacity 0.3s ease;
 }
 
@@ -954,4 +1008,37 @@ form select:focus {
 }
 .add-btn {
   display: none;
+}
+#saveStatus {
+  position: fixed;
+  top: 20px; /* distance from top */
+  left: 50%;
+  transform: translateX(-50%); /* center horizontally */
+  background-color: #4caf50; /* green for success */
+  color: white;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#saveStatus.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0); /* optional slight animation */
+}
+
+#saveStatus.error {
+  background-color: #f44336; /* red for errors */
+}
+
+
+.table-wrapper table tbody tr:hover {
+  background-color: rgba(13, 71, 161, 0.08); /* subtle bluish tint */
+  transform: scale(1.01); /* tiny pop-up effect */
+  cursor: pointer;  
 }

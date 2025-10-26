@@ -50,4 +50,47 @@ router.get("/", async (req, res) => {
   }
 });
 
+// ✅ Mark all alerts as read (including older ones without 'read' field)
+router.put("/mark-all-read", async (req, res) => {
+  try {
+    console.log("🟡 Marking all alerts as read...");
+
+    // Include alerts that either don't have `read` or are explicitly false
+    const filter = { $or: [{ read: false }, { read: { $exists: false } }] };
+    const update = { $set: { read: true } };
+
+    const result = await StoredAlert.updateMany(filter, update);
+
+    console.log("✅ Updated alerts:", result);
+
+    res.json({
+      message: "All alerts marked as read",
+      matchedCount: result.matchedCount ?? result.n,
+      modifiedCount: result.modifiedCount ?? result.nModified,
+    });
+  } catch (err) {
+    console.error("❌ Error in mark-all-read:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ✅ Mark a single alert as read
+router.put("/:id/read", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updated = await StoredAlert.findByIdAndUpdate(
+      id,
+      { read: true },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ message: "Alert not found" });
+
+    res.json({ message: "Alert marked as read", alert: updated });
+  } catch (err) {
+    console.error("❌ Error marking alert as read:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

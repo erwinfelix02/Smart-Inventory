@@ -110,7 +110,7 @@
 
       <!-- System Logs -->
       <div class="card logs-card">
-        <h3>System Logs & API Keys</h3>
+        <h3>System Logs</h3>
         <p class="desc">Recent system activities</p>
         <div class="logs-container">
           <table class="logs-table">
@@ -251,7 +251,11 @@ async function loadSettings() {
   }
 }
 
-window.addEventListener("DOMContentLoaded", loadSettings);
+window.addEventListener("DOMContentLoaded", () => {
+  loadSettings();
+  loadSystemLogs(); // <-- fetch logs when page loads
+});
+
 
 // Edit General
 editBtn?.addEventListener('click', () => {
@@ -280,16 +284,10 @@ saveBtn?.addEventListener('click', async () => {
     currency: document.querySelector("select[name='currency']")?.value || "PHP",
     language: document.querySelector("select[name='language']")?.value || "English"
   };
-
+ 
   try {
-    const response = await fetch("/system-settings/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
+    const result = await updateSettings(data); // <-- call the helper
 
-    if (!response.ok) throw new Error("Failed to save settings");
-    const result = await response.json();
 
     generalOriginalValues = generalInputs.map(input => input.value);
     disableGeneralInputs();
@@ -369,7 +367,7 @@ saveAlertBtn?.addEventListener('click', async () => {
     recipients: Array.from(document.querySelectorAll('.alert-card input[type="checkbox"]:checked'))
       .map(cb => cb.parentNode.textContent.trim())
   };
-
+ 
   try {
     const response = await fetch("/system-settings/update", {
       method: "POST",
@@ -411,6 +409,90 @@ function showStatusMessage(message, isError = false) {
     status.classList.remove('show', 'error');
   }, 2500);
 }
+
+
+
+// ============================
+// LOAD SYSTEM LOGS
+// ============================
+async function loadSystemLogs() {
+  try {
+    const response = await fetch("/system-settings/logs"); // use the route we added in backend
+    if (!response.ok) throw new Error("Failed to fetch system logs");
+
+    const logs = await response.json();
+    const tbody = document.querySelector(".logs-table tbody");
+    tbody.innerHTML = ""; // clear existing rows
+
+    logs.forEach(log => {
+      const tr = document.createElement("tr");
+
+      const dateTd = document.createElement("td");
+      const options = { 
+        weekday: 'short', 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric'
+      };
+
+dateTd.textContent = new Date(log.date).toLocaleDateString('en-US', options);
+
+      tr.appendChild(dateTd);
+
+      const actionTd = document.createElement("td");
+      const actionText = log.action || "Login";
+      actionTd.textContent = actionText.charAt(0).toUpperCase() + actionText.slice(1);
+
+      tr.appendChild(actionTd);
+
+      const userTd = document.createElement("td");
+      userTd.textContent = log.email;
+      tr.appendChild(userTd);
+
+      const statusTd = document.createElement("td");
+      statusTd.textContent = log.status.charAt(0).toUpperCase() + log.status.slice(1);
+      statusTd.classList.add("status");
+      statusTd.classList.add(log.status === "success" ? "success" : "failed");
+      tr.appendChild(statusTd);
+
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("❌ Error loading system logs:", err);
+  }
+}
+
+
+// Get logged-in user from sidebar (localStorage)
+const userData = localStorage.getItem("user");
+let user = null;
+if (userData) user = JSON.parse(userData);
+
+// Example: sending update request
+async function updateSettings(data) {
+  try {
+    const res = await fetch("/system-settings/update", { // use relative URL
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...data,
+        userEmail: user?.email // send sidebar user email
+      })
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      return { message: result.error || "Failed to update settings", error: true };
+    }
+
+    return { message: result.message || "Settings updated successfully", error: false };
+  } catch (err) {
+    console.error(err);
+    return { message: "Failed to update settings", error: true };
+  }
+}
+
 
 </script>
 

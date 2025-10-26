@@ -1,3 +1,4 @@
+// models/StoredAlert.js
 const mongoose = require("mongoose");
 
 const StoredAlertSchema = new mongoose.Schema({
@@ -5,7 +6,8 @@ const StoredAlertSchema = new mongoose.Schema({
   stock: { type: Number, required: true },
   status: { type: String, default: "New" },
   createdAt: { type: Date, default: Date.now },
+  read: { type: Boolean, default: false } // 🆕 Add this
 });
 
-// ✅ This will save into the "alerts" collection
+// ✅ Use the same collection
 module.exports = mongoose.model("StoredAlert", StoredAlertSchema, "alerts");

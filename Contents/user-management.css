@@ -381,3 +381,17 @@ th, td {
 #saveStatus.error {
   background-color: #dc3545; /* Red for error */
 }
+/* Table row highlight on hover */
+table tbody tr:hover {
+  background-color: #f3f4f6; /* light gray highlight */
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+/* Info boxes highlight on hover (already in your code) */
+.info-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}

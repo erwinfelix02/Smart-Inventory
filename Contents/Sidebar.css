@@ -517,3 +517,54 @@ body {
 .bell-container.active .alert-dropdown {
   display: block;
 }
+/* 🔔 Alert Dropdown Header */
+.alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 0 8px;
+}
+
+/* 🟢 Mark All Button Style */
+.mark-all-btn {
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.mark-all-btn:hover {
+  background-color: #0056b3;
+}
+
+.mark-all-btn.hidden {
+  display: none;
+}
+#saveStatus {
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4caf50;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  z-index: 9999;
+}
+#saveStatus.error {
+  background: #e53935;
+}
+#saveStatus.show {
+  opacity: 1;
+  top: 30px;
+}

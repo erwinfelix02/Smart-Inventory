@@ -226,7 +226,6 @@ select:focus {
   justify-content: center;
   z-index: 1000;
   backdrop-filter: blur(4px);
-  background-color: rgba(0,0,0,0.3);
   animation: fadeIn 0.3s ease forwards;
 }
 

@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       tr.innerHTML = `
         <td><a href="#" class="view-link">ALT-${start + index + 1}</a></td>
-        <td>${alert.stock === 0 ? "No Stock" : "Low Stock"}</td>
+        <td>${alert.stock === 0 ? "Out of Stock" : "Low Stock"}</td>
         <td>${alert.name || "N/A"}</td>
         <td><span class="badge ${severity.toLowerCase()}">${severity}</span></td>
         <td>${new Date(alert.createdAt).toLocaleString("en-US", {

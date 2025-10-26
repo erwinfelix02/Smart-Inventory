@@ -797,3 +797,13 @@ tr:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+/* Highlight table row on hover */
+.card.transactions table tbody tr {
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.card.transactions table tbody tr:hover {
+  background-color: #f0f8ff; /* light blue background */
+  transform: scale(1.01);    /* subtle pop effect */
+  cursor: pointer;            /* indicates interactivity */
+}

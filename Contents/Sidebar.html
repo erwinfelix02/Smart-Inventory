@@ -84,11 +84,17 @@
         <img src="../images/bell.svg" alt="Notification Bell" class="bell">
         <span class="bell-badge" id="bellBadge">0</span>
 
+       
         <!--  Dropdown for alerts -->
-        <div id="alertDropdown" class="alert-dropdown hidden">
-          <h4>Recent Alerts</h4>
-          <ul id="alertList"></ul>
-        </div>
+      <div id="alertDropdown" class="alert-dropdown hidden">
+        <h4 class="alert-header">
+            <span>Recent Alerts</span>
+            <button id="markAllBtn" class="mark-all-btn hidden">✓ Mark all as read</button>
+          </h4>
+
+        <ul id="alertList"></ul>
+      </div>
+
       </div>
 
     </div>
@@ -99,6 +105,10 @@
       <iframe id="content-frame" src="" style="width:100%; height:80vh; border:none;"></iframe>
     </div>
   </div>
+
+
+  <!-- Save Status Message -->
+<div id="saveStatus"></div>
 
   <script>
     // --- Get user from localStorage ---
@@ -221,13 +231,39 @@
 
 
 
-   function toggleBell(element) {
+function toggleBell(element) {
   if (!element) return;
-  element.classList.toggle("active");
 
   const dropdown = document.getElementById("alertDropdown");
-  dropdown.classList.toggle("hidden");
+  const bellContainer = document.querySelector(".bell-container");
+
+  // Toggle dropdown
+  const isHidden = dropdown.classList.contains("hidden");
+  dropdown.classList.toggle("hidden", !isHidden);
+  bellContainer.classList.toggle("active", isHidden);
+
+  if (isHidden) {
+    // Delay to avoid immediate click closing
+    setTimeout(() => {
+      const handleClickOutside = (event) => {
+        const clickedInsideBell = bellContainer.contains(event.target);
+
+        // If clicked anywhere except the bell container, hide dropdown
+        if (!clickedInsideBell) {
+          dropdown.classList.add("hidden");
+          bellContainer.classList.remove("active");
+
+          // Remove listener after hiding
+          document.removeEventListener("click", handleClickOutside);
+        }
+      };
+
+      document.addEventListener("click", handleClickOutside);
+    }, 50);
+  }
 }
+
+
 
 async function fetchAlerts() {
   try {
@@ -238,7 +274,8 @@ async function fetchAlerts() {
     const alerts = await res.json();
 
     // Filter active alerts (low stock alerts)
-    const activeAlerts = alerts.filter(alert => Number(alert.stock) <= 10);
+    const activeAlerts = alerts.filter(alert => !alert.read && Number(alert.stock) <= 10);
+
 
     // Count of active alerts
     const alertCount = activeAlerts.length;
@@ -251,6 +288,18 @@ async function fetchAlerts() {
     // Update the dropdown list
     const alertList = document.getElementById("alertList");
     alertList.innerHTML = "";
+
+
+        // --- Toggle Mark All button visibility ---
+    const markAllBtn = document.getElementById("markAllBtn");
+    if (markAllBtn) {
+      if (activeAlerts.length >= 2) {
+        markAllBtn.classList.remove("hidden");
+      } else {
+        markAllBtn.classList.add("hidden");
+      }
+    }
+
 
     if (alertCount === 0) {
       alertList.innerHTML = `<li style="text-align:center;color:#777;">No active alerts</li>`;
@@ -266,6 +315,22 @@ async function fetchAlerts() {
           <span>${a.name || "N/A"}</span>
           <small>${severity}</small>
         `;
+
+        // 🆕 Add click handler to mark as read
+li.onclick = async () => {
+  try {
+    await fetch(`http://localhost:3000/stored-alerts/${a._id}/read`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+    });
+    showStatusMessage(`"${a.name}" marked as read.`);
+    fetchAlerts();
+  } catch (err) {
+    console.error("Error marking alert as read:", err);
+    showStatusMessage("Failed to mark alert as read.", true);
+  }
+};
+
         alertList.appendChild(li);
       });
     }
@@ -300,6 +365,48 @@ function getSeverityScore(stock) {
 // Initial fetch + repeat every 30 seconds
 fetchAlerts();
 setInterval(fetchAlerts, 30000);
+
+
+const markAllBtn = document.getElementById("markAllBtn");
+if (markAllBtn) {
+  markAllBtn.onclick = async () => {
+  try {
+    markAllBtn.disabled = true;
+    markAllBtn.textContent = "Marking...";
+
+    const res = await fetch("http://localhost:3000/stored-alerts/mark-all-read", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!res.ok) throw new Error("Failed to mark all as read");
+
+    showStatusMessage("All alerts marked as read.");
+    fetchAlerts();
+  } catch (err) {
+    console.error("Error marking all as read:", err);
+    showStatusMessage("Failed to mark all as read.", true);
+  } finally {
+    markAllBtn.disabled = false;
+    markAllBtn.textContent = "Mark all as read";
+  }
+};
+
+}
+
+
+function showStatusMessage(message, isError = false) {
+  const status = document.getElementById('saveStatus');
+  status.textContent = message;
+  status.classList.add('show');
+  status.classList.toggle('error', isError);
+
+  // Auto-hide after 2.5s
+  setTimeout(() => {
+    status.classList.remove('show', 'error');
+  }, 2500);
+}
+
 
   </script>
 </body>

@@ -14,7 +14,7 @@ router.get("/", async (req, res) => {
     const alerts = products.map((p) => ({
       _id: p._id,
       name: p.name,
-      type: p.stock === 0 ? "No Stock" : "Low Stock",
+      type: p.stock === 0 ? "Out of Stock" : "Low Stock",
       severity: p.stock === 0 ? "Critical" : "Warning",
       status: "New",
       createdAt: p.updatedAt || new Date(),

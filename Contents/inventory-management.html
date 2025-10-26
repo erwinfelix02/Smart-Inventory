@@ -12,6 +12,9 @@
 </head>
 <body>
 
+  
+  <!-- Save Status Message -->
+<div id="saveStatus"></div>
   <div class="dashboard-container">
     
     <!-- ===== Inventory Overview ===== -->
@@ -219,7 +222,6 @@
 </form>
 
 
-  
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let allProducts = [];
@@ -240,53 +242,84 @@ function updateModalHeight() {
 }
 
 // 🧩 Load all products once
+let settings = {}; // global
+
 async function loadProducts() {
   try {
-    const res = await fetch("/products");
-    const products = await res.json();
+    // 1️⃣ Fetch thresholds
+    const settingsRes = await fetch("/system-settings");
+    settings = await settingsRes.json();
+    console.log("System Settings:", settings); // debug
+
+    // 2️⃣ Fetch products
+    const productsRes = await fetch("/products");
+    const products = await productsRes.json();
     allProducts = products;
 
     updateDashboard(products);
     displayProducts(products);
-    displayLowStock(products); // initial low stock alerts
+    displayLowStock(products);
+
     const categories = renderCategoryChart(products);
     renderStockTrendChart(products, categories);
   } catch (err) {
-    console.error("Error loading products:", err);
+    console.error("Error loading data:", err);
   }
 }
 
+
 // 📊 Dashboard Counters
 function updateDashboard(products) {
+  const critical = settings.critical_stock_threshold ?? 10;
+  const low = settings.low_stock_threshold ?? 15;
+  const warning = settings.warning_stock_threshold ?? 30;
+
   const totalQuantity = products.reduce((sum, p) => sum + (p.stock || 0), 0);
-  const inStock = products.filter(p => p.stock > 10).length;
-  const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;
+  const inStock = products.filter(p => p.stock > warning).length;
+  const warningStock = products.filter(p => p.stock > low && p.stock <= warning).length;
+  const lowStock = products.filter(p => p.stock > critical && p.stock <= low).length;
   const outStock = products.filter(p => p.stock === 0).length;
+
 
   document.querySelector(".total p").textContent = totalQuantity;
   document.querySelector(".in-stock p").textContent = inStock;
-  document.querySelector(".low-stock p").textContent = lowStock;
+  document.querySelector(".low-stock p").textContent = lowStock 
   document.querySelector(".out-stock p").textContent = outStock;
 }
+
+
+
 
 // 📋 Product Table
 function displayProducts(products) {
   const tbody = document.querySelector("tbody");
   tbody.innerHTML = "";
 
-  if (!products.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No products found</td></tr>`;
-    return;
-  }
+  const critical = settings.critical_stock_threshold;
+  const low = settings.low_stock_threshold;
+  const warning = settings.warning_stock_threshold;
 
   products.forEach(p => {
-    const tr = document.createElement("tr");
     let statusClass = "", statusText = "";
 
-    if (p.stock === 0) { statusClass = "out"; statusText = "Out of Stock"; }
-    else if (p.stock <= 10) { statusClass = "low"; statusText = "Low Stock"; }
-    else { statusClass = "normal"; statusText = "Normal"; }
+    if (p.stock === 0) {
+      statusClass = "out";
+      statusText = "Out of Stock";
+    } else if (p.stock <= critical) {
+      statusClass = "critical";
+      statusText = "Critical Stock";
+    } else if (p.stock <= low) {
+      statusClass = "low";
+      statusText = "Low Stock";
+    } else if (p.stock <= warning) {
+      statusClass = "warning";
+      statusText = "Warning ";
+    } else {
+      statusClass = "normal";
+      statusText = "Normal";
+    }
 
+    const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${p.name}</td>
       <td>${p.sku || "-"}</td>
@@ -298,19 +331,20 @@ function displayProducts(products) {
   });
 }
 
+
+
+
 // 🚨 Low Stock Alerts — only respect category filter
 function displayLowStock(products) {
   const scrollable = document.querySelector(".low-stock-alerts .alert-scrollable");
-  scrollable.innerHTML = ""; // clear only the scrollable area
+  scrollable.innerHTML = "";
 
-  const lowProducts = products.filter(p => p.stock > 0 && p.stock <= 10);
+  const critical = settings.critical_stock_threshold;
+  const low = settings.low_stock_threshold;
 
-  if (!lowProducts.length) {
-    scrollable.innerHTML = `<p style="text-align:center;">All stocks are sufficient 🎉</p>`;
-    return;
-  }
+  const lowStockProducts = products.filter(p => p.stock > critical && p.stock <= low);
 
-  lowProducts.forEach(p => {
+  lowStockProducts.forEach(p => {
     const div = document.createElement("div");
     div.classList.add("alert-item");
     div.innerHTML = `
@@ -323,7 +357,21 @@ function displayLowStock(products) {
     `;
     scrollable.appendChild(div);
   });
+
+  if (!lowStockProducts.length) {
+    const div = document.createElement("div");
+    div.classList.add("no-low-stock"); // new class
+    div.innerHTML = `
+      <p>All stocks are sufficient 🎉</p>
+    `;
+    scrollable.appendChild(div);
+  }
 }
+
+
+
+
+
 
 
 // 🎨 Custom Colors
@@ -429,7 +477,7 @@ function filterProducts() {
   displayProducts(filteredTable);
 
 
-  displayLowStock(filteredAlerts);
+  displayLowStock(filteredTable);
 }
 
 // ⚙️ Initialize
@@ -535,13 +583,13 @@ function selectProduct(p) {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!selectedProduct) {
-    alert("Please select a product first.");
+    showStatusMessage("Please select a product first.", true);
     return;
   }
 
   const addAmount = parseInt(document.getElementById("addStockAmount").value);
   if (isNaN(addAmount) || addAmount <= 0) {
-    alert("Enter a valid stock quantity to add.");
+     showStatusMessage("Enter a valid stock quantity to add.", true);
     return;
   }
 
@@ -555,15 +603,15 @@ form.addEventListener("submit", async (e) => {
     });
 
     if (res.ok) {
-      alert(`✅ Added ${addAmount} stock to ${selectedProduct.name}`);
+     showStatusMessage(`Added ${addAmount} stock to ${selectedProduct.name}`);
       modal.style.display = "none";
       loadProducts();
     } else {
-      alert("❌ Failed to update stock.");
+       showStatusMessage("Failed to update stock.", true);
     }
   } catch (err) {
     console.error(err);
-    alert("⚠️ Error connecting to server.");
+   showStatusMessage("Error connecting to server.", true);
   }
 });
 
@@ -632,10 +680,10 @@ newProductForm.addEventListener("submit", async (e) => {
   const price = parseFloat(document.getElementById("newProductPrice").value);
 
   // Validate
-  if (!name) return alert("⚠️ Product name is required.");
-  if (isNaN(stock) || stock < 0) return alert("⚠️ Please enter a valid initial stock quantity.");
-  if (isNaN(price) || price < 0) return alert("⚠️ Please enter a valid price.");
-  if (!category) return alert("⚠️ Please select a category.");
+ if (!name) return showStatusMessage("Product name is required.", true);
+  if (isNaN(stock) || stock < 0) return showStatusMessage("Please enter a valid initial stock quantity.", true);
+  if (isNaN(price) || price < 0) return showStatusMessage("Please enter a valid price.", true);
+  if (!category) return showStatusMessage("Please select a category.", true);
 
   try {
     // Send to backend
@@ -652,7 +700,8 @@ newProductForm.addEventListener("submit", async (e) => {
 
     // Success
     const newProduct = await res.json();
-    alert(`✅ Product "${newProduct.name}" added successfully!`);
+ showStatusMessage(`Product "${newProduct.name}" added successfully!`);
+
 
     // Refresh list
     await loadProducts();
@@ -666,7 +715,8 @@ newProductForm.addEventListener("submit", async (e) => {
 
   } catch (err) {
     console.error("Add product error:", err);
-    alert(`❌ ${err.message}`);
+    showStatusMessage(err.message, true);
+
   }
 });
 
@@ -692,6 +742,18 @@ if (addProductButton) {
   }
 }
 
+
+function showStatusMessage(message, isError = false) {
+  const status = document.getElementById('saveStatus');
+  status.textContent = message;
+  status.classList.add('show');
+  status.classList.toggle('error', isError);
+
+  // Auto-hide after 2.5 seconds
+  setTimeout(() => {
+    status.classList.remove('show', 'error');
+  }, 2500);
+}
 
 </script>
 

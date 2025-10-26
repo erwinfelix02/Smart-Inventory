@@ -2,6 +2,8 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const { Admin, Manager, Staff } = require("../models/user");
+const SystemLog = require("../models/SystemLog");
+
 
 const router = express.Router();
 
@@ -30,36 +32,39 @@ async function findUserByEmail(email) {
   return null;
 }
 
-// ---------------- LOGIN ROUTE ----------------
 router.post("/login", async (req, res) => {
   try {
     const email = req.body.email.trim();
     const password = req.body.password.trim();
     const result = await findUserByEmail(email);
 
-    // 🔹 Unified error message for invalid email or password
     if (!result) {
+      await SystemLog.create({ email, status: "failure" });
       return res.status(400).json({ msg: "Invalid email or password" });
     }
 
     const { user, role } = result;
 
-    // ❌ Check if account is disabled
     if (user.isDisabled) {
+      await SystemLog.create({ email, status: "failure" });
       return res.status(403).json({ msg: "Your account has been disabled. Contact administrator." });
     }
 
-    // ✅ Check password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ msg: "Invalid email or password" });
+    if (!isMatch) {
+      await SystemLog.create({ email, status: "failure" });
+      return res.status(400).json({ msg: "Invalid email or password" });
+    }
 
-    // Generate 6-digit verification code
+    // ✅ Successful login
+    await SystemLog.create({ email, status: "success" });
+
+    // Generate verification code etc...
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     user.verificationCode = code;
-    user.codeExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
+    user.codeExpiry = new Date(Date.now() + 5 * 60 * 1000);
     await user.save();
 
-    // Send email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: user.email,
@@ -68,8 +73,10 @@ router.post("/login", async (req, res) => {
     });
 
     res.json({ msg: "Verification code sent", role });
+
   } catch (err) {
     console.error("Login Error:", err);
+    await SystemLog.create({ email: req.body.email, status: "failure" }); // log server error as failure
     res.status(500).json({ msg: "Server error" });
   }
 });
