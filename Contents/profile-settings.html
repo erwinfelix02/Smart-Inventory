@@ -111,7 +111,7 @@ if (user && user.email) {
     .then(data => {
       if (data.success) {
         const u = data.user;
-        document.getElementById("fullname").value = u.fullName || "";
+        document.getElementById("fullname").value = capitalizeFullName(u.fullName || "");
         document.getElementById("role").value = u.role || "";
         document.getElementById("email").value = u.email || "";
         document.getElementById("phone").value = u.phone || "";
@@ -253,6 +253,15 @@ document.querySelectorAll(".toggle-password").forEach(icon => {
     }
   });
 });
+
+function capitalizeFullName(name) {
+  if (!name) return "";
+  return name
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
 </script>
 
 </body>

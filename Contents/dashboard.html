@@ -383,154 +383,123 @@ fetch("/transactions")
   })
   .catch(err => console.error("❌ Failed to fetch top selling products:", err));
 
-// Fetch all alerts and populate dashboard recent alerts + count active alerts
-async function loadDashboardAlerts() {
-  try {
-    const response = await fetch("http://localhost:3000/alert"); // backend endpoint
-    if (!response.ok) throw new Error("Failed to fetch alerts");
-    const alerts = await response.json();
 
-    const container = document.querySelector(".right-panel .alerts-list");
-    const activeAlertsCountElem = document.querySelector(".summary-card.active-alerts h2");
-
-    if (!container) return;
-
-    container.innerHTML = ""; // clear existing alerts
-
-    // Sort alerts by createdAt descending
-    const sortedAlerts = alerts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    // Update Active Alerts count
-    if (activeAlertsCountElem) {
-      activeAlertsCountElem.textContent = sortedAlerts.length;
-    }
-
-    // Loop through all alerts
-    sortedAlerts.forEach(alert => {
-      const severity = alert.stock === 0 ? "Critical" : (alert.stock <= 5 ? "Warning" : "Info");
-      const dotColor = severity === "Critical" ? "red" : (severity === "Warning" ? "orange" : "blue");
-
-      const div = document.createElement("div");
-      div.classList.add("alert-item");
-
-      div.innerHTML = `
-        <div class="dot ${dotColor}"></div>
-        <div>
-          <p><strong>${alert.stock === 0 ? "No Stock Alert!" : "Low Stock Alert!"}</strong></p>
-          <small>${alert.name || "Unknown Product"} ${alert.stock === 0 ? "is out of stock" : `has ${alert.stock} units left`}</small><br>
-          <small>${new Date(alert.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
-        </div>
-      `;
-
-      container.appendChild(div);
-    });
-  } catch (err) {
-    console.error("❌ Failed to load dashboard alerts:", err);
-  }
-}
 
 // Call on page load
 document.addEventListener("DOMContentLoaded", loadDashboardAlerts);
+
+
 
 
 let alertsChart; // store chart instance globally
 
 async function loadDashboardAlerts() {
   try {
-    const response = await fetch("http://localhost:3000/alert"); 
-    if (!response.ok) throw new Error("Failed to fetch alerts");
-    const alerts = await response.json();
+    // 1️⃣ Fetch products and system thresholds
+    const [productsRes, settingsRes] = await Promise.all([
+      fetch("http://localhost:3000/products"),
+      fetch("http://localhost:3000/system-settings")
+    ]);
+    const products = await productsRes.json();
+    const settings = await settingsRes.json();
 
+    const thresholds = {
+      critical: settings.critical_stock_threshold ?? 0,
+      low: settings.low_stock_threshold ?? 5,
+      warning: settings.warning_stock_threshold ?? 10
+    };
+
+    // 2️⃣ Generate alerts for products under warning
+    const alerts = products
+      .filter(p => p.stock <= thresholds.warning)
+      .map(p => ({
+        name: p.name,
+        stock: p.stock,
+        createdAt: p.updatedAt || p.createdAt || new Date()
+      }));
+
+    // 3️⃣ Save alerts to DB (optional)
+    for (const alert of alerts) {
+      await fetch("http://localhost:3000/stored-alerts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...alert, status: "New" })
+      });
+    }
+
+    // 4️⃣ Render Recent Alerts
     const container = document.querySelector(".right-panel .alerts-list");
     const activeAlertsCountElem = document.querySelector(".summary-card.active-alerts h2");
-
     if (!container) return;
 
     container.innerHTML = "";
 
-    // Sort alerts by newest first
-    const sortedAlerts = alerts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+alerts
+  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  .forEach(alert => {
+    // Determine severity based on thresholds
+    const severity = getSeverity(alert.stock, thresholds);
 
-    // Update Active Alerts count
-    if (activeAlertsCountElem) activeAlertsCountElem.textContent = sortedAlerts.length;
+    // Map severity to color and title
+    const config = severityConfig[severity];
 
-    // Populate recent alerts list
-    sortedAlerts.forEach(alert => {
-      const severity = alert.stock === 0 ? "Critical" : (alert.stock <= 5 ? "Warning" : "Info");
-      const dotColor = severity === "Critical" ? "red" : (severity === "Warning" ? "orange" : "blue");
+    // Create alert item div
+    const div = document.createElement("div");
+    div.classList.add("alert-item");
+    div.innerHTML = `
+      <div class="dot ${config.color}"></div>
+      <div>
+        <p><strong>${config.title}</strong></p>
+        <small>${alert.name} ${severity === "Out-of-stock" ? "is out of stock" : `has ${alert.stock} units left`}</small><br>
+        <small>${new Date(alert.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
+      </div>
+    `;
+    container.appendChild(div);
+  });
 
-      const div = document.createElement("div");
-      div.classList.add("alert-item");
-      div.innerHTML = `
-        <div class="dot ${dotColor}"></div>
-        <div>
-          <p><strong>${alert.stock === 0 ? "No Stock Alert!" : "Low Stock Alert!"}</strong></p>
-          <small>${alert.name || "Unknown Product"} ${alert.stock === 0 ? "is out of stock" : `has ${alert.stock} units left`}</small><br>
-          <small>${new Date(alert.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
-        </div>
-      `;
-      container.appendChild(div);
-    });
 
-// ===============================
-// Prepare data for line chart (last 7 days)
-// ===============================
-const days = [];
-const counts = [];
+    // 5️⃣ Update Active Alerts Count
+    if (activeAlertsCountElem) activeAlertsCountElem.textContent = alerts.length;
 
-for (let i = 6; i >= 0; i--) {
-  const date = new Date();
-  date.setDate(date.getDate() - i);
-
-  // Human-readable date for x-axis
-  const dateText = date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-  days.push(dateText);
-
-  // Count alerts for that day
-  const count = sortedAlerts.filter(a => new Date(a.createdAt).toDateString() === date.toDateString()).length;
-  counts.push(count);
-}
-
-// Get canvas context
-const ctx = document.getElementById("alertsChart").getContext("2d");
-
-// Destroy previous chart if exists
-if (alertsChart) alertsChart.destroy();
-
-alertsChart = new Chart(ctx, {
-  type: "line",
-  data: {
-    labels: days, // human-readable dates
-    datasets: [{
-      label: "Number of Alerts",
-      data: counts,
-      fill: false,
-      borderColor: "#3498db",
-      tension: 0.3,
-      pointBackgroundColor: "#3498db",
-      pointRadius: 5
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: {
-      legend: { display: false },
-      title: { display: true, text: "Alerts in the Last 7 Days" }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: { stepSize: 1 }
-      }
+    // 6️⃣ Update Chart (last 7 days)
+    const days = [];
+    const counts = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      days.push(date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }));
+      const count = alerts.filter(a => new Date(a.createdAt).toDateString() === date.toDateString()).length;
+      counts.push(count);
     }
-  }
-});
+
+    const ctx = document.getElementById("alertsChart").getContext("2d");
+    if (alertsChart) alertsChart.destroy();
+    alertsChart = new Chart(ctx, {
+      type: "line",
+      data: { labels: days, datasets: [{ label: "Number of Alerts", data: counts, fill: false, borderColor: "#3498db", tension: 0.3, pointBackgroundColor: "#3498db", pointRadius: 5 }] },
+      options: { responsive: true, plugins: { legend: { display: false }, title: { display: true, text: "Alerts in the Last 7 Days" } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
 
   } catch (err) {
     console.error("❌ Failed to load dashboard alerts:", err);
   }
 }
-  
+function getSeverity(stock, thresholds) {
+  if (stock === 0) return "Out-of-stock";
+  if (stock <= thresholds.critical) return "Critical";
+  if (stock <= thresholds.low) return "Low-stock";
+  if (stock <= thresholds.warning) return "Warning";
+  return "Normal"; // optional fallback
+}
+const severityConfig = {
+  "Out-of-stock": { color: "red", title: "No Stock Alert!" },
+  "Critical": { color: "orange", title: "Critical Stock Alert!" },
+  "Low-stock": { color: "yellow", title: "Low Stock Alert!" },
+  "Warning": { color: "blue", title: "Warning Stock Alert!" }
+};
+
+
+
 
 </script>
 
