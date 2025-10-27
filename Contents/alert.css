@@ -112,15 +112,10 @@ select:focus {
   font-weight: 600;
 }
 
-.badge.critical {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-.badge.warning {
-  background: #fef3c7;
-  color: #92400e;
-}
+.badge.critical { background: #fee2e2; color: #b91c1c; }
+.badge.warning { background: #fef3c7; color: #92400e; }
+.badge.low-stock { background: #feeedd; color: #b45309; } /* can add */
+.badge.out-of-stock { background: #fee2e2; color: #b91c1c; }
 
 .badge.info {
   background: #e0f2fe;

@@ -17,16 +17,24 @@
       </div>
       <select>
         <option value="">Severity</option>
-        <option value="Critical">Critical</option>
         <option value="Warning">Warning</option>
-        <option value="Info">Info</option>
+        <option value="Low-stock">Low Stock</option>
+        <option value="Critical">Critical</option>
+        <option value="Out-of-stock">Out of Stock</option>
       </select>
-      <select>
+      <select id="statusFilter">
         <option value="">All Status</option>
         <option value="New">New</option>
-        <option value="Acknowledged">Acknowledged</option>
-        <option value="Resolved">Resolved</option>
+        <option value="1 day ago">1 day ago</option>
+        <option value="2 days ago">2 days ago</option>
+        <option value="3 days ago">3 days ago</option>
+        <option value="4 days ago">4 days ago</option>
+        <option value="5 days ago">5 days ago</option>
+        <option value="6 days ago">6 days ago</option>
+        <option value="1 week ago">1 week ago</option>
+        <option value="Older">Older</option>
       </select>
+
     </div>
 
     <!-- 🔹 TABLE -->
@@ -94,6 +102,38 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentPage = 1;
   const rowsPerPage = 5;
 
+
+  let thresholds = {
+  critical: 0, // Out of Stock
+  low: 5,      // Low stock warning
+  warning: 10  // Optional warning
+};
+
+// Map the <select> values to the actual severity returned by getSeverity()
+function mapSeverityFilter(value) {
+  switch(value) {
+    case "Out-of-stock": return "Out-of-stock";
+    case "Critical": return "Critical";
+    case "Low-stock": return "Low-stock";
+    case "Warning": return "Warning";
+     return value || null;
+  }
+}
+
+
+// Or fetch from backend dynamically:
+async function loadThresholds() {
+  try {
+    const res = await fetch("http://localhost:3000/system-settings");
+    const data = await res.json();
+    thresholds.critical = data.critical_stock_threshold ?? 0;
+    thresholds.low = data.low_stock_threshold ?? 5;
+    thresholds.warning = data.warning_stock_threshold ?? 10;
+  } catch (err) {
+    console.error("Failed to load thresholds, using defaults:", err);
+  }
+}
+
   // -----------------------------
   // SAVE ALERT TO DATABASE
   // -----------------------------
@@ -119,48 +159,53 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // -----------------------------
-  // LOAD ALERTS
-  // -----------------------------
-  async function loadAlerts() {
-    try {
-      // Fetch dynamic alerts (based on low stock)
-      const response = await fetch("http://localhost:3000/alert");
-      if (!response.ok) throw new Error("Failed to fetch alerts");
-      alerts = await response.json();
+// LOAD ALERTS
+// -----------------------------
+async function loadAlerts() {
+  await loadThresholds(); // ensure thresholds are loaded
 
-      // Fetch stored alerts to avoid duplicates
-      const storedResponse = await fetch("http://localhost:3000/stored-alerts");
-      if (!storedResponse.ok) throw new Error("Failed to fetch stored alerts");
-      const storedAlerts = await storedResponse.json();
+  try {
+    const res = await fetch("http://localhost:3000/products");
+    const products = await res.json();
 
-      const existingKeys = storedAlerts.map(a => `${a.name}-${a.stock}`);
+    // Generate alerts for any product under warning threshold
+    alerts = products
+      .filter(p => p.stock <= thresholds.warning) // Include Warning, Low, Critical, Out-of-stock
+      .map(p => ({
+        name: p.name,
+        stock: p.stock,
+        status: "New",
+        createdAt: p.updatedAt || p.createdAt || new Date()
+      }));
 
-      // Save only new alerts (not already stored)
-      for (const alert of alerts) {
-        const key = `${alert.name}-${alert.stock}`;
-        if (!existingKeys.includes(key)) {
-          await saveAlert(alert);
-        }
-      }
-
-      renderTable();
-    } catch (error) {
-      console.error("❌ Error fetching alerts:", error);
-      tableBody.innerHTML = `
-        <tr>
-          <td colspan="7" style="text-align:center;color:red;">Error loading alerts</td>
-        </tr>`;
+    // Save new alerts to DB
+    for (const alert of alerts) {
+      await saveAlert(alert);
     }
-  }
 
-  // -----------------------------
-  // SEVERITY HELPER
-  // -----------------------------
-  function getSeverity(stock) {
-    if (stock === 0) return "Critical";
-    if (stock <= 5) return "Warning";
-    return "Info";
+    renderTable();
+  } catch (err) {
+    console.error("Error loading alerts:", err);
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center;color:red;">Error loading alerts</td>
+      </tr>`;
   }
+}
+
+// -----------------------------
+// SEVERITY HELPER
+// -----------------------------
+function getSeverity(stock) {
+  if (stock === 0) return "Out-of-stock";
+  if (stock <= thresholds.critical) return "Critical";
+  if (stock <= thresholds.low) return "Low-stock";
+  if (stock <= thresholds.warning) return "Warning";
+  return "Normal"; // optional fallback
+}
+
+
+
 
   // -----------------------------
   // OPEN INVENTORY PAGE
@@ -181,19 +226,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+
+function updateStatusFilterOptions() {
+  const statusSet = new Set(alerts.map(a => getAlertAgeStatus(a.createdAt)));
+  const statusFilter = document.getElementById("statusFilter");
+
+  // Save currently selected value
+  const selectedValue = statusFilter.value;
+
+  // Rebuild the options
+  statusFilter.innerHTML = '<option value="">All Status</option>';
+
+  Array.from(statusSet)
+    .sort((a, b) => {
+      const order = ["New", "1 day ago", "2 days ago", "3 days ago", "4 days ago", "5 days ago", "6 days ago", "1 week ago", "Older"];
+      return order.indexOf(a) - order.indexOf(b);
+    })
+    .forEach(status => {
+      const opt = document.createElement("option");
+      opt.value = status;
+      opt.textContent = status;
+      statusFilter.appendChild(opt);
+    });
+
+  // Restore previously selected value
+  statusFilter.value = selectedValue;
+}
+
+
   // -----------------------------
   // RENDER ALERT TABLE
   // -----------------------------
   function renderTable() {
+      updateStatusFilterOptions();
     tableBody.innerHTML = "";
 
-    const filtered = alerts.filter((alert) => {
-      const searchMatch = alert.name?.toLowerCase().includes(searchInput.value.toLowerCase());
-      const severity = getSeverity(alert.stock);
-      const severityMatch = !severityFilter.value || severity === severityFilter.value;
-      const statusMatch = !statusFilter.value || alert.status === statusFilter.value;
-      return searchMatch && severityMatch && statusMatch;
-    });
+const filtered = alerts.filter(alert => {
+  const searchMatch = alert.name?.toLowerCase().includes(searchInput.value.toLowerCase());
+  const severity = getSeverity(alert.stock);
+  const severityMatch = !severityFilter.value || severity === severityFilter.value;
+    const ageStatus = getAlertAgeStatus(alert.createdAt);
+  const statusMatch = !statusFilter.value || ageStatus === statusFilter.value;
+
+  return searchMatch && severityMatch && statusMatch;
+});
+
 
     const start = (currentPage - 1) * rowsPerPage;
     const paginated = filtered.slice(start, start + rowsPerPage);
@@ -206,57 +283,87 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     paginated.forEach((alert, index) => {
-      const status = alert.status || "New";
-      const severity = getSeverity(alert.stock);
-      const tr = document.createElement("tr");
+ const status = getAlertAgeStatus(alert.createdAt);
+  const severity = getSeverity(alert.stock);
 
-      const actionButtons = `
-        <button class="action-btn resolve" title="Resolve Alert">
-          <i class="fa fa-check"></i> Resolve
-        </button>
-      `;
+  // Map severity to display type
+let typeText = "";
+switch(severity) {
+  case "Out-of-stock": typeText = "Out of Stock"; break;
+  case "Critical": typeText = "Critical Stock"; break;
+  case "Low-stock": typeText = "Low Stock"; break;
+  case "Warning": typeText = "Warning"; break;
+}
 
-      const clickableStatus =
-        status === "Resolved"
-          ? `<span class="status resolved clickable-status">${status}</span>`
-          : `<span class="status ${status.toLowerCase()}">${status}</span>`;
 
-      tr.innerHTML = `
-        <td><a href="#" class="view-link">ALT-${start + index + 1}</a></td>
-        <td>${alert.stock === 0 ? "Out of Stock" : "Low Stock"}</td>
-        <td>${alert.name || "N/A"}</td>
-        <td><span class="badge ${severity.toLowerCase()}">${severity}</span></td>
-        <td>${new Date(alert.createdAt).toLocaleString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        })}</td>
-        <td>${clickableStatus}</td>
-        <td>${actionButtons}</td>
-      `;
+  const tr = document.createElement("tr");
 
-      tableBody.appendChild(tr);
+  const actionButtons = `
+    <button class="action-btn resolve" title="Resolve Alert">
+      <i class="fa fa-check"></i> Resolve
+    </button>
+  `;
 
-      // Resolve button → open inventory
-      const resolveBtn = tr.querySelector(".resolve");
-      if (resolveBtn) resolveBtn.addEventListener("click", openInventoryPage);
+  const clickableStatus =
+    status === "Resolved"
+      ? `<span class="status resolved clickable-status">${status}</span>`
+      : `<span class="status ${status.toLowerCase()}">${status}</span>`;
 
-      // Resolved status → open inventory
-      const resolvedStatus = tr.querySelector(".clickable-status");
-      if (resolvedStatus) {
-        resolvedStatus.style.color = "#007bff";
-        resolvedStatus.style.cursor = "pointer";
-        resolvedStatus.title = "Go to Inventory Management";
-        resolvedStatus.addEventListener("click", openInventoryPage);
-      }
-    });
+  tr.innerHTML = `
+    <td><a href="#" class="view-link">ALT-${start + index + 1}</a></td>
+    <td>${typeText}</td>
+    <td>${alert.name || "N/A"}</td>
+    <td><span class="badge ${severity.toLowerCase()}">${severity}</span></td>
+    <td>${new Date(alert.createdAt).toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })}</td>
+    <td>${clickableStatus}</td>
+    <td>${actionButtons}</td>
+  `;
+
+  tableBody.appendChild(tr);
+
+  // Resolve button → open inventory
+  const resolveBtn = tr.querySelector(".resolve");
+  if (resolveBtn) resolveBtn.addEventListener("click", openInventoryPage);
+
+  // Resolved status → open inventory
+  const resolvedStatus = tr.querySelector(".clickable-status");
+  if (resolvedStatus) {
+    resolvedStatus.style.color = "#007bff";
+    resolvedStatus.style.cursor = "pointer";
+    resolvedStatus.title = "Go to Inventory Management";
+    resolvedStatus.addEventListener("click", openInventoryPage);
+  }
+});
+
 
     updatePaginationInfo(filtered.length);
     renderPagination(filtered.length);
   }
+
+
+
+  // -----------------------------
+// STATUS BASED ON AGE
+// -----------------------------
+function getAlertAgeStatus(createdAt) {
+  const now = new Date();
+  const alertDate = new Date(createdAt);
+  const diffTime = now - alertDate;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "New";
+  if (diffDays === 1) return "1 day ago";
+  if (diffDays >= 2 && diffDays <= 6) return `${diffDays} days ago`;
+  if (diffDays === 7) return "1 week ago";
+  return "Older";
+}
 
   // -----------------------------
   // PAGINATION

@@ -217,74 +217,6 @@ select:focus {
   opacity: 0.6;
 }
 
-/* ===== MODAL ===== */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.3s ease forwards;
-}
-
-.modal {
-  background: #fff;
-  width: 90%;
-  max-width: 750px;
-  border-radius: 16px;
-  overflow: hidden;
-  animation: slideIn 0.4s ease forwards;
-  position: relative;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-}
-
-.modal h2 {
-  background: linear-gradient(90deg, #2563eb, #00c8ff);
-  color: #fff;
-  margin: 0;
-  padding: 14px 22px;
-  font-size: 1.25rem;
-  font-weight: 600;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-}
-
-.close-btn {
-  position: absolute;
-  top: 10px;
-  right: 16px;
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 24px;
-  cursor: pointer;
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.close-btn:hover {
-  transform: rotate(90deg);
-  color: #ff4d4d;
-}
-
-/* Modal Content */
-#modalContent {
-  background: #f9fafb;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-/* Info Grid */
-#modalContent .info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-}
 
 .info-box {
   background: #fff;
@@ -369,4 +301,137 @@ select:focus {
 .transactions-table td a:hover {
   color: #0056b3;
   text-decoration: none;
+}
+
+/* ===== Transaction Details Modal ===== */
+#transactionDetailModal.modal {
+  display: none; /* hidden by default */
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+#transactionDetailModal .modal-content {
+  background-color: #fff;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 900px;
+  overflow: hidden;
+  animation: slideIn 0.4s ease;
+  height: auto;         
+  margin: auto;         
+  display: inline-block;
+}
+
+
+#transactionDetailModal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  background: linear-gradient(90deg, #2563eb, #00c8ff);
+  color: #fff;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+#transactionDetailModal .modal-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+#transactionDetailModal .modal-header .close {
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+#transactionDetailModal .modal-header .close:hover {
+  transform: rotate(90deg);
+  color: #ff4d4d;
+}
+
+#transactionDetailModal .modal-body {
+  overflow-y: auto;
+  padding: 20px;
+  overflow-y: visible;
+  background-color: #f9f9f9;
+}
+
+/* Modal Table */
+#transactionDetailModal .modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Inter', sans-serif;
+  table-layout: fixed;
+}
+
+#transactionDetailModal .modal-table thead {
+  position: sticky;
+  top: 0;
+  background-color: #e0e7ff;
+  z-index: 2;
+}
+
+#transactionDetailModal .modal-table th,
+#transactionDetailModal .modal-table td {
+  padding: 12px 15px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  word-wrap: break-word;
+}
+
+#transactionDetailModal .modal-table th {
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+#transactionDetailModal .modal-table tbody tr:hover {
+  background-color: #f1f5f9;
+  transition: background 0.2s;
+}
+
+/* Status Badges inside Modal Table */
+#transactionDetailModal .modal-table .status.completed {
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+#transactionDetailModal .modal-table .status.pending {
+  background: #fff8e1;
+  color: #f57f17;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+#transactionDetailModal .modal-table .status.cancelled {
+  background: #ffebee;
+  color: #c62828;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }

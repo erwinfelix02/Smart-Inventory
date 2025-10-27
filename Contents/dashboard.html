@@ -38,7 +38,7 @@
             <div class="summary-info">
               <p>Today's Sales</p>
               <h2>₱1,247</h2>
-              <small>+25% from yesterday</small>
+              <small>Sales</small>
             </div>
             <div class="summary-icon"><img src="../images/money.svg" alt="Sales"></div>
           </div>
@@ -266,13 +266,23 @@ fetch("/products/available")
   .catch(err => console.error("❌ Failed to fetch available products:", err));
 
 // ⚠️ Load Low-Stock Products
-fetch("/products/low-stock")
+fetch("/products")
   .then(res => res.json())
-  .then(data => {
+  .then(products => {
     const lowStockElem = document.querySelector(".summary-card.low-stock h2");
-    if (lowStockElem) lowStockElem.textContent = data.length;
+    const settingsRes = fetch("/system-settings").then(r => r.json());
+
+    Promise.all([products, settingsRes]).then(([products, settings]) => {
+      const critical = settings.critical_stock_threshold ?? 10;
+      const low = settings.low_stock_threshold ?? 15;
+
+      // Count products that are low stock (above critical, but below or equal low threshold)
+      const lowStockCount = products.filter(p => p.stock > critical && p.stock <= low).length;
+
+      if (lowStockElem) lowStockElem.textContent = lowStockCount;
+    });
   })
-  .catch(err => console.error("❌ Failed to load low stock count:", err));
+  .catch(err => console.error("❌ Failed to fetch low stock count:", err));
 
 
 // 🧾 Fetch all products and compute total stock dynamically

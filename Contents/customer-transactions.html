@@ -54,23 +54,43 @@
     </div>
   </div>
 
-  <!-- MODAL -->
-  <div class="modal-overlay" id="transactionModal">
-    <div class="modal">
-      <button class="close-btn" id="closeModal">&times;</button>
-      <h2>Transaction Details</h2>
-      <div id="modalContent" class="info-grid"></div>
+<!-- Transaction Details Modal -->
+<div id="transactionDetailModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Transaction Details</h3>
+      <span class="close">&times;</span>
+    </div>
+    <div class="modal-body">
+      <table class="modal-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Date/Time</th>
+            <th>Staff</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="modalBody">
+          <!-- Filled dynamically with JS -->
+        </tbody>
+      </table>
     </div>
   </div>
+</div>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const tableBody = document.querySelector(".transactions-table tbody");
   const searchInput = document.querySelector(".search-box input");
   const statusFilter = document.getElementById("statusFilter");
-  const modalOverlay = document.getElementById("transactionModal");
-  const modalContent = document.getElementById("modalContent");
-  const closeModalBtn = document.getElementById("closeModal");
+  const modalOverlay = document.getElementById("transactionDetailModal");
+  const modalBody = document.getElementById("modalBody");
+  const closeModalBtn = modalOverlay.querySelector(".close");
   const paginationContainer = document.querySelector(".pages");
   const paginationInfo = document.querySelector(".pagination p");
 
@@ -78,15 +98,15 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentPage = 1;
   const rowsPerPage = 5;
 
-// 🔠 Convert text to Title Case
-function toTitleCase(str) {
-  if (!str) return "";
-  return str.replace(/\w\S*/g, word =>
-    word.charAt(0).toUpperCase() + word.substr(1).toLowerCase()
-  );
-}
+  // Convert text to Title Case
+  function toTitleCase(str) {
+    if (!str) return "";
+    return str.replace(/\w\S*/g, word =>
+      word.charAt(0).toUpperCase() + word.substr(1).toLowerCase()
+    );
+  }
 
-  // --- PARSE AND FORMAT DATE ---
+  // Parse and format date
   function parseDate(input) {
     if (!input) return null;
     if (typeof input === "object" && "$date" in input) return new Date(input.$date);
@@ -94,30 +114,20 @@ function toTitleCase(str) {
   }
 
   function formatDate(input) {
-  const d = parseDate(input);
-  if (!d || isNaN(d)) return "-";
+    const d = parseDate(input);
+    if (!d || isNaN(d)) return "-";
+    const datePart = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const timePart = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+    return `${datePart} at ${timePart}`;
+  }
 
-  // Example: "Oct 23, 2025 11:45"
-  const datePart = d.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric"
-  });
-
-  const timePart = d.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true
-  });
-
-  return `${datePart} at ${timePart}`;
-}
-
-  // --- MODAL ---
+  // Modal close
   closeModalBtn.addEventListener("click", () => modalOverlay.style.display = "none");
-  modalOverlay.addEventListener("click", e => { if(e.target === modalOverlay) modalOverlay.style.display = "none"; });
+  modalOverlay.addEventListener("click", e => {
+    if (e.target === modalOverlay) modalOverlay.style.display = "none";
+  });
 
-  // --- LOAD DATA ---
+  // Load transactions
   async function loadTransactions() {
     try {
       const res = await fetch("http://localhost:3000/transactions");
@@ -130,10 +140,9 @@ function toTitleCase(str) {
     }
   }
 
-  // --- RENDER TABLE ---
+  // Render table
   function renderTable() {
     tableBody.innerHTML = "";
-
     const filtered = transactions.filter(txn => {
       const searchMatch = txn.customerName?.toLowerCase().includes(searchInput.value.toLowerCase());
       const statusMatch = !statusFilter.value || txn.status === statusFilter.value;
@@ -165,21 +174,20 @@ function toTitleCase(str) {
       `;
       tableBody.appendChild(tr);
 
-      const viewBtn = tr.querySelector(".view");
-      viewBtn.addEventListener("click", () => {
-        modalContent.innerHTML = `
-          <div class="info-box"><span class="info-title">Customer</span><span class="info-value">${txn.customerName || "-"}</span></div>
-          <div class="info-box"><span class="info-title">Staff</span><span class="info-value">${txn.staffName || "-"}</span></div>
-         <div class="info-box"><span class="info-title">Product</span><span class="info-value">${txn.product?.name ? toTitleCase(txn.product.name) : "Unknown"}</span></div>
-          <div class="info-box"><span class="info-title">SKU</span><span class="info-value">${txn.product?.sku || "-"}</span></div>
-          <div class="info-box"><span class="info-title">Unit Price</span><span class="info-value">${txn.product?.price || 0}</span></div>
-          <div class="info-box"><span class="info-title">Quantity</span><span class="info-value">${txn.quantity || 0}</span></div>
-          <div class="info-box"><span class="info-title">Discount</span><span class="info-value">${txn.discount || 0}</span></div>
-          <div class="info-box"><span class="info-title">Tax</span><span class="info-value">${txn.tax || 0}</span></div>
-          <div class="info-box"><span class="info-title">Total</span><span class="info-value">${txn.total || 0}</span></div>
-          <div class="info-box"><span class="info-title">Status</span><span class="info-value status ${txn.status?.toLowerCase() || ""}">${txn.status || "-"}</span></div>
-          <div class="info-box"><span class="info-title">Date</span><span class="info-value">${formatDate(txn.date)}</span></div>
+      // View transaction modal
+      tr.querySelector(".view").addEventListener("click", () => {
+        modalBody.innerHTML = `
+          <tr>
+            <td>TXN-${start + idx + 1}</td>
+            <td>${txn.customerName ? toTitleCase(txn.customerName) : "-"}</td>
+            <td>${formatDate(txn.date)}</td>
+            <td>${txn.staffName ? toTitleCase(txn.staffName) : "-"}</td>
+            <td>${txn.product?.name ? toTitleCase(txn.product.name) : "Unknown"}</td>
+            <td>₱${txn.total?.toLocaleString() || 0}</td>
+            <td><span class="status ${txn.status?.toLowerCase() || ""}">${txn.status || "-"}</span></td>
+          </tr>
         `;
+
         modalOverlay.style.display = "flex";
       });
     });
@@ -188,7 +196,7 @@ function toTitleCase(str) {
     renderPagination(filtered.length);
   }
 
-  // --- PAGINATION ---
+  // Pagination
   function renderPagination(total) {
     paginationContainer.innerHTML = "";
     const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
@@ -226,5 +234,6 @@ function toTitleCase(str) {
   loadTransactions();
 });
 </script>
+
 </body>
 </html>
