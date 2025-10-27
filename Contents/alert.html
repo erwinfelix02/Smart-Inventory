@@ -67,24 +67,62 @@
       </div>
     </div>
   </div>
-<!-- Alert Details Modal -->
-<div class="modal-overlay" id="alertModal">
-  <div class="modal">
-    <button class="close-btn" id="closeModal">&times;</button>
-    <h2>Alert Details</h2>
-    <div id="modalContent" class="info-grid">
-      <!-- Info boxes will be inserted dynamically -->
+<!-- ALERT DETAILS MODAL -->
+<div id="alertModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Alert Details</h3>
+      <span class="close" id="closeModal">&times;</span>
+    </div>
+    <div class="modal-body" id="modalContent">
+      <!-- JS inserts alert info boxes here -->
     </div>
   </div>
 </div>
 
 
+
 <script>
+
+    let thresholds = {
+  critical: 0, // Out of Stock
+  low: 5,      // Low stock warning
+  warning: 10  // Optional warning
+};
+
+// -----------------------------
+// SEVERITY HELPER
+// -----------------------------
+function getSeverity(stock) {
+  if (stock === 0) return "Out-of-stock";
+  if (stock <= thresholds.critical) return "Critical";
+  if (stock <= thresholds.low) return "Low-stock";
+  if (stock <= thresholds.warning) return "Warning";
+  return "Normal"; // optional fallback
+}
+
+
+  // -----------------------------
+// STATUS BASED ON AGE
+// -----------------------------
+function getAlertAgeStatus(createdAt) {
+  const now = new Date();
+  const alertDate = new Date(createdAt);
+  const diffTime = now - alertDate;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "New";
+  if (diffDays === 1) return "1 day ago";
+  if (diffDays >= 2 && diffDays <= 6) return `${diffDays} days ago`;
+  if (diffDays === 7) return "1 week ago";
+  return "Older";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const modalOverlay = document.getElementById("alertModal");
   const modalContent = document.getElementById("modalContent");
   const closeModalBtn = document.getElementById("closeModal");
-
+let alerts = []; // your alerts array
   closeModalBtn.addEventListener("click", () => (modalOverlay.style.display = "none"));
   modalOverlay.addEventListener("click", (e) => {
     if (e.target === modalOverlay) modalOverlay.style.display = "none";
@@ -98,16 +136,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const paginationContainer = document.querySelector(".pages");
   const paginationInfo = document.querySelector(".pagination p");
 
-  let alerts = [];
   let currentPage = 1;
   const rowsPerPage = 5;
-
-
-  let thresholds = {
-  critical: 0, // Out of Stock
-  low: 5,      // Low stock warning
-  warning: 10  // Optional warning
-};
 
 // Map the <select> values to the actual severity returned by getSeverity()
 function mapSeverityFilter(value) {
@@ -191,17 +221,6 @@ async function loadAlerts() {
         <td colspan="7" style="text-align:center;color:red;">Error loading alerts</td>
       </tr>`;
   }
-}
-
-// -----------------------------
-// SEVERITY HELPER
-// -----------------------------
-function getSeverity(stock) {
-  if (stock === 0) return "Out-of-stock";
-  if (stock <= thresholds.critical) return "Critical";
-  if (stock <= thresholds.low) return "Low-stock";
-  if (stock <= thresholds.warning) return "Warning";
-  return "Normal"; // optional fallback
 }
 
 
@@ -296,13 +315,24 @@ switch(severity) {
 }
 
 
-  const tr = document.createElement("tr");
+const tr = document.createElement("tr");
 
-  const actionButtons = `
+
+let actionButtons = "";
+if (userRole === "staff") {
+  actionButtons = `
+    <button class="action-btn view" title="View Alert">
+      <i class="fa fa-eye"></i>
+    </button>
+  `;
+} else {
+  actionButtons = `
     <button class="action-btn resolve" title="Resolve Alert">
       <i class="fa fa-check"></i> Resolve
     </button>
   `;
+}
+
 
   const clickableStatus =
     status === "Resolved"
@@ -327,6 +357,7 @@ switch(severity) {
   `;
 
   tableBody.appendChild(tr);
+  
 
   // Resolve button → open inventory
   const resolveBtn = tr.querySelector(".resolve");
@@ -340,6 +371,14 @@ switch(severity) {
     resolvedStatus.title = "Go to Inventory Management";
     resolvedStatus.addEventListener("click", openInventoryPage);
   }
+
+const viewBtn = tr.querySelector(".view");
+if (viewBtn) {
+  viewBtn.addEventListener("click", ((a) => () => {
+    openAlertModal(a);
+  })(alert));
+}
+
 });
 
 
@@ -347,23 +386,6 @@ switch(severity) {
     renderPagination(filtered.length);
   }
 
-
-
-  // -----------------------------
-// STATUS BASED ON AGE
-// -----------------------------
-function getAlertAgeStatus(createdAt) {
-  const now = new Date();
-  const alertDate = new Date(createdAt);
-  const diffTime = now - alertDate;
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return "New";
-  if (diffDays === 1) return "1 day ago";
-  if (diffDays >= 2 && diffDays <= 6) return `${diffDays} days ago`;
-  if (diffDays === 7) return "1 week ago";
-  return "Older";
-}
 
   // -----------------------------
   // PAGINATION
@@ -433,6 +455,57 @@ function getAlertAgeStatus(createdAt) {
   // -----------------------------
   loadAlerts();
 });
+
+function openAlertModal(alert) {
+  const modalOverlay = document.getElementById("alertModal");
+  const modalContent = document.getElementById("modalContent");
+
+  modalContent.innerHTML = "";
+
+const details = [
+  { label: "Product Name", value: alert.name },
+  { label: "Stock", value: alert.stock },
+  { label: "Severity", value: getSeverity(alert.stock), type: "severity" },
+  { label: "Status", value: getAlertAgeStatus(alert.createdAt), type: "status" },
+ { 
+  label: "Triggered At", 
+  value: (() => {
+    const d = new Date(alert.createdAt);
+    const month = d.toLocaleString('default', { month: 'short' }); // e.g., "Oct"
+    const day = d.getDate();
+    const year = d.getFullYear();
+
+    // 12-hour time format
+    let hours = d.getHours();
+    const minutes = d.getMinutes().toString().padStart(2,'0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // convert 0 to 12
+
+    return `${month} ${day}, ${year}, ${hours}:${minutes} ${ampm}`;
+  })()
+},
+
+];
+
+
+  details.forEach(d => {
+    const div = document.createElement("div");
+    div.classList.add("info-box");
+
+    let valueClass = "";
+    if(d.type) valueClass = ` ${d.type.toLowerCase()}`
+    div.innerHTML = `
+      <div class="info-title">${d.label}</div>
+      <div class="info-value${valueClass}">${d.value}</div>
+    `;
+    modalContent.appendChild(div);
+  });
+
+  modalOverlay.style.display = "flex";
+}
+
+
 </script>
 
 
