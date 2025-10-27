@@ -114,18 +114,18 @@ select:focus {
 }
 
 .status.completed {
-  background: #dcfce7;
-  color: #166534;
+  background: #e8f5e9;
+  color: #2e7d32;
 }
 
 .status.pending {
-  background: #fef3c7;
-  color: #92400e;
+  background: #fff8e1;
+  color: #f57f17;
 }
 
 .status.cancelled {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: #ffebee;
+  color: #c62828;
 }
 
 /* ===== ACTION BUTTONS ===== */

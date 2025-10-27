@@ -112,10 +112,10 @@ select:focus {
   font-weight: 600;
 }
 
-.badge.critical { background: #fee2e2; color: #b91c1c; }
-.badge.warning { background: #fef3c7; color: #92400e; }
-.badge.low-stock { background: #feeedd; color: #b45309; } /* can add */
-.badge.out-of-stock { background: #fee2e2; color: #b91c1c; }
+.badge.critical {  background: #ffccbc;color: #d84315; }
+.badge.warning {  background: #fff8e1;color: #ffb300;   }
+.badge.low-stock {  background: #ffe0b2; color: #fb8c00; }
+.badge.out-of-stock {  background: #f44336;color: #ffffff;}
 
 .badge.info {
   background: #e0f2fe;
