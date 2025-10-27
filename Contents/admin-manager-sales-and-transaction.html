@@ -237,6 +237,14 @@ let transactions = [];
 let currentPage = 1;
 let currentFilter = "All Status";
 
+
+// 🔠 Convert string to Title Case
+function toTitleCase(str) {
+  return str.replace(/\w\S*/g, word =>
+    word.charAt(0).toUpperCase() + word.substr(1).toLowerCase()
+  );
+}
+
 // ------------------------
 // Load Today's Sales based on completed transactions
 // ------------------------
@@ -357,7 +365,7 @@ async function loadLowStockAlerts() {
       div.innerHTML = `
         <i class="fa fa-box"></i>
         <div class="alert-details">
-          <p>${p.name}</p>
+          <p>${toTitleCase(p.name)}</p>
           <small>SKU: ${p.sku || "N/A"}</small>
         </div>
         <span class="units">${p.stock} unit${p.stock !== 1 ? "s" : ""} left - ${statusText}</span>
@@ -428,7 +436,9 @@ function renderTransactionsPage() {
   } else {
    pageItems.forEach(tx => {
   const dateTime = new Date(tx.date).toLocaleString("en-PH", { dateStyle: "medium", timeStyle: "short" });
-  const productName = tx.product?.name || "Unknown Product";
+  const productName = tx.product?.name
+  ? toTitleCase(tx.product.name)
+  : "Unknown Product";
   const itemsSummary = `${productName} x${tx.quantity}`;
   const badgeClassMap = {
     "Completed": "paid",
@@ -445,7 +455,7 @@ function renderTransactionsPage() {
   tr.innerHTML = `
     <td>#${tx._id.slice(-6).toUpperCase()}</td>
     <td>${dateTime}</td>
-    <td>${tx.staffName}</td>
+    <td>${toTitleCase(tx.staffName)}</td>
     <td>${itemsSummary}</td>
     <td>₱${tx.total.toLocaleString()}</td>
     <td><span class="badge ${statusClass}">${tx.status}</span></td>
@@ -647,7 +657,7 @@ document.getElementById("transactions-body").addEventListener("click", (e) => {
       <tr>
         <td>${txnId}</td>
         <td>${dateTime}</td>
-        <td>${staff}</td>
+        <td>${toTitleCase(staff)}</td>
         <td>${items}</td>
         <td>${total}</td>
         <td><span class="status ${status.toLowerCase()}">${status}</span></td>
@@ -696,7 +706,7 @@ document.getElementById("transactions-body").addEventListener("click", (e) => {
 
     document.getElementById("editTxnId").textContent = row.children[0].textContent;
     document.getElementById("editTxnDate").textContent = row.children[1].textContent;
-    document.getElementById("editTxnStaff").textContent = row.children[2].textContent;
+    document.getElementById("editTxnStaff").textContent = toTitleCase(row.children[2].textContent);
     document.getElementById("editTxnItems").textContent = row.children[3].textContent;
     document.getElementById("editTxnTotal").textContent = row.children[4].textContent;
 

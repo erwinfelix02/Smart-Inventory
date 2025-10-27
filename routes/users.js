@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { Admin, Manager, Staff } = require("../models/user");
+const bcrypt = require("bcryptjs");
+
 
 // =========================
 // Fetch all users
@@ -75,6 +77,40 @@ router.post("/staff", async (req, res) => {
   }
 });
 
+
+// ✅ Put this BEFORE any routes like "/:id"
+router.put("/reset-password", async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    console.log("🔍 Reset request for:", email);
+
+    if (!email || !newPassword) {
+      return res.status(400).json({ success: false, message: "Email and new password are required." });
+    }
+
+    let user =
+      (await Admin.findOne({ email })) ||
+      (await Manager.findOne({ email })) ||
+      (await Staff.findOne({ email }));
+
+    if (!user) {
+      console.log("❌ No user found for:", email);
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    console.log("✅ Password updated successfully for:", email);
+    return res.status(200).json({ success: true, message: "Password reset successful." });
+  } catch (error) {
+    console.error("❌ Reset password error:", error);
+    return res.status(500).json({ success: false, message: "Server error. Please try again later." });
+  }
+});
+
+
 // =========================
 // Update user
 // =========================
@@ -139,6 +175,7 @@ router.put("/:id/status", async (req, res) => {
     res.status(500).json({ message: "Failed to update user status" });
   }
 });
+
 
 
 

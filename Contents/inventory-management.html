@@ -231,6 +231,13 @@ let allProducts = [];
 let categoryChart;
 let stockTrendChart;
 
+// 🔠 Capitalize first letter of each word
+function toTitleCase(str) {
+  return str.replace(/\w\S*/g, word =>
+    word.charAt(0).toUpperCase() + word.substr(1).toLowerCase()
+  );
+}
+
 
 // 🧩 Fix modal expansion issue
 function updateModalHeight() {
@@ -324,7 +331,7 @@ function displayProducts(products) {
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${p.name}</td>
+      <td>${toTitleCase(p.name)}</td>
       <td>${p.sku || "-"}</td>
       <td>${p.category || "Uncategorized"}</td>
       <td>${p.stock}</td>
@@ -353,7 +360,7 @@ function displayLowStock(products) {
     div.innerHTML = `
       <img src="../images/exclamation.svg" class="alert-icon" alt="alert">
       <div class="details">
-        <p>${p.name}</p>
+        <p>${toTitleCase(p.name)}</p>
         <small>SKU: ${p.sku || "N/A"}</small>
       </div>
       <div class="units">${p.stock} units left</div>
@@ -759,6 +766,7 @@ function showStatusMessage(message, isError = false) {
     status.classList.remove('show', 'error');
   }, 2500);
 }
+
 
 </script>
 

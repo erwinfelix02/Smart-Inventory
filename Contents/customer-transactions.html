@@ -78,6 +78,14 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentPage = 1;
   const rowsPerPage = 5;
 
+// 🔠 Convert text to Title Case
+function toTitleCase(str) {
+  if (!str) return "";
+  return str.replace(/\w\S*/g, word =>
+    word.charAt(0).toUpperCase() + word.substr(1).toLowerCase()
+  );
+}
+
   // --- PARSE AND FORMAT DATE ---
   function parseDate(input) {
     if (!input) return null;
@@ -146,9 +154,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td><a href="#" class="view-link">TXN-${start + idx + 1}</a></td>
-        <td>${txn.customerName || "-"}</td>
-        <td>${txn.staffName || "-"}</td>
-        <td>${txn.product?.name || "Unknown"}</td>
+        <td>${txn.customerName ? toTitleCase(txn.customerName) : "-"}</td>
+        <td>${txn.staffName ? toTitleCase(txn.staffName) : "-"}</td>
+        <td>${txn.product?.name ? toTitleCase(txn.product.name) : "Unknown"}</td>
         <td>${txn.quantity || 0}</td>
         <td>₱${txn.total?.toLocaleString() || 0}</td>
         <td><span class="status ${txn.status?.toLowerCase() || ""}">${txn.status || "-"}</span></td>
@@ -162,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modalContent.innerHTML = `
           <div class="info-box"><span class="info-title">Customer</span><span class="info-value">${txn.customerName || "-"}</span></div>
           <div class="info-box"><span class="info-title">Staff</span><span class="info-value">${txn.staffName || "-"}</span></div>
-          <div class="info-box"><span class="info-title">Product</span><span class="info-value">${txn.product?.name || "Unknown"}</span></div>
+         <div class="info-box"><span class="info-title">Product</span><span class="info-value">${txn.product?.name ? toTitleCase(txn.product.name) : "Unknown"}</span></div>
           <div class="info-box"><span class="info-title">SKU</span><span class="info-value">${txn.product?.sku || "-"}</span></div>
           <div class="info-box"><span class="info-title">Unit Price</span><span class="info-value">${txn.product?.price || 0}</span></div>
           <div class="info-box"><span class="info-title">Quantity</span><span class="info-value">${txn.quantity || 0}</span></div>

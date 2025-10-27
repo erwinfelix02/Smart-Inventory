@@ -8,6 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
+app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
@@ -54,7 +55,7 @@ app.use("/users", usersRoute);
 app.use("/auth", signinRoutes);     // login & verify
 app.use("/products", productRoutes);
 app.use("/settings", settingsRoutes); // fetch settings info
-app.use("/users", userManagementRoutes);
+app.use("/users-management", userManagementRoutes);
 
 // Start server
 app.listen(PORT, () => {

@@ -400,7 +400,6 @@ input[disabled], select[disabled] {
   width: 90%;
   max-width: 900px;
   max-height: 80vh;  /* scroll if content exceeds */
-  overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   transition: all 0.3s ease-in-out;
 }
@@ -431,34 +430,39 @@ input[disabled], select[disabled] {
 /* Table styling */
 .modal-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 14px;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border-collapse: collapse;
 }
-
 .modal-table th, .modal-table td {
   padding: 12px 15px;
   text-align: left;
 }
+.modal-table td {
+  padding: 12px 15px;
+  background-color: #fff;
+}
 
+.modal-table-container {
+  max-height: 300px;
+  overflow-y: auto;  
+}
 .modal-table th {
+  position: sticky;
+  top: 0;                     
   background-color: #1c2b4d;
   color: #fff;
-  font-weight: 600;
+  z-index: 10;
 }
+.modal-table tbody tr:hover {
+  background-color: #f0f8ff;
+}
+
 
 .modal-table tbody tr {
   background-color: #fff;
   transition: background-color 0.2s, transform 0.2s;
 }
 
-.modal-table tbody tr:hover {
-  background-color: #f0f8ff;
-  transform: translateX(3px);
-}
+
 
 .modal-table .status.success {
   color: #28a745;

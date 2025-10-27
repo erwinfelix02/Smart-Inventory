@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const nodemailer = require("nodemailer");
-const { Admin, Manager, Staff } = require("../models/User"); // your schema file path
+const { Admin, Manager, Staff } = require("../models/user"); // your schema file path
 
 // 📧 POST /forgot-password/verify-email
 router.post("/verify-email", async (req, res) => {

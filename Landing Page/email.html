@@ -142,12 +142,13 @@ continueBtn.addEventListener("click", async () => {
 
        setTimeout(() => {
         if (source === "forgot") {
-          // ✅ If coming from forgot password →  reset password
-          window.location.href = "../Contents/reset-password.html";
+          // ✅ Redirect to reset-password page and include the email in the URL
+          window.location.href = `../Contents/reset-password.html?email=${encodeURIComponent(email)}`;
         } else {
           // ✅ If from login/signup → go to dashboard
           window.location.href = "../Contents/Sidebar.html";
         }
+
       }, 1000);
 
 
