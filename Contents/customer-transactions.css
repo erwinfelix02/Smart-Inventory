@@ -435,3 +435,21 @@ select:focus {
   from { transform: translateY(-50px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+.action-btn.delete {
+  background: transparent;
+  color: #1a73e8; /* blue */
+  font-size: 16px;
+}
+
+.action-btn.delete:hover {
+  color: #0b5ed7; /* darker blue on hover */
+}
+
+.action-btn.delete i {
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.action-btn.delete:hover i {
+  transform: scale(1.2);
+  color: #0b5ed7; /* same darker blue on hover */
+}

@@ -170,7 +170,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>₱${txn.total?.toLocaleString() || 0}</td>
         <td><span class="status ${txn.status?.toLowerCase() || ""}">${txn.status || "-"}</span></td>
         <td>${formatDate(txn.date)}</td>
-        <td><button class="action-btn view"><i class="fa fa-eye"></i></button></td>
+        <td>
+          <button class="action-btn view"><i class="fa fa-eye"></i></button>
+        </td>
+
       `;
       tableBody.appendChild(tr);
 
@@ -233,6 +236,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadTransactions();
 });
+
+
+
 </script>
 
 </body>
