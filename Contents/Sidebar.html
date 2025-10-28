@@ -1,140 +1,461 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Inventory</title>
-  <link rel="icon" type="image/png" href="../images/logo.svg">
-  <link rel="stylesheet" href="Sidebar.css">
-</head>
-<body>
-  <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
-    <div class="logo">
-      <img src="../images/logo.svg" alt="Logo" class="logo-img"> 
-      <div class="logo-text">
-        <h2>Smart Inventory</h2>
-        <small>Alert System</small>
-      </div>
-      <button id="collapse-btn" onclick="toggleSidebar()" class="collapse-btn">
-        <img src="../images/collapse.svg" alt="Collapse Sidebar">
-      </button>
-      <button class="close-btn" onclick="closeSidebar()">✖</button>
-    </div>
-
-    <ul>
-      <li id="dashboard-menu" class="active" onclick="handleDashboardMenu(this)">
-        <img src="../images/dashboard.svg" alt="Dashboard Icon" class="menu-icon"> Dashboard
-      </li>
-
-      <li id="inventory-management" onclick="changePage('Inventory Management','Track and manage inventory', this, '../Contents/inventory-management.html')">
-        <img src="../images/inventory.svg" alt="Inventory Icon" class="menu-icon"> Inventory Management
-      </li>
-
-      <li id="sales-menu" onclick="handleSalesMenu(this)">
-        <img src="../images/sales.svg" alt="Sales Icon" class="menu-icon">
-        <span id="sales-text">Sales & Transactions</span>
-      </li>
-
-      <li onclick="changePage('Alert Management','Manage system alerts and notifications', this, '../Contents/alert.html')">
-        <img src="../images/alert.svg" alt="Alert Icon" class="menu-icon"> Alert Management
-      </li>
-      <li id="customer-transactions" onclick="changePage('Customer Transactions','Manage customer transactions', this, '../Contents/customer-transactions.html')">
-        <img src="../images/transaction.png" alt="Customer Transactions Icon" class="menu-icon"> Customer Transactions
-      </li>
-
-
-      <li id="user-management" onclick="changePage('User Management','Manage users and roles', this, '../Contents/user-management.html')">
-        <img src="../images/user.svg" alt="User Management Icon" class="menu-icon"> User Management
-      </li>
-
-      <li id="settings-menu">
-        <img src="../images/settings.svg" alt="Settings Icon" class="menu-icon"> Settings
-      </li>
-    </ul>
-
-    <!-- User footer -->
-    <div class="user-info">
-      <span class="avatar"></span>
-      <div>
-        <p></p>
-        <small></small>
-      </div>
-      <button class="log-out" onclick="changeAccount()">
-        <img src="../images/logout.svg" alt="Change Account">
-      </button>
-    </div>
-  </div>
-
-  <!-- Main Content -->
-  <div class="main-content">
-    <div class="topbar">
-      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-      <div class="title">
-        <h2 id="page-title">Dashboard</h2>
-        <p id="page-subtitle">Real-time inventory monitoring and alerts</p>
-      </div>
-      <div class="banner-container">
-        <div class="banner-text">
-          - Welcome to Smart Inventory System! | Stay updated with real-time alerts, low-stock warnings, and sales notifications! | Manage your inventory efficiently today!
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Inventory</title>
+    <link rel="icon" type="image/png" href="../images/logo.svg">
+    <link rel="stylesheet" href="Sidebar.css">
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="logo">
+        <img src="../images/logo.svg" alt="Logo" class="logo-img"> 
+        <div class="logo-text">
+          <h2>Smart Inventory</h2>
+          <small>Alert System</small>
         </div>
-      </div>
-      <div class="icons">
-      <div class="bell-container" onclick="toggleBell(this)">
-        <img src="../images/bell.svg" alt="Notification Bell" class="bell">
-        <span class="bell-badge" id="bellBadge">0</span>
-
-       
-        <!--  Dropdown for alerts -->
-      <div id="alertDropdown" class="alert-dropdown hidden">
-        <h4 class="alert-header">
-            <span>Recent Alerts</span>
-            <button id="markAllBtn" class="mark-all-btn hidden">✓ Mark all as read</button>
-          </h4>
-
-        <ul id="alertList"></ul>
+        <button id="collapse-btn" onclick="toggleSidebar()" class="collapse-btn">
+          <img src="../images/collapse.svg" alt="Collapse Sidebar">
+        </button>
+        <button class="close-btn" onclick="closeSidebar()">✖</button>
       </div>
 
+      <ul>
+        <li id="dashboard-menu" class="active" onclick="handleDashboardMenu(this)">
+          <img src="../images/dashboard.svg" alt="Dashboard Icon" class="menu-icon"> Dashboard
+        </li>
+
+        <li id="inventory-management" onclick="changePage('Inventory Management','Track and manage inventory', this, '../Contents/inventory-management.html')">
+          <img src="../images/inventory.svg" alt="Inventory Icon" class="menu-icon"> Inventory Management
+        </li>
+
+        <li id="sales-menu" onclick="handleSalesMenu(this)">
+          <img src="../images/sales.svg" alt="Sales Icon" class="menu-icon">
+          <span id="sales-text">Sales & Transactions</span>
+        </li>
+
+        <li onclick="changePage('Alert Management','Manage system alerts and notifications', this, '../Contents/alert.html')">
+          <img src="../images/alert.svg" alt="Alert Icon" class="menu-icon"> Alert Management
+        </li>
+        <li id="customer-transactions" onclick="changePage('Customer Transactions','Manage customer transactions', this, '../Contents/customer-transactions.html')">
+          <img src="../images/transaction.png" alt="Customer Transactions Icon" class="menu-icon"> Customer Transactions
+        </li>
+
+
+        <li id="user-management" onclick="changePage('User Management','Manage users and roles', this, '../Contents/user-management.html')">
+          <img src="../images/user.svg" alt="User Management Icon" class="menu-icon"> User Management
+        </li>
+
+        <li id="settings-menu">
+          <img src="../images/settings.svg" alt="Settings Icon" class="menu-icon"> Settings
+        </li>
+      </ul>
+
+      <!-- User footer -->
+      <div class="user-info">
+        <span class="avatar"></span>
+        <div>
+          <p></p>
+          <small></small>
+        </div>
+        <button class="log-out" onclick="changeAccount()">
+          <img src="../images/logout.svg" alt="Change Account">
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="topbar">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <div class="title">
+          <h2 id="page-title">Dashboard</h2>
+          <p id="page-subtitle">Real-time inventory monitoring and alerts</p>
+        </div>
+        <div class="banner-container">
+          <div class="banner-text">
+            - Welcome to Smart Inventory System! | Stay updated with real-time alerts, low-stock warnings, and sales notifications! | Manage your inventory efficiently today!
+          </div>
+        </div>
+        <div class="icons">
+        <div class="bell-container" onclick="toggleBell(this)">
+          <img src="../images/bell.svg" alt="Notification Bell" class="bell">
+          <span class="bell-badge" id="bellBadge">0</span>
+
+        
+          <!--  Dropdown for alerts -->
+        <div id="alertDropdown" class="alert-dropdown hidden">
+          <h4 class="alert-header">
+              <span>Recent Alerts</span>
+              <button id="markAllBtn" class="mark-all-btn hidden">✓ Mark all as read</button>
+            </h4>
+
+          <ul id="alertList"></ul>
+        </div>
+
+        </div>
+
       </div>
 
-    </div>
+      </div>
 
-    </div>
-
-    
-<div id="welcomeOverlay">
-  <div id="welcomeMessage">
-    Welcome, <span id="welcomeUserName"></span>!
-  </div>
-</div>
-
-    <div id="page-content">
-      <iframe id="content-frame" src="" style="width:100%; height:80vh; border:none;"></iframe>
+      
+  <div id="welcomeOverlay">
+    <div id="welcomeMessage">
+      Welcome, <span id="welcomeUserName"></span>!
     </div>
   </div>
 
-<!-- Logout Confirmation Modal -->
-<div id="logoutModal" class="modal hidden">
-  <div class="modal-content">
-    <h3>Confirm Logout</h3>
-    <p>Are you sure you want to log out?</p>
-    <div class="modal-buttons">
-      <button id="cancelLogout" class="btn cancel">Cancel</button>
-      <button id="confirmLogout" class="btn confirm">Logout</button>
+      <div id="page-content">
+        <iframe id="content-frame" src="" style="width:100%; height:80vh; border:none;"></iframe>
+      </div>
+    </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Confirm Logout</h3>
+      <p>Are you sure you want to log out?</p>
+      <div class="modal-buttons">
+        <button id="cancelLogout" class="btn cancel">Cancel</button>
+        <button id="confirmLogout" class="btn confirm">Logout</button>
+      </div>
     </div>
   </div>
-</div>
 
 
 
-  <!-- Save Status Message -->
-<div id="saveStatus"></div>
+    <!-- Save Status Message -->
+  <div id="saveStatus"></div>
 
 
 
 
-<script>
-    // --- Get user from localStorage ---
+  <script>
+      // --- Get user from localStorage ---
+      const userData = localStorage.getItem("user");
+      let user = null;
+
+      if (userData) {
+        try { user = JSON.parse(userData); } 
+        catch(e) { console.error("Error parsing user data:", e); }
+      }
+
+      // --- Display user info ---
+      const userNameEl = document.querySelector(".user-info p");
+      const userRoleEl = document.querySelector(".user-info small");
+      const avatarEl = document.querySelector(".user-info .avatar");
+
+      userNameEl.innerText = user?.fullName || "Guest";
+      userRoleEl.innerText = user?.role || "Unknown";
+      avatarEl.innerText = user?.fullName 
+        ? user.fullName.split(" ").map(n => n[0]).join("").toUpperCase()
+        : "?";
+
+      // --- Hide User Management for non-admin/manager ---
+      const userManagementMenu = document.getElementById("user-management");
+      if (userManagementMenu) {
+        const role = user?.role?.toLowerCase();
+        if (role !== "admin" && role !== "manager") userManagementMenu.style.display = "none";
+      }
+
+      // --- Set Sales & Transactions label based on role ---
+      const salesMenu = document.getElementById("sales-menu");
+      if (salesMenu) {
+        const span = salesMenu.querySelector("span") || document.createElement("span");
+        const role = user?.role?.toLowerCase();
+        span.textContent = (role === "admin" || role === "manager") ? "Sales" :
+                          (role === "staff") ? "Transactions" : "Sales & Transactions";
+        if (!salesMenu.querySelector("span")) salesMenu.appendChild(span);
+      }
+
+      // --- Role-based dashboard ---
+      function getDashboardFile() {
+        const role = user?.role?.toLowerCase();
+        if (role === "staff") return { file: "../Contents/staff-dashboard.html", title: "Staff Dashboard", subtitle: "Track your transactions and performance" };
+        return { file: "../Contents/dashboard.html", title: "Dashboard", subtitle: "Real-time inventory monitoring and alerts" };
+      }
+
+      const { file: dashboardFile, title: dashboardTitle, subtitle: dashboardSubtitle } = getDashboardFile();
+
+      // --- Load initial dashboard ---
+      const iframe = document.getElementById("content-frame");
+      iframe.src = dashboardFile;
+      document.getElementById("page-title").innerText = dashboardTitle;
+      document.getElementById("page-subtitle").innerText = dashboardSubtitle;
+
+      // --- Change page function ---
+      function changePage(title, subtitle, element, file) {
+        document.getElementById("page-title").innerText = title;
+        document.getElementById("page-subtitle").innerText = subtitle;
+        iframe.src = file;
+        document.querySelectorAll(".sidebar ul li").forEach(li => li.classList.remove("active"));
+        if (element) element.classList.add("active");
+        if (window.innerWidth < 768) closeSidebar();
+      }
+
+      // --- Dashboard menu click ---
+      function handleDashboardMenu(element) {
+        const { file, title, subtitle } = getDashboardFile();
+        changePage(title, subtitle, element, file);
+      }
+
+      // --- Sales menu click ---
+      function handleSalesMenu(element) {
+        const role = user?.role?.toLowerCase();
+        let file, title, subtitle;
+
+        if (role === "admin" || role === "manager") {
+          file = "../Contents/admin-manager-sales-and-transaction.html";
+          title = "Sales";
+          subtitle = "Monitor sales and transactions (Admin/Manager)";
+        } else if (role === "staff") {
+          file = "../Contents/staff-sales-and-transaction.html";
+          title = "Transactions";
+          subtitle = "Monitor sales and transactions (Staff)";
+        } else {
+          alert("You do not have access to Sales & Transactions.");
+          return;
+        }
+        changePage(title, subtitle, element, file);
+      }
+
+      // --- Settings menu click ---
+      const settingsMenu = document.getElementById("settings-menu");
+      if (settingsMenu) {
+        settingsMenu.onclick = function() {
+          const role = user?.role?.toLowerCase();
+          const file = (role === "admin") ? "system-settings.html" : "profile-settings.html";
+          const title = (role === "admin") ? "System Settings" : "Profile Settings";
+          const subtitle = (role === "admin") ? "Manage business settings and preferences" : "Manage your account settings";
+          changePage(title, subtitle, settingsMenu, file);
+        };
+      }
+
+      // --- Sidebar toggle ---
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const collapseBtnImg = document.querySelector("#collapse-btn img");
+        sidebar.classList.toggle("collapsed");
+        collapseBtnImg.style.transform = sidebar.classList.contains("collapsed") ? "rotate(180deg)" : "rotate(0deg)";
+      }
+      function closeSidebar() {
+        document.getElementById("sidebar").classList.remove("open");
+      }
+      window.addEventListener("resize", () => { if (window.innerWidth >= 768) closeSidebar(); });
+
+      // --- Logout ---
+      function changeAccount() {
+        localStorage.removeItem("user");
+        window.location.href = "../Landing Page/signin.html";
+      }
+
+
+
+  function toggleBell(element) {
+    if (!element) return;
+
+    const dropdown = document.getElementById("alertDropdown");
+    const bellContainer = document.querySelector(".bell-container");
+
+    // Toggle dropdown
+    const isHidden = dropdown.classList.contains("hidden");
+    dropdown.classList.toggle("hidden", !isHidden);
+    bellContainer.classList.toggle("active", isHidden);
+
+    if (isHidden) {
+      // Delay to avoid immediate click closing
+      setTimeout(() => {
+        const handleClickOutside = (event) => {
+          const clickedInsideBell = bellContainer.contains(event.target);
+
+          // If clicked anywhere except the bell container, hide dropdown
+          if (!clickedInsideBell) {
+            dropdown.classList.add("hidden");
+            bellContainer.classList.remove("active");
+
+            // Remove listener after hiding
+            document.removeEventListener("click", handleClickOutside);
+          }
+        };
+
+        document.addEventListener("click", handleClickOutside);
+      }, 50);
+    }
+  }
+
+
+
+  async function fetchAlerts() {
+  try {
+    // Fetch unread alerts from backend
+    const res = await fetch("http://localhost:3000/stored-alerts/unread");
+
+    if (!res.ok) throw new Error("Failed to fetch alerts");
+
+    const alerts = await res.json();
+
+    // 🟢 Show ALL unread alerts (not filtered by stock)
+    const unreadAlerts = alerts.filter(alert => !alert.read);
+
+    // Count of unread alerts
+    const alertCount = unreadAlerts.length;
+
+    // Update bell badge
+    const badge = document.getElementById("bellBadge");
+    badge.textContent = alertCount;
+    badge.style.display = alertCount > 0 ? "flex" : "none";
+
+    // Update dropdown list
+    const alertList = document.getElementById("alertList");
+    alertList.innerHTML = "";
+
+    // --- Toggle Mark All button visibility ---
+    const markAllBtn = document.getElementById("markAllBtn");
+    if (markAllBtn) {
+      if (unreadAlerts.length >= 2) {
+        markAllBtn.classList.remove("hidden");
+      } else {
+        markAllBtn.classList.add("hidden");
+      }
+    }
+
+    if (alertCount === 0) {
+      alertList.innerHTML = `<li style="text-align:center;color:#777;">No unread alerts</li>`;
+      return;
+    }
+
+    // Sort by newest first
+    unreadAlerts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    unreadAlerts.forEach(a => {
+      const li = document.createElement("li");
+      li.className = getSeverityClass(a.severity);
+
+      li.innerHTML = `
+        <div class="alert-info">
+          <strong>${a.type || "Unknown Alert"}</strong>
+          <span>${a.name || "Unnamed Product"}</span>
+        </div>
+        <small>${formatAlertDate(a.createdAt)}</small>
+      `;
+
+      // 🆕 Mark single alert as read on click
+      li.onclick = async () => {
+        try {
+          await fetch(`http://localhost:3000/stored-alerts/${a._id}/read`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+          });
+          showStatusMessage(`"${a.name}" marked as read.`);
+          fetchAlerts();
+        } catch (err) {
+          console.error("Error marking alert as read:", err);
+          showStatusMessage("Failed to mark alert as read.", true);
+        }
+      };
+
+      alertList.appendChild(li);
+    });
+
+    console.log(`🎯 ${alertCount} unread alerts:`, unreadAlerts);
+  } catch (err) {
+    console.error("❌ Error fetching alerts:", err);
+  }
+}
+
+
+function getSeverityClass(severity) {
+  if (!severity) return "info";
+  const level = severity.toLowerCase();
+  if (level.includes("critical")) return "critical";
+  if (level.includes("warning") || level.includes("low")) return "warning";
+  return "info";
+}
+
+
+  // Helper: returns human-readable severity text
+  function getSeverityText(stock) {
+    if (stock === 0) return "Critical";
+    if (stock <= 5) return "Warning";
+    return "Info";
+  }
+
+  // Helper: numeric score for sorting (Critical=1, Warning=2, Info=3)
+  function getSeverityScore(stock) {
+    if (stock === 0) return 1;
+    if (stock <= 5) return 2;
+    return 3;
+  }
+
+  // Initial fetch + repeat every 30 seconds
+  fetchAlerts();
+  setInterval(fetchAlerts, 30000);
+
+
+  const markAllBtn = document.getElementById("markAllBtn");
+  if (markAllBtn) {
+    markAllBtn.onclick = async () => {
+    try {
+      markAllBtn.disabled = true;
+      markAllBtn.textContent = "Marking...";
+
+      const res = await fetch("http://localhost:3000/stored-alerts/mark-all-read", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!res.ok) throw new Error("Failed to mark all as read");
+
+      showStatusMessage("All alerts marked as read.");
+      fetchAlerts();
+    } catch (err) {
+      console.error("Error marking all as read:", err);
+      showStatusMessage("Failed to mark all as read.", true);
+    } finally {
+      markAllBtn.disabled = false;
+      markAllBtn.textContent = "Mark all as read";
+    }
+  };
+
+  }
+
+
+  function showStatusMessage(message, isError = false) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = message;
+    status.classList.add('show');
+    status.classList.toggle('error', isError);
+
+    // Auto-hide after 2.5s
+    setTimeout(() => {
+      status.classList.remove('show', 'error');
+    }, 2500);
+  }
+
+  function changeAccount() {
+    const modal = document.getElementById("logoutModal");
+    modal.classList.add("show");
+
+    // Cancel button
+    document.getElementById("cancelLogout").onclick = () => modal.classList.remove("show");
+
+    // Confirm logout
+    document.getElementById("confirmLogout").onclick = () => {
+      localStorage.removeItem("user");
+      window.location.href = "../Landing Page/signin.html";
+    };
+  }
+
+  // Optional: Close modal when clicking outside content
+  window.onclick = (event) => {
+    const modal = document.getElementById("logoutModal");
+    if (event.target === modal) modal.classList.remove("show");
+  };
+
+  window.addEventListener("DOMContentLoaded", () => {
     const userData = localStorage.getItem("user");
     let user = null;
 
@@ -143,399 +464,125 @@
       catch(e) { console.error("Error parsing user data:", e); }
     }
 
-    // --- Display user info ---
-    const userNameEl = document.querySelector(".user-info p");
-    const userRoleEl = document.querySelector(".user-info small");
-    const avatarEl = document.querySelector(".user-info .avatar");
+    const welcomeOverlay = document.getElementById("welcomeOverlay");
+    const welcomeMessage = document.getElementById("welcomeMessage");
+    document.getElementById("welcomeUserName").textContent = user?.fullName || "User";
 
-    userNameEl.innerText = user?.fullName || "Guest";
-    userRoleEl.innerText = user?.role || "Unknown";
-    avatarEl.innerText = user?.fullName 
-      ? user.fullName.split(" ").map(n => n[0]).join("").toUpperCase()
-      : "?";
-
-    // --- Hide User Management for non-admin/manager ---
-    const userManagementMenu = document.getElementById("user-management");
-    if (userManagementMenu) {
-      const role = user?.role?.toLowerCase();
-      if (role !== "admin" && role !== "manager") userManagementMenu.style.display = "none";
-    }
-
-    // --- Set Sales & Transactions label based on role ---
-    const salesMenu = document.getElementById("sales-menu");
-    if (salesMenu) {
-      const span = salesMenu.querySelector("span") || document.createElement("span");
-      const role = user?.role?.toLowerCase();
-      span.textContent = (role === "admin" || role === "manager") ? "Sales" :
-                         (role === "staff") ? "Transactions" : "Sales & Transactions";
-      if (!salesMenu.querySelector("span")) salesMenu.appendChild(span);
-    }
-
-    // --- Role-based dashboard ---
-    function getDashboardFile() {
-      const role = user?.role?.toLowerCase();
-      if (role === "staff") return { file: "../Contents/staff-dashboard.html", title: "Staff Dashboard", subtitle: "Track your transactions and performance" };
-      return { file: "../Contents/dashboard.html", title: "Dashboard", subtitle: "Real-time inventory monitoring and alerts" };
-    }
-
-    const { file: dashboardFile, title: dashboardTitle, subtitle: dashboardSubtitle } = getDashboardFile();
-
-    // --- Load initial dashboard ---
-    const iframe = document.getElementById("content-frame");
-    iframe.src = dashboardFile;
-    document.getElementById("page-title").innerText = dashboardTitle;
-    document.getElementById("page-subtitle").innerText = dashboardSubtitle;
-
-    // --- Change page function ---
-    function changePage(title, subtitle, element, file) {
-      document.getElementById("page-title").innerText = title;
-      document.getElementById("page-subtitle").innerText = subtitle;
-      iframe.src = file;
-      document.querySelectorAll(".sidebar ul li").forEach(li => li.classList.remove("active"));
-      if (element) element.classList.add("active");
-      if (window.innerWidth < 768) closeSidebar();
-    }
-
-    // --- Dashboard menu click ---
-    function handleDashboardMenu(element) {
-      const { file, title, subtitle } = getDashboardFile();
-      changePage(title, subtitle, element, file);
-    }
-
-    // --- Sales menu click ---
-    function handleSalesMenu(element) {
-      const role = user?.role?.toLowerCase();
-      let file, title, subtitle;
-
-      if (role === "admin" || role === "manager") {
-        file = "../Contents/admin-manager-sales-and-transaction.html";
-        title = "Sales";
-        subtitle = "Monitor sales and transactions (Admin/Manager)";
-      } else if (role === "staff") {
-        file = "../Contents/staff-sales-and-transaction.html";
-        title = "Transactions";
-        subtitle = "Monitor sales and transactions (Staff)";
-      } else {
-        alert("You do not have access to Sales & Transactions.");
-        return;
-      }
-      changePage(title, subtitle, element, file);
-    }
-
-    // --- Settings menu click ---
-    const settingsMenu = document.getElementById("settings-menu");
-    if (settingsMenu) {
-      settingsMenu.onclick = function() {
-        const role = user?.role?.toLowerCase();
-        const file = (role === "admin") ? "system-settings.html" : "profile-settings.html";
-        const title = (role === "admin") ? "System Settings" : "Profile Settings";
-        const subtitle = (role === "admin") ? "Manage business settings and preferences" : "Manage your account settings";
-        changePage(title, subtitle, settingsMenu, file);
-      };
-    }
-
-    // --- Sidebar toggle ---
-    function toggleSidebar() {
-      const sidebar = document.getElementById("sidebar");
-      const collapseBtnImg = document.querySelector("#collapse-btn img");
-      sidebar.classList.toggle("collapsed");
-      collapseBtnImg.style.transform = sidebar.classList.contains("collapsed") ? "rotate(180deg)" : "rotate(0deg)";
-    }
-    function closeSidebar() {
-      document.getElementById("sidebar").classList.remove("open");
-    }
-    window.addEventListener("resize", () => { if (window.innerWidth >= 768) closeSidebar(); });
-
-    // --- Logout ---
-    function changeAccount() {
-      localStorage.removeItem("user");
-      window.location.href = "../Landing Page/signin.html";
-    }
-
-
-
-function toggleBell(element) {
-  if (!element) return;
-
-  const dropdown = document.getElementById("alertDropdown");
-  const bellContainer = document.querySelector(".bell-container");
-
-  // Toggle dropdown
-  const isHidden = dropdown.classList.contains("hidden");
-  dropdown.classList.toggle("hidden", !isHidden);
-  bellContainer.classList.toggle("active", isHidden);
-
-  if (isHidden) {
-    // Delay to avoid immediate click closing
-    setTimeout(() => {
-      const handleClickOutside = (event) => {
-        const clickedInsideBell = bellContainer.contains(event.target);
-
-        // If clicked anywhere except the bell container, hide dropdown
-        if (!clickedInsideBell) {
-          dropdown.classList.add("hidden");
-          bellContainer.classList.remove("active");
-
-          // Remove listener after hiding
-          document.removeEventListener("click", handleClickOutside);
-        }
-      };
-
-      document.addEventListener("click", handleClickOutside);
-    }, 50);
-  }
-}
-
-
-
-async function fetchAlerts() {
-  try {
-    // Fetch alerts from backend
-    const res = await fetch("http://localhost:3000/stored-alerts");
-    if (!res.ok) throw new Error("Failed to fetch alerts");
-
-    const alerts = await res.json();
-
-    // Filter active alerts (low stock alerts)
-    const activeAlerts = alerts.filter(alert => !alert.read && Number(alert.stock) <= 10);
-
-
-    // Count of active alerts
-    const alertCount = activeAlerts.length;
-
-    // Update the bell badge
-    const badge = document.getElementById("bellBadge");
-    badge.textContent = alertCount;
-    badge.style.display = alertCount > 0 ? "flex" : "none";
-
-    // Update the dropdown list
-    const alertList = document.getElementById("alertList");
-    alertList.innerHTML = "";
-
-
-        // --- Toggle Mark All button visibility ---
-    const markAllBtn = document.getElementById("markAllBtn");
-    if (markAllBtn) {
-      if (activeAlerts.length >= 2) {
-        markAllBtn.classList.remove("hidden");
-      } else {
-        markAllBtn.classList.add("hidden");
-      }
-    }
-
-
-    if (alertCount === 0) {
-      alertList.innerHTML = `<li style="text-align:center;color:#777;">No active alerts</li>`;
-    } else {
-      // Sort alerts by severity: Critical > Warning > Info
-      activeAlerts.sort((a, b) => getSeverityScore(a.stock) - getSeverityScore(b.stock));
-
-      activeAlerts.forEach(a => {
-        const li = document.createElement("li");
-        const severity = getSeverityText(a.stock);
-        li.className = getSeverityClass(a.stock);
-        li.innerHTML = `
-          <span>${a.name || "N/A"}</span>
-          <small>${severity}</small>
-        `;
-
-        // 🆕 Add click handler to mark as read
-li.onclick = async () => {
-  try {
-    await fetch(`http://localhost:3000/stored-alerts/${a._id}/read`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-    });
-    showStatusMessage(`"${a.name}" marked as read.`);
-    fetchAlerts();
-  } catch (err) {
-    console.error("Error marking alert as read:", err);
-    showStatusMessage("Failed to mark alert as read.", true);
-  }
-};
-
-        alertList.appendChild(li);
-      });
-    }
-
-    console.log(`🎯 ${alertCount} Active alerts:`, activeAlerts);
-  } catch (err) {
-    console.error("❌ Error fetching alerts:", err);
-  }
-}
-
-// Helper: returns CSS class for severity
-function getSeverityClass(stock) {
-  if (stock === 0) return "critical";
-  if (stock <= 5) return "warning";
-  return "info";
-}
-
-// Helper: returns human-readable severity text
-function getSeverityText(stock) {
-  if (stock === 0) return "Critical";
-  if (stock <= 5) return "Warning";
-  return "Info";
-}
-
-// Helper: numeric score for sorting (Critical=1, Warning=2, Info=3)
-function getSeverityScore(stock) {
-  if (stock === 0) return 1;
-  if (stock <= 5) return 2;
-  return 3;
-}
-
-// Initial fetch + repeat every 30 seconds
-fetchAlerts();
-setInterval(fetchAlerts, 30000);
-
-
-const markAllBtn = document.getElementById("markAllBtn");
-if (markAllBtn) {
-  markAllBtn.onclick = async () => {
-  try {
-    markAllBtn.disabled = true;
-    markAllBtn.textContent = "Marking...";
-
-    const res = await fetch("http://localhost:3000/stored-alerts/mark-all-read", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-    });
-
-    if (!res.ok) throw new Error("Failed to mark all as read");
-
-    showStatusMessage("All alerts marked as read.");
-    fetchAlerts();
-  } catch (err) {
-    console.error("Error marking all as read:", err);
-    showStatusMessage("Failed to mark all as read.", true);
-  } finally {
-    markAllBtn.disabled = false;
-    markAllBtn.textContent = "Mark all as read";
-  }
-};
-
-}
-
-
-function showStatusMessage(message, isError = false) {
-  const status = document.getElementById('saveStatus');
-  status.textContent = message;
-  status.classList.add('show');
-  status.classList.toggle('error', isError);
-
-  // Auto-hide after 2.5s
-  setTimeout(() => {
-    status.classList.remove('show', 'error');
-  }, 2500);
-}
-
-function changeAccount() {
-  const modal = document.getElementById("logoutModal");
-  modal.classList.add("show");
-
-  // Cancel button
-  document.getElementById("cancelLogout").onclick = () => modal.classList.remove("show");
-
-  // Confirm logout
-  document.getElementById("confirmLogout").onclick = () => {
-    localStorage.removeItem("user");
-    window.location.href = "../Landing Page/signin.html";
-  };
-}
-
-// Optional: Close modal when clicking outside content
-window.onclick = (event) => {
-  const modal = document.getElementById("logoutModal");
-  if (event.target === modal) modal.classList.remove("show");
-};
-
-window.addEventListener("DOMContentLoaded", () => {
-  const userData = localStorage.getItem("user");
-  let user = null;
-
-  if (userData) {
-    try { user = JSON.parse(userData); } 
-    catch(e) { console.error("Error parsing user data:", e); }
-  }
-
-  const welcomeOverlay = document.getElementById("welcomeOverlay");
-  const welcomeMessage = document.getElementById("welcomeMessage");
-  document.getElementById("welcomeUserName").textContent = user?.fullName || "User";
-
-  // Only show welcome overlay if flag is set
-  if (localStorage.getItem("showWelcome") && !sessionStorage.getItem("welcomeShown")) {
-    // Small delay to ensure everything is rendered
-    setTimeout(() => {
-      welcomeOverlay.style.display = "flex";
-      setTimeout(() => welcomeMessage.classList.add("show"), 50);
-
+    // Only show welcome overlay if flag is set
+    if (localStorage.getItem("showWelcome") && !sessionStorage.getItem("welcomeShown")) {
+      // Small delay to ensure everything is rendered
       setTimeout(() => {
-        welcomeMessage.classList.remove("show");
-        setTimeout(() => welcomeOverlay.style.display = "none", 400);
-      }, 3000);
+        welcomeOverlay.style.display = "flex";
+        setTimeout(() => welcomeMessage.classList.add("show"), 50);
 
-      sessionStorage.setItem("welcomeShown", "true");
-      localStorage.removeItem("showWelcome"); // remove flag after showing
-    }, 300);
-  }
-});
+        setTimeout(() => {
+          welcomeMessage.classList.remove("show");
+          setTimeout(() => welcomeOverlay.style.display = "none", 400);
+        }, 3000);
+
+        sessionStorage.setItem("welcomeShown", "true");
+        localStorage.removeItem("showWelcome"); // remove flag after showing
+      }, 300);
+    }
+  });
 
 
 
 
 
-async function checkAccountStatus() {
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-  if (!storedUser || !storedUser.email) {
-    console.warn("⚠️ No user found in localStorage.");
-    return;
-  }
-
-  try {
-    const res = await fetch(`http://localhost:3000/users?email=${encodeURIComponent(storedUser.email)}`);
-    const users = await res.json();
-
-    if (!users.length) {
-      console.log("❌ User not found in database.");
+  async function checkAccountStatus() {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (!storedUser || !storedUser.email) {
+      console.warn("⚠️ No user found in localStorage.");
       return;
     }
 
-    const user = users[0];
+    try {
+      const res = await fetch(`http://localhost:3000/users?email=${encodeURIComponent(storedUser.email)}`);
+      const users = await res.json();
 
-if (user.isDisabled) {
-  const welcomeOverlay = document.getElementById("welcomeOverlay");
-  const welcomeMessage = document.getElementById("welcomeMessage");
-  const welcomeUserName = document.getElementById("welcomeUserName");
+      if (!users.length) {
+        console.log("❌ User not found in database.");
+        return;
+      }
 
-  // Show a custom message
-  welcomeUserName.textContent = ""; // hide the username for clarity
-  welcomeMessage.textContent = "⚠️ Your account has been disabled. Please contact the administrator.";
+      const user = users[0];
 
-  welcomeOverlay.style.display = "flex";
-  setTimeout(() => welcomeMessage.classList.add("show"), 50);
+  if (user.isDisabled) {
+    const welcomeOverlay = document.getElementById("welcomeOverlay");
+    const welcomeMessage = document.getElementById("welcomeMessage");
+    const welcomeUserName = document.getElementById("welcomeUserName");
 
-  // After showing the message, clear and redirect
-  setTimeout(() => {
-    welcomeMessage.classList.remove("show");
+    // Show a custom message
+    welcomeUserName.textContent = ""; // hide the username for clarity
+    welcomeMessage.textContent = "⚠️ Your account has been disabled. Please contact the administrator.";
+
+    welcomeOverlay.style.display = "flex";
+    setTimeout(() => welcomeMessage.classList.add("show"), 50);
+
+    // After showing the message, clear and redirect
     setTimeout(() => {
-      welcomeOverlay.style.display = "none";
-      localStorage.clear();
-      window.location.href = "../Landing Page/signin.html";
-    }, 400);
-  }, 3000);
-}
+      welcomeMessage.classList.remove("show");
+      setTimeout(() => {
+        welcomeOverlay.style.display = "none";
+        localStorage.clear();
+        window.location.href = "../Landing Page/signin.html";
+      }, 400);
+    }, 3000);
+  }
 
+    } catch (err) {
+      console.error("Error checking account status:", err);
+    }
+  }
+  document.addEventListener("DOMContentLoaded", () => {
+    checkAccountStatus();
+    setInterval(checkAccountStatus, 20000); // optional, re-check every 30s
+  });
+
+// 🟢 Save alert to backend (prevents duplicates in same minute)
+async function saveAlert(name, stock, type, severity) {
+  try {
+    const response = await fetch("http://localhost:3000/stored-alerts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        stock,
+        type,
+        severity,
+        createdAt: new Date().toISOString()
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    console.log("✅ Alert saved:", data);
   } catch (err) {
-    console.error("Error checking account status:", err);
+    console.error("❌ Error saving alert:", err);
   }
 }
-document.addEventListener("DOMContentLoaded", () => {
-  checkAccountStatus();
-  setInterval(checkAccountStatus, 20000); // optional, re-check every 30s
-});
 
+function formatAlertDate(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
 
-  </script>
-</body>
-</html>
+  const isToday = date.toDateString() === now.toDateString();
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+
+  const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  if (isToday) return `Today at ${time}`;
+  if (isYesterday) return `Yesterday at ${time}`;
+  
+  // If older, show full date
+  return date.toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric'
+  }) + ` at ${time}`;
+}
+
+    </script>
+  </body>
+  </html>

@@ -164,29 +164,42 @@ async function loadThresholds() {
   }
 }
 
-  // -----------------------------
-  // SAVE ALERT TO DATABASE
-  // -----------------------------
-  async function saveAlert(alert) {
-    try {
-      console.log("📤 Sending alert to backend:", alert);
-      const res = await fetch("http://localhost:3000/stored-alerts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: alert.name,
-          stock: alert.stock,
-          status: alert.status || "New",
-          createdAt: alert.createdAt,
-        }),
-      });
-      console.log("✅ Response status:", res.status);
-      const data = await res.json();
-      console.log("✅ Response data:", data);
-    } catch (err) {
-      console.error("❌ Failed to store alert:", err);
-    }
+// -----------------------------
+// SAVE ALERT TO DATABASE
+// -----------------------------
+async function saveAlert(alert, index) {
+  try {
+    // Generate a unique alert ID (ALT-1, ALT-2, etc.)
+    const alertId = `ALT-${index + 1}`;
+
+    // Prepare the payload to match your Mongo schema
+    const payload = {
+      alertId: alertId,
+      name: alert.name,
+      stock: alert.stock,
+      type: alert.type || getSeverity(alert.stock) + " Stock", // e.g., "Critical Stock"
+      severity: getSeverity(alert.stock),
+      createdAt: alert.createdAt,
+      status: "New",
+      read: false
+    };
+
+    console.log("📤 Sending alert to backend:", payload);
+
+    const res = await fetch("http://localhost:3000/stored-alerts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+    const data = await res.json();
+    console.log("✅ Alert stored successfully:", data);
+  } catch (err) {
+    console.error("❌ Failed to store alert:", err);
   }
+}
+
 
   // -----------------------------
 // LOAD ALERTS

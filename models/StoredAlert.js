@@ -2,12 +2,14 @@
 const mongoose = require("mongoose");
 
 const StoredAlertSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  alertId: { type: String, required: true }, // e.g., ALT-1
+  type: { type: String, required: true }, // e.g., "Critical Stock"
+  name: { type: String, required: true }, // Product name
+  severity: { type: String, required: true }, // e.g., "Critical", "Out-of-stock"
   stock: { type: Number, required: true },
-  status: { type: String, default: "New" },
   createdAt: { type: Date, default: Date.now },
-  read: { type: Boolean, default: false } // 🆕 Add this
+  status: { type: String, default: "New" }, // New, Older, etc.
+  read: { type: Boolean, default: false },
 });
 
-// ✅ Use the same collection
 module.exports = mongoose.model("StoredAlert", StoredAlertSchema, "alerts");

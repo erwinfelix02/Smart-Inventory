@@ -720,3 +720,46 @@ body {
 #saveStatus.error {
   background: rgba(220, 38, 38, 0.9); /* red for errors */
 }
+
+
+
+
+
+.alert-dropdown ul li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+/* 🔴 Critical Alerts */
+.alert-dropdown ul li.critical {
+  border-left: 4px solid #e11d48;
+  background-color: #fee2e2; /* light red */
+}
+
+/* 🟡 Warning Alerts */
+.alert-dropdown ul li.warning {
+  border-left: 4px solid #f59e0b;
+  background-color: #fef9c3; /* light yellow */
+}
+
+/* 🔵 Info Alerts */
+.alert-dropdown ul li.info {
+  border-left: 4px solid #7f1d1d; /* dark red border */
+  background-color: #fecaca; /* light red background */
+}
+
+.alert-dropdown ul li:hover {
+  background: #f9fafb;
+}
+
+.alert-dropdown ul li small {
+  font-size: 12px;
+  color: #555;
+  margin-top: 4px;
+}
