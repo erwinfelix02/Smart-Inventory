@@ -10,52 +10,38 @@ body, html {
   font-family: Arial, sans-serif;
 }
 
-/* ===== LAYOUT ===== */
+/* ===== CONTAINER ===== */
 .container {
-  display: flex;
+  position: relative;
+  width: 100%;
   height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .image-side {
-  flex: 1;
-  background: url("../images/signin.svg") no-repeat center center / cover;
-}
-
-.form-side {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  color: #fff;
-  padding: 2rem;
-  background: #111;
-  z-index: 0;
-}
-
-/* ===== GRADIENT ANIMATION ===== */
-.form-side::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: linear-gradient(
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  /* Black base with moving blue gradient on top */
+   background: linear-gradient(
     45deg,
     #0a0a0a,
     #1a1a1a,
-    #164285,
-    #4a6fa5,
-    #2c3e50,
+    #164285, 
+    #4a6fa5, 
+    #2c3e50, 
     #0a0a0a
   );
-  background-size: 400% 400%;
-  animation: gradientMove 18s ease-in-out infinite;
-  z-index: -1;
-  opacity: 0.4; 
+  background-size: 200% 100%; /* wider for noticeable horizontal movement */
+  animation: blueGradientMove 20s linear infinite;
 }
 
-@keyframes gradientMove {
+@keyframes blueGradientMove {
   0%   { background-position: 0% 0%; }
   25%  { background-position: 100% 0%; }
   50%  { background-position: 100% 100%; }
@@ -63,30 +49,53 @@ body, html {
   100% { background-position: 0% 0%; }
 }
 
-/* ===== FORM CONTENT ===== */
+
+
+/* ===== SIGNIN CARD ===== */
 .signin {
   position: relative;
+  display: flex;              /* flex is fine */
+  flex-direction: column;
+  gap: 1.5rem;               
+  padding: 2.5rem;    
+  background: rgba(0,0,0,0.75);
+  border-radius: 14px;
   z-index: 1;
-  max-width: 350px;
-  width: 100%;
+  text-align: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+
+  width: 500px;    /* fixed width */
+  height: auto;   /* fixed height */
+  max-width: 95%;  /* optional for smaller screens */
 }
 
+/* ===== LOGO ===== */
+.signin-logo {
+  display: block;
+  margin: 0 auto 1.5rem auto;  
+  width: 45px;       
+  height: auto;
+}
+
+/* ===== HEADING & SUBTITLE ===== */
 .signin h2 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+  font-size: 24px;          
+  margin: 0 0 0.8rem 0;       
   color: #A4BADB;
 }
 
 .signin .subtitle {
-  margin-bottom: 1.5rem;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;     
   color: #A4BADB;
+  line-height: 1.3;
 }
 
 /* ===== INPUTS ===== */
 .input-group {
   position: relative;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;      
 }
 
 .input-group i {
@@ -107,11 +116,12 @@ body, html {
 
 .input-group input {
   width: 100%;
-  padding: 0.8rem 2.5rem;
+  padding: 1rem 2.5rem;       
   border: 1px solid #555;
-  border-radius: 5px;
+  border-radius: 6px;
   background: rgba(0,0,0,0.5);
   color: #fff;
+  font-size: 0.95rem;
   transition: border 0.2s, box-shadow 0.2s;
 }
 
@@ -121,11 +131,12 @@ body, html {
 
 /* ===== LINKS ===== */
 .forgot {
-  display: block;
-  margin-bottom: 1.5rem;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: #A4BADB;
   text-decoration: none;
+  margin: 0.8rem 0 1rem 0; 
+  align-self: flex-end;
+  display: inline-block;   
 }
 
 .forgot:hover {
@@ -135,11 +146,12 @@ body, html {
 /* ===== BUTTON ===== */
 .btn {
   width: 100%;
-  padding: 0.8rem;
+  padding: 1.2rem;              
+  margin-top: 1rem;             
   background: #164285;
   color: #A4BADB;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -150,93 +162,109 @@ body, html {
   color: #ffffff; 
 }
 
+/* ===== ERROR STATES ===== */
+.input-error {
+  border: 1px solid #e74c3c !important;
+  box-shadow: 0 0 6px rgba(231, 76, 60, 0.6);
+}
+
+.error-text {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
   .container {
     flex-direction: column;
   }
+
   .image-side {
-    height: 40vh;
-    flex: none;
+    width: 100%;
+    height: 35vh; 
   }
+
   .form-side {
-    flex: none;
-    height: auto;
+    width: 100%;
+    padding: 2rem 1.5rem;
+    min-height: auto;
+  }
+
+  .signin {
+    max-width: 95%;
+    padding: 2rem 1.5rem;
+    gap: 1rem;               
+  }
+
+  .signin-logo {
+    width: 55px;
+    margin-bottom: 1rem;
+  }
+
+  .signin h2 {
+    font-size: 1.4rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .signin .subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .input-group input {
+    padding: 0.85rem 2rem;
+  }
+
+  .input-group {
+    margin-bottom: 1.2rem;
+  }
+
+  .btn {
+    padding: 1rem;
+    margin-top: 0.8rem;
+  }
+
+  .forgot {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
   }
 }
-
-/* ===== ERROR STATES ===== */
-.input-group.error input,
-.input-error {
-  border: 1px solid #ff4c4c !important;
-  animation: shake 0.3s ease;
-  box-shadow: 0 0 6px rgba(255, 76, 76, 0.6);
+.forgot:hover {
+  text-decoration: underline;
+  color: #ffffff;
 }
-
-.input-group.error i:first-child {
-  color: #ff4c4c;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
-}
-
-/* Small red text under inputs */
-.error-message,
-.error-text {
-  color: #ff4c4c;
-  font-size: 0.8rem;
-  margin-top: 4px; /* a little space from input */
-  text-align: center; /* center text */
-  width: 100%; /* span full width of container */
-  display: block; /* ensure block for centering */
-  transition: opacity 0.2s ease;
-}
-
-
-/* ===== LOADING SPINNER ===== */
+/* Loading Overlay */
 .loading-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  inset: 0; /* top:0; right:0; bottom:0; left:0; */
   background: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
   opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
 .loading-overlay.active {
   opacity: 1;
-  visibility: visible;
+  pointer-events: all;
 }
 
+/* Spinner */
 .spinner {
   border: 4px solid rgba(255,255,255,0.3);
   border-top: 4px solid #A4BADB;
   border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  animation: spin 0.9s linear infinite;
+  width: 50px;
+  height: 50px;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-.input-error {
-  border: 1px solid #e74c3c !important;
-}
-
-.error-message {
-  color: #e74c3c;
-  font-size: 0.85rem;
-  margin-top: 6px;
-  display: none;
-  transition: opacity 0.3s ease;
+  to { transform: rotate(360deg); }
 }

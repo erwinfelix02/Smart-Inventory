@@ -15,6 +15,7 @@
     <!-- Right Side Form -->
     <div class="form-side">
       <div class="form-box">
+        <img src="../images/LOGO2.svg" alt="Logo" class="signin-logo">
         <h2>Check your email</h2>
        <p id="emailMessage">
            We’ve sent you a passcode.<br>
@@ -136,8 +137,7 @@ continueBtn.addEventListener("click", async () => {
         localStorage.setItem("user", JSON.stringify(verifiedUser));
 
          // Set flag to show welcome overlay
-    localStorage.setItem("showWelcome", "true")
-    
+    localStorage.setItem("showWelcome", "true");
         const msg = document.createElement("p");
         msg.style.color = "green";
         msg.textContent = "Verification successful! Redirecting...";
@@ -253,7 +253,6 @@ resendBtn.addEventListener("click", async (e) => {
     }, 500);
   }
 });
-localStorage.setItem("userRole", user.role);
 
 
 

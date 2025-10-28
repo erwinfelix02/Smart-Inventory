@@ -1,3 +1,4 @@
+/* ===== RESET ===== */
 * {
   margin: 0;
   padding: 0;
@@ -9,31 +10,19 @@ body, html {
   font-family: Arial, sans-serif;
 }
 
+/* ===== FULL SCREEN CONTAINER ===== */
 .container {
-  display: flex;
-  height: 100vh;
-  width: 100%;
-}
-
-.image-side {
-  flex: 1;
-  background: url("../images/signin.svg") no-repeat center center / cover;
-}
-
-.form-side {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;  /* center horizontally */
+  align-items: center;      /* center vertically */
   overflow: hidden;
-  color: #fff;
-  padding: 2rem;
-  background: #111;
-  z-index: 0;
 }
 
-.form-side::before {
+/* ===== BACKGROUND GRADIENT ===== */
+.container::before {
   content: "";
   position: absolute;
   top: 0; left: 0;
@@ -43,15 +32,14 @@ body, html {
     45deg,
     #0a0a0a,
     #1a1a1a,
-    #164285, 
-    #4a6fa5, 
-    #2c3e50, 
+    #164285,
+    #4a6fa5,
+    #2c3e50,
     #0a0a0a
   );
   background-size: 400% 400%;
   animation: gradientMove 18s ease-in-out infinite;
   z-index: -1;
-  opacity: 0.45;
 }
 
 @keyframes gradientMove {
@@ -62,14 +50,28 @@ body, html {
   100% { background-position: 0% 0%; }
 }
 
+/* ===== FORM CARD ===== */
 .form-box {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 380px;
+  max-width: 500px;           /* fixed width card */
+  background: rgba(0,0,0,0.75);
+  padding: 2.5rem;
+  border-radius: 14px;
   text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
 }
 
+/* ===== LOGO ===== */
+.form-box img.signin-logo {
+  display: block;
+  margin: 0 auto 1.5rem auto;
+  width: 45px;
+  height: auto;
+}
+
+/* ===== HEADING & SUBTITLE ===== */
 .form-box h2 {
   font-size: clamp(1.4rem, 2vw, 2rem);
   margin-bottom: 0.5rem;
@@ -77,12 +79,13 @@ body, html {
 }
 
 .form-box p {
-  margin-bottom: 1.5rem;
-  font-size: clamp(0.85rem, 1.5vw, 1rem);
+  font-size: clamp(0.85rem, 1.2vw, 1rem);
   color: #c0cad8;
+  margin-bottom: 1.5rem;
   line-height: 1.4;
 }
 
+/* ===== CODE INPUTS ===== */
 .code-inputs {
   display: flex;
   justify-content: space-between;
@@ -106,7 +109,7 @@ body, html {
   outline: 2px solid #164285;
 }
 
-/* Resend Link */
+/* ===== RESEND LINK ===== */
 .resend {
   display: inline-block;
   margin-bottom: 1.5rem;
@@ -117,9 +120,10 @@ body, html {
 
 .resend:hover {
   text-decoration: underline;
+  color: #ffffff;
 }
 
-/* Button */
+/* ===== BUTTON ===== */
 .btn {
   width: 100%;
   padding: 0.9rem;
@@ -137,62 +141,26 @@ body, html {
   color: #ffffff; 
 }
 
-@media (max-width: 1024px) {
-  .container {
-    flex-direction: column;
-  }
-
-  .image-side {
-    height: 40vh;
-  }
-
-  .form-side {
-    height: auto;
-    padding: 2rem 1rem;
-  }
-
-  .form-box {
-    max-width: 90%;
-  }
-}
-
-@media (max-width: 600px) {
-  .code-inputs {
-    gap: 0.3rem;
-  }
-
-  .code-inputs input {
-    height: 45px;
-    font-size: 1.1rem;
-  }
-
-  .btn {
-    font-size: 0.95rem;
-    padding: 0.8rem;
-  }
-}
-/* Error state for code inputs */
+/* ===== ERROR STATE ===== */
 .code-inputs input.input-error {
   border: 1px solid #ff4c4c;
   box-shadow: 0 0 6px rgba(255, 76, 76, 0.6);
   animation: shake 0.3s ease;
 }
 
-/* Shake animation */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-4px); }
   75% { transform: translateX(4px); }
 }
 
-/* Loading overlay */
+/* ===== LOADING OVERLAY ===== */
 .loading-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  inset: 0;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   background: rgba(0,0,0,0.5);
   z-index: 9999;
   opacity: 0;
@@ -217,4 +185,22 @@ body, html {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .form-box {
+    padding: 2rem 1.5rem;
+    max-width: 95%;
+  }
+
+  .code-inputs input {
+    height: 45px;
+    font-size: 1.1rem;
+  }
+
+  .btn {
+    padding: 0.8rem;
+    font-size: 0.95rem;
+  }
 }
