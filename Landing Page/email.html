@@ -135,6 +135,9 @@ continueBtn.addEventListener("click", async () => {
         };
         localStorage.setItem("user", JSON.stringify(verifiedUser));
 
+         // Set flag to show welcome overlay
+    localStorage.setItem("showWelcome", "true")
+    
         const msg = document.createElement("p");
         msg.style.color = "green";
         msg.textContent = "Verification successful! Redirecting...";

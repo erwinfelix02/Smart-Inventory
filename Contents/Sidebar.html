@@ -101,6 +101,13 @@
 
     </div>
 
+    
+<div id="welcomeOverlay">
+  <div id="welcomeMessage">
+    Welcome, <span id="welcomeUserName"></span>!
+  </div>
+</div>
+
     <div id="page-content">
       <iframe id="content-frame" src="" style="width:100%; height:80vh; border:none;"></iframe>
     </div>
@@ -123,7 +130,10 @@
   <!-- Save Status Message -->
 <div id="saveStatus"></div>
 
-  <script>
+
+
+
+<script>
     // --- Get user from localStorage ---
     const userData = localStorage.getItem("user");
     let user = null;
@@ -439,6 +449,91 @@ window.onclick = (event) => {
   const modal = document.getElementById("logoutModal");
   if (event.target === modal) modal.classList.remove("show");
 };
+
+window.addEventListener("DOMContentLoaded", () => {
+  const userData = localStorage.getItem("user");
+  let user = null;
+
+  if (userData) {
+    try { user = JSON.parse(userData); } 
+    catch(e) { console.error("Error parsing user data:", e); }
+  }
+
+  const welcomeOverlay = document.getElementById("welcomeOverlay");
+  const welcomeMessage = document.getElementById("welcomeMessage");
+  document.getElementById("welcomeUserName").textContent = user?.fullName || "User";
+
+  // Only show welcome overlay if flag is set
+  if (localStorage.getItem("showWelcome") && !sessionStorage.getItem("welcomeShown")) {
+    // Small delay to ensure everything is rendered
+    setTimeout(() => {
+      welcomeOverlay.style.display = "flex";
+      setTimeout(() => welcomeMessage.classList.add("show"), 50);
+
+      setTimeout(() => {
+        welcomeMessage.classList.remove("show");
+        setTimeout(() => welcomeOverlay.style.display = "none", 400);
+      }, 3000);
+
+      sessionStorage.setItem("welcomeShown", "true");
+      localStorage.removeItem("showWelcome"); // remove flag after showing
+    }, 300);
+  }
+});
+
+
+
+
+
+async function checkAccountStatus() {
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  if (!storedUser || !storedUser.email) {
+    console.warn("⚠️ No user found in localStorage.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:3000/users?email=${encodeURIComponent(storedUser.email)}`);
+    const users = await res.json();
+
+    if (!users.length) {
+      console.log("❌ User not found in database.");
+      return;
+    }
+
+    const user = users[0];
+
+if (user.isDisabled) {
+  const welcomeOverlay = document.getElementById("welcomeOverlay");
+  const welcomeMessage = document.getElementById("welcomeMessage");
+  const welcomeUserName = document.getElementById("welcomeUserName");
+
+  // Show a custom message
+  welcomeUserName.textContent = ""; // hide the username for clarity
+  welcomeMessage.textContent = "⚠️ Your account has been disabled. Please contact the administrator.";
+
+  welcomeOverlay.style.display = "flex";
+  setTimeout(() => welcomeMessage.classList.add("show"), 50);
+
+  // After showing the message, clear and redirect
+  setTimeout(() => {
+    welcomeMessage.classList.remove("show");
+    setTimeout(() => {
+      welcomeOverlay.style.display = "none";
+      localStorage.clear();
+      window.location.href = "../Landing Page/signin.html";
+    }, 400);
+  }, 3000);
+}
+
+  } catch (err) {
+    console.error("Error checking account status:", err);
+  }
+}
+document.addEventListener("DOMContentLoaded", () => {
+  checkAccountStatus();
+  setInterval(checkAccountStatus, 20000); // optional, re-check every 30s
+});
 
 
   </script>
