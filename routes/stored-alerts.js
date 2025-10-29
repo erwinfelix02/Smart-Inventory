@@ -48,7 +48,7 @@ router.post("/", async (req, res) => {
     else if (diffDays >= 14) status = "Older";
 
     // 🧩 Save new alert
-    const newAlert = new StoredAlert({
+const newAlert = new StoredAlert({
       alertId: nextId,
       type,
       name,
@@ -56,6 +56,7 @@ router.post("/", async (req, res) => {
       stock,
       createdAt: alertDate,
       status,
+      readBy: { admin: false, manager: false, staff: false },
     });
 
     await newAlert.save();
@@ -83,49 +84,74 @@ router.get("/", async (req, res) => {
 // 🟢 GET — Fetch all unread alerts only
 router.get("/unread", async (req, res) => {
   try {
-    const unreadAlerts = await StoredAlert.find({
-      $or: [{ read: false }, { read: { $exists: false } }]
-    }).sort({ createdAt: -1 });
+    const { role } = req.query;
 
+    if (!role || !["admin", "manager", "staff"].includes(role.toLowerCase())) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    const filter = {};
+    filter[`readBy.${role.toLowerCase()}`] = false;
+
+    const unreadAlerts = await StoredAlert.find(filter).sort({ createdAt: -1 });
     res.json(unreadAlerts);
   } catch (err) {
-    console.error("❌ Error fetching unread alerts:", err);
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 });
+
 
 
 // ✅ Mark all alerts as read
 router.put("/mark-all-read", async (req, res) => {
   try {
-    const filter = { $or: [{ read: false }, { read: { $exists: false } }] };
-    const update = { $set: { read: true } };
-    const result = await StoredAlert.updateMany(filter, update);
+    const { role } = req.body;
+
+    if (!role || !["admin", "manager", "staff"].includes(role.toLowerCase())) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    const update = {};
+    update[`readBy.${role.toLowerCase()}`] = true;
+
+    const result = await StoredAlert.updateMany(
+      { [`readBy.${role.toLowerCase()}`]: false },
+      { $set: update }
+    );
 
     res.json({
-      message: "All alerts marked as read",
+      message: `All alerts marked as read for ${role}`,
       matchedCount: result.matchedCount ?? result.n,
       modifiedCount: result.modifiedCount ?? result.nModified,
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 });
+
 
 // ✅ Mark a single alert as read
 router.put("/:id/read", async (req, res) => {
   try {
     const { id } = req.params;
-    const updated = await StoredAlert.findByIdAndUpdate(
-      id,
-      { read: true },
-      { new: true }
-    );
+    const { role } = req.body;
+
+    if (!role || !["admin", "manager", "staff"].includes(role.toLowerCase())) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    const update = {};
+    update[`readBy.${role.toLowerCase()}`] = true; // mark only this role as read
+
+    const updated = await StoredAlert.findByIdAndUpdate(id, { $set: update }, { new: true });
 
     if (!updated) return res.status(404).json({ message: "Alert not found" });
 
-    res.json({ message: "Alert marked as read", alert: updated });
+    res.json({ message: `Alert marked as read by ${role}`, alert: updated });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 });
