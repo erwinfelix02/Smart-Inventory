@@ -291,7 +291,8 @@
   async function fetchAlerts() {
   try {
     // Fetch unread alerts from backend
-    const res = await fetch("http://localhost:3000/stored-alerts/unread");
+    const res = await fetch(`http://localhost:3000/stored-alerts/unread?role=${user?.role?.toLowerCase()}`);
+
 
     if (!res.ok) throw new Error("Failed to fetch alerts");
 
@@ -345,10 +346,12 @@
       // 🆕 Mark single alert as read on click
       li.onclick = async () => {
         try {
-          await fetch(`http://localhost:3000/stored-alerts/${a._id}/read`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-          });
+await fetch(`http://localhost:3000/stored-alerts/${a._id}/read`, {
+  method: "PUT",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ role: user?.role?.toLowerCase() }),
+});
+
           showStatusMessage(`"${a.name}" marked as read.`);
           fetchAlerts();
         } catch (err) {
@@ -402,10 +405,12 @@ function getSeverityClass(severity) {
       markAllBtn.disabled = true;
       markAllBtn.textContent = "Marking...";
 
-      const res = await fetch("http://localhost:3000/stored-alerts/mark-all-read", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-      });
+const res = await fetch("http://localhost:3000/stored-alerts/mark-all-read", {
+  method: "PUT",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ role: user?.role?.toLowerCase() }),
+});
+
 
       if (!res.ok) throw new Error("Failed to mark all as read");
 
