@@ -56,4 +56,4 @@ ProductSchema.pre("findOneAndUpdate", async function (next) {
 // Case-insensitive unique index on name
 ProductSchema.index({ name: 1 }, { unique: true, collation: { locale: "en", strength: 2 } });
 
-module.exports = mongoose.model("Product", ProductSchema, "products");
+module.exports = mongoose.models.Product || mongoose.model("Product", ProductSchema, "products");
