@@ -83,43 +83,27 @@ router.get("/", async (req, res) => {
 // 🟢 GET — Fetch all unread alerts only
 router.get("/unread", async (req, res) => {
   try {
-    const { role } = req.query; // role passed from frontend
+    const unreadAlerts = await StoredAlert.find({
+      $or: [{ read: false }, { read: { $exists: false } }]
+    }).sort({ createdAt: -1 });
 
-    if (!role || !["admin", "manager", "staff"].includes(role.toLowerCase())) {
-      return res.status(400).json({ message: "Invalid role" });
-    }
-
-    const filter = {};
-    filter[`readBy.${role.toLowerCase()}`] = false;
-
-    const unreadAlerts = await StoredAlert.find(filter).sort({ createdAt: -1 });
     res.json(unreadAlerts);
   } catch (err) {
+    console.error("❌ Error fetching unread alerts:", err);
     res.status(500).json({ message: err.message });
   }
 });
 
 
-
 // ✅ Mark all alerts as read
 router.put("/mark-all-read", async (req, res) => {
   try {
-    const { role } = req.body; // role must be sent from frontend
-
-    if (!role || !["admin", "manager", "staff"].includes(role.toLowerCase())) {
-      return res.status(400).json({ message: "Invalid role" });
-    }
-
-    const update = {};
-    update[`readBy.${role.toLowerCase()}`] = true;
-
-    const result = await StoredAlert.updateMany(
-      { $or: [{ [`readBy.${role.toLowerCase()}`]: false }, { [`readBy.${role.toLowerCase()}`]: { $exists: false } }] },
-      { $set: update }
-    );
+    const filter = { $or: [{ read: false }, { read: { $exists: false } }] };
+    const update = { $set: { read: true } };
+    const result = await StoredAlert.updateMany(filter, update);
 
     res.json({
-      message: `All alerts marked as read for ${role}`,
+      message: "All alerts marked as read",
       matchedCount: result.matchedCount ?? result.n,
       modifiedCount: result.modifiedCount ?? result.nModified,
     });
@@ -128,33 +112,22 @@ router.put("/mark-all-read", async (req, res) => {
   }
 });
 
-
 // ✅ Mark a single alert as read
 router.put("/:id/read", async (req, res) => {
   try {
     const { id } = req.params;
-    const { role } = req.body; // role should be "admin", "manager", or "staff"
-
-    if (!role || !["admin", "manager", "staff"].includes(role.toLowerCase())) {
-      return res.status(400).json({ message: "Invalid role" });
-    }
-
-    const update = {};
-    update[`readBy.${role.toLowerCase()}`] = true;
-
     const updated = await StoredAlert.findByIdAndUpdate(
       id,
-      { $set: update },
+      { read: true },
       { new: true }
     );
 
     if (!updated) return res.status(404).json({ message: "Alert not found" });
 
-    res.json({ message: `Alert marked as read by ${role}`, alert: updated });
+    res.json({ message: "Alert marked as read", alert: updated });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
-
 
 module.exports = router;
