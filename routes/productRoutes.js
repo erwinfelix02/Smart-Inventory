@@ -18,16 +18,28 @@ router.get("/", async (req, res) => {
 router.patch("/:id/stock", async (req, res) => {
   try {
     const { change } = req.body; // e.g. { "change": -2 } or { "change": 10 }
-    const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
-      { $inc: { stock: change } },
-      { new: true }
-    );
-    res.json(updatedProduct);
+
+    // Find current product
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    // Update stock
+    product.stock += change;
+
+    // Push stock change to history
+    product.stockHistory.push({
+      change,
+      stockAfter: product.stock,
+    });
+
+    await product.save();
+
+    res.json(product);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
+
 
 
 

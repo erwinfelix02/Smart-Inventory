@@ -606,10 +606,11 @@ form.addEventListener("submit", async (e) => {
   const newStock = (selectedProduct.stock || 0) + addAmount;
 
   try {
-    const res = await fetch(`/products/${selectedProduct._id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stock: newStock }),
+const res = await fetch(`/products/${selectedProduct._id}/stock`, {
+  method: "PATCH",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ change: addAmount }), // send change, not absolute stock
+
     });
 
     if (res.ok) {
