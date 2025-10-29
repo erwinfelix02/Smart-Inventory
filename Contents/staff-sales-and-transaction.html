@@ -141,8 +141,12 @@
 
 
 <script>
+  
 let allProducts = [];
 let currentStaffName = ""; // Will be fetched dynamically
+function capitalizeWords(str) {
+  return str.replace(/\b\w/g, char => char.toUpperCase());
+}
 
 // 🧩 Fetch current logged-in staff name from localStorage
 function loadCurrentStaff() {
@@ -326,9 +330,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     matched.slice(0, 8).forEach(p => {
       const li = document.createElement("li");
-      li.textContent = `${p.name} (${p.sku})`;
+      li.textContent = `${capitalizeWords(p.name)} (${p.sku})`;
       li.addEventListener("click", () => {
-        searchInput.value = p.name;
+        searchInput.value = capitalizeWords(p.name);
         selectedProduct = p;
         priceInput.value = p.price;
         quantityInput.max = p.stock;
