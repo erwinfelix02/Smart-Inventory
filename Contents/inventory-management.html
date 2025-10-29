@@ -565,13 +565,18 @@ searchInput.addEventListener("input", async () => {
       resultsList.innerHTML = "<li>No products found</li>";
       return;
     }
+matches.forEach(p => {
+  const li = document.createElement("li");
 
-    matches.forEach(p => {
-      const li = document.createElement("li");
-      li.textContent = `${p.name} (${p.sku || "N/A"})`;
-      li.addEventListener("click", () => selectProduct(p));
-      resultsList.appendChild(li);
-    });
+  // Function to capitalize first letter of each word
+  const toTitleCase = str =>
+    str.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+
+  li.textContent = `${toTitleCase(p.name)} (${p.sku || "N/A"})`;
+  li.addEventListener("click", () => selectProduct(p));
+  resultsList.appendChild(li);
+});
+
   } catch (err) {
     console.error("Search error:", err);
   }
@@ -580,13 +585,14 @@ searchInput.addEventListener("input", async () => {
 // ✅ When clicking an item in search results
 function selectProduct(p) {
   selectedProduct = p;
-  document.getElementById("productName").value = p.name;
+   const titleName = toTitleCase(p.name);
+  document.getElementById("productName").value = titleName;
   document.getElementById("productSKU").value = p.sku || "N/A";
   document.getElementById("productCategory").value = p.category || "Uncategorized";
   document.getElementById("currentStock").value = p.stock ?? 0;
 
   resultsList.innerHTML = "";
-  searchInput.value = p.name;
+  searchInput.value = titleName;
 }
 
 // 💾 Add stock to selected product
