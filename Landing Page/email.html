@@ -18,8 +18,8 @@
         <img src="../images/LOGO2.svg" alt="Logo" class="signin-logo">
         <h2>Check your email</h2>
        <p id="emailMessage">
-           We’ve sent you a passcode.<br>
-           Please check your inbox at <span id="userEmail"></span>
+            We’ve sent you a passcode.<br>
+            Please check your inbox at <span id="userEmail"></span>
        </p>
 
 
@@ -117,7 +117,8 @@ continueBtn.addEventListener("click", async () => {
   const loading = showLoading();
 
   try {
-    const response = await fetch("http://127.0.0.1:3000/auth/verify", {
+    // 🌐 UPDATED: Points to your EC2 Public IP
+    const response = await fetch("http://3.26.115.219:3000/auth/verify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, code })
@@ -208,7 +209,8 @@ resendBtn.addEventListener("click", async (e) => {
   const loading = showLoading();
 
   try {
-    const response = await fetch("http://127.0.0.1:3000/auth/resend-code", {
+    // 🌐 UPDATED: Points to your EC2 Public IP
+    const response = await fetch("http://3.26.115.219:3000/auth/resend-code", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email })
@@ -253,11 +255,7 @@ resendBtn.addEventListener("click", async (e) => {
     }, 500);
   }
 });
-
-
-
 </script>
-
 
 </body>
 </html>
