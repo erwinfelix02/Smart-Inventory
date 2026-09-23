@@ -123,7 +123,8 @@ loginForm.addEventListener("submit", async (e) => {
   const loading = showLoading();
 
   try {
-    const response = await fetch("http://127.0.0.1:3000/auth/login", {
+    // 🌐 FIXED: Now points directly to your EC2 public IP address instead of localhost
+    const response = await fetch("http://3.26.115.219:3000/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
@@ -135,30 +136,25 @@ loginForm.addEventListener("submit", async (e) => {
       hideLoading(loading);
 
       if (response.ok) {
-  // ✅ Save user info to localStorage
-  localStorage.setItem("email", email);
-  localStorage.setItem("role", data.role); // 🔹 this is the key line
-  localStorage.setItem("token", data.token || ""); // optional if your backend returns one
+        // ✅ Save user info to localStorage
+        localStorage.setItem("email", email);
+        localStorage.setItem("role", data.role);
+        localStorage.setItem("token", data.token || "");
 
-  console.log("✅ Login success:", data.role);
+        console.log("✅ Login success:", data.role);
 
-  // ✅ Redirect after storing role
-  window.location.href = `../Landing Page/email.html?email=${encodeURIComponent(email)}&role=${encodeURIComponent(data.role)}&source=login`;
+        // ✅ Redirect after storing role
+        window.location.href = `../Landing Page/email.html?email=${encodeURIComponent(email)}&role=${encodeURIComponent(data.role)}&source=login`;
+      } else {
+        emailInput.classList.add("input-error");
+        passwordInput.classList.add("input-error");
 
-}
- else {
-  // Show proper error message from backend
-  emailInput.classList.add("input-error");
-  passwordInput.classList.add("input-error");
-
-  // Check if backend returned a custom message (like disabled)
-  if (data.msg) {
-    emailError.textContent = data.msg;
-  } else {
-    emailError.textContent = "Incorrect email or password.";
-  }
-}
-
+        if (data.msg) {
+          emailError.textContent = data.msg;
+        } else {
+          emailError.textContent = "Incorrect email or password.";
+        }
+      }
     }, 800);
 
   } catch (err) {
@@ -185,12 +181,7 @@ inputs.forEach(input => {
     if (errorText) errorText.textContent = '';
   });
 });
-localStorage.setItem("userRole", user.role);
-
-
 </script>
-
-
 
 </body>
 </html>
